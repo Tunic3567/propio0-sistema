@@ -1,0 +1,10 @@
+1. **Recaudo actual**: Suma de todos los pagos recibidos de clientes durante el día (incluye pagos de ventas al contado y pagos de cartera). Se calcula automáticamente sumando las transacciones de pago.
+2. **Caja inicial**: Valor ingresado manualmente al inicio del día que representa el efectivo inicial en caja.
+3. **Cartera inicial**: Valor ingresado manualmente al inicio del día que representa la deuda inicial de los clientes.
+4. **Recaudo pretendido del día**: Sumatoria total del monto a recoger por cada uno de los clientes.
+5. **Ingresos**: Suma de todos los ingresos no relacionados con ventas (ej: alquileres, servicios). Se calcula automáticamente sumando las transacciones de ingresos.
+6. **Ventas**: Suma de todas las ventas realizadas durante el día (tanto al contado como a crédito). Se calcula automáticamente sumando las transacciones de ventas.
+7. **Retiros**: Suma de todo el dinero retirado de la caja durante el día. Se calcula automáticamente sumando las transacciones de retiro.
+8. **Egresos**: Suma de todos los gastos pagados durante el día. Se calcula automáticamente sumando las transacciones de gastos.
+9. **Caja final**: Calculado como: Caja inicial + Recaudo actual + Ingresos - Retiros - Egresos
+10. **Cartera final**: Calculado como: Cartera inicial + Ventas - Recaudo actual

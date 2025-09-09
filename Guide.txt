@@ -1,0 +1,19 @@
+Recaudo Actual => Dinero recogido hasta el momento.
+
+Ingresos => Todo lo ingresado manualmente desde "Ingresos"
+Egresos => Todo el dinero que salió de la caja por pagos, gastos o préstamos entregados.
+
+Caja Inicial => Caja final dia anterior
+Caja Final => Caja final = Caja inicial + Ingresos - Egresos
+
+Cartera Inicial => Monto total que los clientes deben al inicio de la jornada.
+
+Cartera Final => Cartera final = Cartera inicial - Recaudo actual + Nuevos préstamos 
+(Qué es: Monto total que los clientes deben al final de la jornada.)
+
+Recaudo pretendido del dia => Dinero que se espera recibir de los cobros
+
+Retiros => Todos los "retiros de caja"
+
+Ventas => Qué es: En préstamos, sería el monto de nuevos créditos otorgados.
+Cómo se calcula: Suma de todos los préstamos entregados ese día.
