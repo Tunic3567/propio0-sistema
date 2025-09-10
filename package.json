@@ -8,8 +8,7 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && nodemon index.js",
     "dev:frontend": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build && npm run copy:frontend",
-    "copy:frontend": "xcopy frontend\\dist\\* backend\\public\\ /E /I /Y",
+    "build": "node build.js",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
   "keywords": ["cobranza", "vue", "express", "mongodb"],
