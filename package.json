@@ -1,0 +1,22 @@
+{
+  "name": "sistema-cobranza-monolitico",
+  "version": "1.0.0",
+  "description": "Sistema de cobranza diaria - Aplicación monolítica",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && nodemon index.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build && npm run copy:frontend",
+    "copy:frontend": "xcopy frontend\\dist\\* backend\\public\\ /E /I /Y",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": ["cobranza", "vue", "express", "mongodb"],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2"
+  }
+}

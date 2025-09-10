@@ -21,15 +21,23 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Servir archivos estáticos del frontend
+app.use(express.static('public'));
+
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/propio0', {
 })
 .then(() => console.log('Conectado a MongoDB'))
 .catch((err) => console.error('Error conectando a MongoDB:', err));
 
-// Ruta de prueba
+// Ruta principal - servir la aplicación Vue
 app.get('/', (req, res) => {
-  res.send('API funcionando');
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+// Ruta de prueba de API
+app.get('/api', (req, res) => {
+  res.json({ mensaje: 'API funcionando correctamente' });
 });
 
 // Rutas CRUD para clientes
