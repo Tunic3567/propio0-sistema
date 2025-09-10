@@ -1,0 +1,5 @@
+[33m9277435[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Arreglar dependencias para Render - instalar frontend automáticamente
+[33ma37c069[m Arreglar build para Render - script compatible con Linux
+[33m5cb988a[m[33m ([m[1;31morigin/main[m[33m)[m Convertir a aplicación monolítica para hosting único
+[33m649c0f8[m Configurar SPA con hash routing para hosting gratuito
+[33m72afa0a[m Fix vercel.json configuration
