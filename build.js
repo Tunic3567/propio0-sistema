@@ -25,17 +25,21 @@ function copyDir(src, dest) {
 }
 
 try {
-  // 1. Construir frontend
-  console.log('📦 Construyendo frontend...');
+  // 1. Instalar dependencias del frontend
+  console.log('📦 Instalando dependencias del frontend...');
+  execSync('cd frontend && npm install', { stdio: 'inherit' });
+  
+  // 2. Construir frontend
+  console.log('🔨 Construyendo frontend...');
   execSync('cd frontend && npm run build', { stdio: 'inherit' });
   
-  // 2. Crear directorio public si no existe
+  // 3. Crear directorio public si no existe
   const publicDir = path.join(__dirname, 'backend', 'public');
   if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
   }
   
-  // 3. Copiar archivos del frontend al backend
+  // 4. Copiar archivos del frontend al backend
   console.log('📋 Copiando archivos del frontend...');
   const distDir = path.join(__dirname, 'frontend', 'dist');
   copyDir(distDir, publicDir);
