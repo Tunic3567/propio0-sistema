@@ -1,5 +1,6 @@
 // Cargar variables de entorno
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -22,7 +23,7 @@ app.use(cors({
 app.use(express.json());
 
 // Servir archivos estáticos del frontend
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/propio0', {
@@ -32,7 +33,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/propio0', {
 
 // Ruta principal - servir la aplicación Vue
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Ruta de prueba de API
