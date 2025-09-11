@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-100">
     <NavbarAdmin @logout="logout" />
-    <div class="flex h-[calc(100vh-64px)]"> <!-- 64px es la altura de la navbar -->
+    <div class="flex flex-col md:flex-row h-[calc(100vh-64px)]"> <!-- 64px es la altura de la navbar -->
       <!-- Menú lateral izquierdo -->
-      <div class="w-80 md:w-64 sm:w-40 bg-white h-full flex flex-col justify-between flex-shrink-0 border-r border-gray-200">
-        <div class="pl-6 pt-6 flex flex-col gap-4">
+      <div class="w-full md:w-64 bg-white h-auto md:h-full flex flex-col justify-between flex-shrink-0 md:border-r border-gray-200 overflow-y-auto">
+        <div class="px-4 md:pl-6 pt-4 md:pt-6 flex flex-col gap-4">
           <!-- Menú desplegable de rutas con iconos -->
           <div class="flex flex-col gap-3">
             <button @click="mostrarPais = !mostrarPais" class="flex items-center text-lg font-semibold focus:outline-none gap-2">
@@ -32,7 +32,7 @@
         </div>
       </div>
       <!-- Panel lateral derecho de información del vendedor -->
-      <div class="flex-1 bg-gray-100 h-full p-8 border-l border-gray-200">
+      <div class="flex-1 bg-gray-100 h-full p-4 md:p-8 md:border-l border-gray-200 overflow-y-auto">
         <transition name="fade">
           <div v-if="vendedorSeleccionado">
             <div class="flex justify-end gap-2">
@@ -238,10 +238,24 @@ onMounted(async () => {
 })
 
 function logout() {
-  localStorage.removeItem('rol')
-  localStorage.removeItem('adminId')
-  localStorage.removeItem('codigoVinculacion')
-  router.push('/')
+  try {
+    localStorage.removeItem('rol')
+    localStorage.removeItem('adminId')
+    localStorage.removeItem('vendedorId')
+    localStorage.removeItem('codigoVinculacion')
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e)
+  }
+  try {
+    router.replace('/')
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/'
+      }
+    }, 150)
+  } catch (e) {
+    location.href = '/'
+  }
 }
 
 async function seleccionarVendedor(v) {

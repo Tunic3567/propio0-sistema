@@ -20,12 +20,24 @@
       </div>
     </div>
 
+    <!-- Modal de confirmación para cerrar ruta -->
+    <div v-if="mostrarModalCierre" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
+        <h2 class="text-xl font-bold mb-4 text-center">Cerrar ruta</h2>
+        <p class="mb-6 text-center">¿Estás seguro de que deseas cerrar la ruta? Esta acción no se puede deshacer.</p>
+        <div class="flex justify-center gap-4">
+          <button @click="confirmarCierreRuta" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Confirmar</button>
+          <button @click="mostrarModalCierre = false" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Contenido de clientes -->
     <div class="p-4">
       <div v-if="!rutaAbierta && !cargandoRuta" class="flex flex-col items-center justify-center min-h-[300px]">
         <button
           v-if="!rutaAbierta && !cargandoRuta"
-          @click="abrirRuta"
+          @click="solicitarAperturaRuta"
           class="bg-green-600 text-white px-6 py-3 rounded font-bold"
         >
           Abrir ruta
@@ -135,6 +147,7 @@ const vendedorId = localStorage.getItem('vendedorId')
 const rutaAbierta = ref(false)
 const cargandoRuta = ref(true)
 const mostrarModalApertura = ref(false)
+const mostrarModalCierre = ref(false)
 const actualizandoDatos = ref(false)
 
 // Función para actualizar datos del dashboard
@@ -152,31 +165,37 @@ async function consultarRuta() {
   cargandoRuta.value = false
 }
 
+function solicitarAperturaRuta() {
+  mostrarModalApertura.value = true
+}
+
 async function abrirRuta() {
-  const confirmado = confirm('¿Seguro que deseas abrir la ruta?');
-  if (!confirmado) return;
-  const res = await fetch('${API_BASE_URL}/api/rutas/abrir', {
+  const res = await fetch(`${API_BASE_URL}/api/rutas/abrir`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ vendedorId })
   });
   if (res.ok) {
     rutaAbierta.value = true;
+    mostrarModalApertura.value = false
   } else {
     alert('No se pudo abrir la ruta');
   }
 }
 
-async function cerrarRuta() {
-  const confirmado = confirm('¿Seguro que deseas cerrar la ruta?');
-  if (!confirmado) return;
-  const res = await fetch('${API_BASE_URL}/api/rutas/cerrar', {
+function cerrarRuta() {
+  mostrarModalCierre.value = true
+}
+
+async function confirmarCierreRuta() {
+  const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ vendedorId })
   });
   if (res.ok) {
     rutaAbierta.value = false;
+    mostrarModalCierre.value = false
   } else {
     alert('No se pudo cerrar la ruta');
   }
@@ -184,7 +203,7 @@ async function cerrarRuta() {
 
 async function cargarClientes() {
   try {
-    const res = await fetch('${API_BASE_URL}/api/clientes');
+    const res = await fetch(`${API_BASE_URL}/api/clientes`);
     if (res.ok) {
       // Filtrar solo los clientes no cancelados
       const todos = await res.json();
@@ -202,7 +221,7 @@ async function cargarClientes() {
 
 async function cargarPagos() {
   try {
-    const res = await fetch('${API_BASE_URL}/api/pagos');
+    const res = await fetch(`${API_BASE_URL}/api/pagos`);
     if (res.ok) {
       pagos.value = await res.json();
     } else {
@@ -257,9 +276,24 @@ function irAPagos(cliente) {
 }
 
 function logout() {
-  localStorage.removeItem('rol')
-  localStorage.removeItem('vendedorId')
-  router.push('/')
+  try {
+    localStorage.removeItem('rol')
+    localStorage.removeItem('adminId')
+    localStorage.removeItem('vendedorId')
+    localStorage.removeItem('codigoVinculacion')
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e)
+  }
+  try {
+    router.replace('/')
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/'
+      }
+    }, 150)
+  } catch (e) {
+    location.href = '/'
+  }
 }
 
 function irACrearCliente() {
