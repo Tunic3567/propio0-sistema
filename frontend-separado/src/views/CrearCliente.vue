@@ -262,7 +262,7 @@ import API_BASE_URL from '../config/api.js'
   delete nuevoCliente.parcelas;
 
   try {
-    const res = await fetch('${API_BASE_URL}/api/clientes', {
+    const res = await fetch(`${API_BASE_URL}/api/clientes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nuevoCliente)

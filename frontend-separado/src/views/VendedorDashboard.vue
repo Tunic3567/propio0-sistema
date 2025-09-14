@@ -97,16 +97,16 @@
                 </div>
                 <div class="mt-1 text-sm text-gray-600">
                   <div>
-                    <span class="font-semibold">Parcela:</span>
-                    ${{ c.parcela }} <span class="text-xs text-gray-400">({{ c.total }}/{{ c.dias }} días)</span>
+                    <span class="font-semibold">Saldo inicial:</span>
+                    ${{ c.saldo_inicial }}
                   </div>
                   <div>
-                    <span class="font-semibold">Saldo:</span>
+                    <span class="font-semibold">Saldo restante:</span>
                     ${{ c.total }}
                   </div>
                   <div>
-                    <span class="font-semibold">Saldo inicial:</span>
-                    ${{ c.saldo_inicial }}
+                    <span class="font-semibold">Valor parcela:</span>
+                    ${{ c.parcela }} <span class="text-xs text-gray-600">({{ c.total }}/{{ c.dias }} días)</span>
                   </div>
                 </div>
                 <!-- Info extra desplegable -->

@@ -58,6 +58,27 @@ function volver() {
   router.push('/admin');
 }
 
+function logout() {
+  try {
+    localStorage.removeItem('rol');
+    localStorage.removeItem('adminId');
+    localStorage.removeItem('vendedorId');
+    localStorage.removeItem('codigoVinculacion');
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e);
+  }
+  try {
+    router.replace('/');
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/';
+      }
+    }, 150);
+  } catch (e) {
+    location.href = '/';
+  }
+}
+
 function formatFecha(fecha) {
   return new Date(fecha).toLocaleString();
 }
@@ -68,22 +89,44 @@ const rutasFiltradas = computed(() => {
 });
 
 async function fetchVendedores() {
-  const res = await fetch('${API_BASE_URL}/api/vendedores');
+  const res = await fetch(`${API_BASE_URL}/api/vendedores`);
   vendedores.value = await res.json();
 }
 
 async function fetchRutas() {
-  const res = await fetch('${API_BASE_URL}/api/admin/rutas');
-  rutas.value = await res.json();
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/rutas`);
+    if (res.ok) {
+      rutas.value = await res.json();
+    } else {
+      const txt = await res.text();
+      console.error('Error al obtener rutas (admin egresos):', res.status, txt);
+      rutas.value = [];
+    }
+  } catch (e) {
+    console.error('Excepción al obtener rutas (admin egresos):', e);
+    rutas.value = [];
+  }
 }
 
 async function fetchEgresos() {
   loading.value = true;
-  let url = '${API_BASE_URL}/api/egresos?';
+  let url = `${API_BASE_URL}/api/egresos?`;
   if (vendedorSeleccionado.value) url += `vendedor=${vendedorSeleccionado.value}&`;
   if (rutaSeleccionada.value) url += `ruta=${rutaSeleccionada.value}`;
-  const res = await fetch(url);
-  egresos.value = await res.json();
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      egresos.value = await res.json();
+    } else {
+      const txt = await res.text();
+      console.error('Error al obtener egresos (admin):', res.status, txt);
+      egresos.value = [];
+    }
+  } catch (e) {
+    console.error('Excepción al obtener egresos (admin):', e);
+    egresos.value = [];
+  }
   loading.value = false;
 }
 

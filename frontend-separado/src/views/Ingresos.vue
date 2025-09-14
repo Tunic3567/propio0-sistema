@@ -203,7 +203,7 @@ async function registrarIngreso() {
       descripcion: nuevoIngreso.value.descripcion || undefined
     }
 
-    const res = await fetch('${API_BASE_URL}/api/ingresos', {
+    const res = await fetch(`${API_BASE_URL}/api/ingresos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -236,9 +236,24 @@ async function registrarIngreso() {
 }
 
 function logout() {
-  localStorage.removeItem('rol')
-  localStorage.removeItem('vendedorId')
-  router.push('/')
+  try {
+    localStorage.removeItem('rol')
+    localStorage.removeItem('adminId')
+    localStorage.removeItem('vendedorId')
+    localStorage.removeItem('codigoVinculacion')
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e)
+  }
+  try {
+    router.replace('/')
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/'
+      }
+    }, 150)
+  } catch (e) {
+    location.href = '/'
+  }
 }
 
 async function cerrarRuta() {
@@ -246,7 +261,7 @@ async function cerrarRuta() {
     const vendedorId = localStorage.getItem('vendedorId')
     if (!vendedorId) return
 
-    const res = await fetch('${API_BASE_URL}/api/rutas/cerrar', {
+    const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

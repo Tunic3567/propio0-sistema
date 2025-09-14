@@ -42,12 +42,6 @@
         <form class="space-y-4">
           <!-- Solo mostrar campos si NO es 'No pago' -->
           <div v-if="tipo !== 'No pago'">
-            <!-- Producto -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Producto</label>
-              <input v-model="producto" type="text" class="w-full px-3 py-2 border rounded" required />
-            </div>
-
             <!-- Valor -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
@@ -126,7 +120,6 @@ import API_BASE_URL from '../config/api.js'
   const router = useRouter()
   const opciones = ['Parcela', 'Abono', 'No pago']
   const tipo = ref('Parcela')
-  const producto = ref('')
   const valor = ref(0)
   const numParcelas = ref(1)
   const observaciones = ref('')
@@ -237,7 +230,6 @@ import API_BASE_URL from '../config/api.js'
     const pago = {
       cliente: cliente.value._id,
       tipo: tipo.value,
-      producto: producto.value,
       valor: tipo.value === 'Parcela' ? valorParcela.value * numParcelas.value : valor.value,
       numParcelas: tipo.value === 'Parcela' ? numParcelas.value : undefined,
       observaciones: observaciones.value,
@@ -248,7 +240,7 @@ import API_BASE_URL from '../config/api.js'
     };
 
     try {
-      const resPago = await fetch('${API_BASE_URL}/api/pagos', {
+      const resPago = await fetch(`${API_BASE_URL}/api/pagos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pago)
@@ -326,6 +318,28 @@ import API_BASE_URL from '../config/api.js'
     // Emitir evento para que el dashboard lo oculte (no eliminar de la base)
     window.dispatchEvent(new CustomEvent('ocultar-cliente', { detail: cliente.value._id }))
     router.push('/vendedor')
+  }
+
+  // Logout robusto por si se usa navbar aquí también
+  function logout() {
+    try {
+      localStorage.removeItem('rol')
+      localStorage.removeItem('adminId')
+      localStorage.removeItem('vendedorId')
+      localStorage.removeItem('codigoVinculacion')
+    } catch (e) {
+      console.warn('No se pudo limpiar storage:', e)
+    }
+    try {
+      router.replace('/')
+      setTimeout(() => {
+        if (location.hash && !location.hash.endsWith('#/')) {
+          location.href = '/'
+        }
+      }, 150)
+    } catch (e) {
+      location.href = '/'
+    }
   }
   </script>
 

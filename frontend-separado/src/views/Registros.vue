@@ -76,15 +76,31 @@ function formatFecha(fecha) {
 }
 
 function logout() {
-  localStorage.clear();
-  router.push('/');
+  try {
+    localStorage.removeItem('rol');
+    localStorage.removeItem('adminId');
+    localStorage.removeItem('vendedorId');
+    localStorage.removeItem('codigoVinculacion');
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e);
+  }
+  try {
+    router.replace('/');
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/';
+      }
+    }, 150);
+  } catch (e) {
+    location.href = '/';
+  }
 }
 
 async function cerrarRuta() {
   const vendedorId = localStorage.getItem('vendedorId');
   const confirmado = confirm('¿Seguro que deseas cerrar la ruta?');
   if (!confirmado) return;
-  const res = await fetch('${API_BASE_URL}/api/rutas/cerrar', {
+  const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ vendedorId })
@@ -111,12 +127,12 @@ async function fetchPagos() {
     return;
   }
   try {
-    const res = await fetch('${API_BASE_URL}/api/vendedor/' + vendedorId + '/registros');
+    const res = await fetch(`${API_BASE_URL}/api/vendedor/${vendedorId}/registros`);
     const data = await res.json();
     console.log('Respuesta de registros:', data);
     pagos.value = data;
     // Consultar si la ruta está abierta
-    const rutaRes = await fetch('${API_BASE_URL}/api/rutas/actual/' + vendedorId);
+    const rutaRes = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`);
     const rutaData = await rutaRes.json();
     rutaAbierta.value = !!rutaData;
   } catch (e) {

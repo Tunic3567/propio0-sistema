@@ -17,24 +17,16 @@ const PORT = process.env.PORT || 4000;
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || 'https://sistema-cobranza-frontend.vercel.app',
   credentials: true
 }));
 app.use(express.json());
-
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/propio0', {
 })
 .then(() => console.log('Conectado a MongoDB'))
 .catch((err) => console.error('Error conectando a MongoDB:', err));
-
-// Ruta principal - servir la aplicación Vue
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 // Ruta de prueba de API
 app.get('/api', (req, res) => {

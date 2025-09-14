@@ -94,18 +94,42 @@ const rutasFiltradas = computed(() => {
 });
 
 async function fetchRutas() {
-  loading.value = true;
-  const res = await fetch('${API_BASE_URL}/api/admin/rutas');
-  rutas.value = await res.json();
-  loading.value = false;
+  try {
+    loading.value = true;
+    const res = await fetch(`${API_BASE_URL}/api/admin/rutas`);
+    if (res.ok) {
+      rutas.value = await res.json();
+    } else {
+      const txt = await res.text();
+      console.error('Error al cargar rutas (admin):', res.status, txt);
+      rutas.value = [];
+    }
+  } catch (e) {
+    console.error('Excepción al cargar rutas (admin):', e);
+    rutas.value = [];
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function verPagosRuta(ruta) {
-  mostrarPagos.value = true;
-  loadingPagos.value = true;
-  const res = await fetch(`${API_BASE_URL}/api/admin/rutas/${ruta._id}/pagos`);
-  pagosRuta.value = await res.json();
-  loadingPagos.value = false;
+  try {
+    mostrarPagos.value = true;
+    loadingPagos.value = true;
+    const res = await fetch(`${API_BASE_URL}/api/admin/rutas/${ruta._id}/pagos`);
+    if (res.ok) {
+      pagosRuta.value = await res.json();
+    } else {
+      const txt = await res.text();
+      console.error('Error al cargar pagos de la ruta (admin):', res.status, txt);
+      pagosRuta.value = [];
+    }
+  } catch (e) {
+    console.error('Excepción al cargar pagos de la ruta (admin):', e);
+    pagosRuta.value = [];
+  } finally {
+    loadingPagos.value = false;
+  }
 }
 
 function cerrarPagos() {

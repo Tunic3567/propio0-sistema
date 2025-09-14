@@ -76,15 +76,31 @@ const loading = ref(true);
 const router = useRouter();
 
 function logout() {
-  localStorage.clear();
-  router.push('/');
+  try {
+    localStorage.removeItem('rol');
+    localStorage.removeItem('adminId');
+    localStorage.removeItem('vendedorId');
+    localStorage.removeItem('codigoVinculacion');
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e);
+  }
+  try {
+    router.replace('/');
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/';
+      }
+    }, 150);
+  } catch (e) {
+    location.href = '/';
+  }
 }
 
 async function cerrarRuta() {
   const vendedorId = localStorage.getItem('vendedorId');
   const confirmado = confirm('¿Seguro que deseas cerrar la ruta?');
   if (!confirmado) return;
-  const res = await fetch('${API_BASE_URL}/api/rutas/cerrar', {
+  const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ vendedorId })
@@ -153,7 +169,7 @@ async function registrarEgreso() {
     valor: valor.value,
     descripcion: tipo.value === 'Gastos varios' ? descripcion.value : ''
   };
-  const res = await fetch('${API_BASE_URL}/api/egresos', {
+  const res = await fetch(`${API_BASE_URL}/api/egresos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(egreso)

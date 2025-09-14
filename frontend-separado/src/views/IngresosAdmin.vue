@@ -139,7 +139,7 @@ onMounted(async () => {
 
 async function cargarVendedores() {
   try {
-    const res = await fetch('${API_BASE_URL}/api/vendedores')
+    const res = await fetch(`${API_BASE_URL}/api/vendedores`)
     if (res.ok) {
       vendedores.value = await res.json()
     }
@@ -150,7 +150,7 @@ async function cargarVendedores() {
 
 async function cargarRutas() {
   try {
-    const res = await fetch('${API_BASE_URL}/api/rutas')
+    const res = await fetch(`${API_BASE_URL}/api/rutas`)
     if (res.ok) {
       rutas.value = await res.json()
     }
@@ -181,8 +181,23 @@ async function aplicarFiltros() {
 }
 
 function logout() {
-  localStorage.removeItem('rol')
-  localStorage.removeItem('vendedorId')
-  router.push('/')
+  try {
+    localStorage.removeItem('rol')
+    localStorage.removeItem('adminId')
+    localStorage.removeItem('vendedorId')
+    localStorage.removeItem('codigoVinculacion')
+  } catch (e) {
+    console.warn('No se pudo limpiar storage:', e)
+  }
+  try {
+    router.replace('/')
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/'
+      }
+    }, 150)
+  } catch (e) {
+    location.href = '/'
+  }
 }
 </script> 
