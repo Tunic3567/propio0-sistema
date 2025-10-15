@@ -82,7 +82,7 @@
             <div v-if="resumenPanel" class="space-y-2">
               <div class="flex items-center gap-2">
                 <CalendarDaysIcon class="w-5 h-5 text-gray-400" />
-                <span class="font-semibold">Fecha apertura cobro:</span>
+                <span class="font-semibold">Fecha apertura recaudo:</span>
                 <span class="text-gray-500">
                   <span v-if="resumenPanel.ruta?.fechaApertura" class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-mono">
                     {{ new Date(resumenPanel.ruta.fechaApertura).toLocaleString('es-ES') }}
