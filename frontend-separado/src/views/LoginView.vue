@@ -1,20 +1,25 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Botón de tema -->
+    <div class="absolute top-4 right-4">
+      <ThemeToggle />
+    </div>
+    
     <!-- Contenedor principal -->
     <div class="w-full max-w-md mx-4">
       <!-- Logo/Header -->
       <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-blue-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <div class="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-16 h-16 text-white">
             <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM6.262 6.072a8.25 8.25 0 1 0 10.562-.766 4.5 4.5 0 0 1-1.318 1.357L14.25 7.5l.165.33a.809.809 0 0 1-1.086 1.085l-.604-.302a1.125 1.125 0 0 0-1.298.21l-.132.131c-.439.44-.439 1.152 0 1.591l.296.296c.256.257.622.374.98.314l1.17-.195c.323-.054.654.036.905.245l1.33 1.108c.32.267.46.694.358 1.1a8.7 8.7 0 0 1-2.288 4.04l-.723.724a1.125 1.125 0 0 1-1.298.21l-.153-.076a1.125 1.125 0 0 1-.622-1.006v-1.089c0-.298-.119-.585-.33-.796l-1.347-1.347a1.125 1.125 0 0 1-.21-1.298L9.75 12l-1.64-1.64a6 6 0 0 1-1.676-3.257l-.172-1.03Z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenido</h1>
-        <p class="text-gray-600">Ingresa a tu cuenta</p>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Bienvenido</h1>
+        <p class="text-gray-600 dark:text-gray-400">Ingresa a tu cuenta</p>
       </div>
 
       <!-- Formulario -->
-      <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <form @submit.prevent="login" class="space-y-6">
           <!-- Campo Usuario -->
           <div>
@@ -31,7 +36,7 @@
                 v-model="usuario"
                 id="usuario"
                 type="text"
-                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition duration-200"
+                class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition duration-200 hover:border-gray-400"
                 placeholder="Ingresa tu usuario"
                 required
               />
@@ -53,7 +58,7 @@
                 v-model="contrasena"
                 id="contrasena"
                 type="password"
-                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition duration-200"
+                class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition duration-200 hover:border-gray-400"
                 placeholder="Ingresa tu contraseña"
                 required
               />
@@ -63,7 +68,7 @@
           <!-- Botón de Login -->
           <button
             type="submit"
-            class="w-full bg-blue-800 text-white py-3 px-4 rounded-xl font-medium hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-800 focus:ring-offset-2 transition duration-200 shadow-lg"
+            class="w-full bg-black text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-offset-2 transition-all duration-300 shadow-2xl hover:shadow-gray-500/25 transform hover:scale-105 active:scale-95"
           >
             Iniciar Sesión
           </button>
@@ -97,6 +102,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import API_BASE_URL from '../config/api.js'
 
 const usuario = ref('')

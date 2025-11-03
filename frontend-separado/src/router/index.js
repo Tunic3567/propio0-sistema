@@ -10,6 +10,9 @@ import Egresos from '../views/Egresos.vue'
 import EgresosAdmin from '../views/EgresosAdmin.vue'
 import Ingresos from '../views/Ingresos.vue'
 import IngresosAdmin from '../views/IngresosAdmin.vue'
+import ResumenVendedor from '../views/ResumenVendedor.vue'
+import HistorialPagosVendedor from '../views/HistorialPagosVendedor.vue'
+import HistorialClientesVendedor from '../views/HistorialClientesVendedor.vue'
 
 const routes = [
   { path: '/', name: 'Login', component: LoginView },
@@ -25,6 +28,9 @@ const routes = [
     component: VendedorDashboard,
     meta: { requiresAuth: true, role: 'vendedor' }
   },
+  { path: '/resumen', name: 'ResumenVendedor', component: ResumenVendedor, meta: { requiresAuth: true, role: 'vendedor' } },
+  { path: '/historial-pagos', name: 'HistorialPagosVendedor', component: HistorialPagosVendedor, meta: { requiresAuth: true, role: 'vendedor' } },
+  { path: '/historial-clientes', name: 'HistorialClientesVendedor', component: HistorialClientesVendedor, meta: { requiresAuth: true, role: 'vendedor' } },
   { 
     path: '/crear-cliente', 
     name: 'CrearCliente', 

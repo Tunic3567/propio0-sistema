@@ -1,0 +1,65 @@
+Guía para entender los valores del Panel del Administrador
+
+Esta guía explica, en palabras sencillas, qué significa cada campo y cómo se calcula. No necesitas saber de programación.
+
+Conceptos básicos
+- Ruta: es el periodo de cobro activo (por ejemplo, el día o la semana de trabajo). Tiene fecha de apertura y, cuando se termine, fecha de cierre.
+- Cliente: la persona a la que se le vendió o prestó un producto.
+- Cuota (parcela): el valor que debe pagar el cliente en cada día/semana/mes, según el acuerdo.
+- Pagos: registros de dinero recibido de un cliente (pueden ser “Parcela”, “Abono” o “No pago”).
+- Ingresos: entradas de dinero del vendedor que no vienen de pagos de clientes (por ejemplo, un ajuste o recarga de caja).
+- Egresos: gastos del vendedor (comisiones, gastos varios, etc.). “Retiros de caja” se muestran por separado.
+
+Campos del panel y su cálculo
+1) Total Clientes
+   - Qué es: cuántos clientes activos están en la lista.
+   - Cómo se calcula: se cuentan los clientes visibles en el panel.
+
+2) Recaudo pretendido del día
+   - Qué es: lo que se espera recaudar hoy (la meta), sumando las cuotas de los clientes que ya existían antes de abrir la ruta actual.
+   - Cómo se calcula: suma de las cuotas de esos clientes (uno por cliente).
+
+3) Recaudo actual
+   - Qué es: el dinero que efectivamente se ha cobrado durante la ruta actual (pagos de clientes).
+   - Cómo se calcula: suma de los pagos recibidos (Parcela y Abono) dentro de la ruta.
+   - Porcentaje mostrado: compara lo cobrado con la meta del día.
+     • 100% significa que ya se alcanzó la meta.
+     • Menos de 100% significa que aún falta.
+     • El color ayuda a ver el progreso: rojo (<50%), amarillo (50–80%), verde (80–<100%), verde intenso (≥100%).
+
+4) Caja inicial
+   - Qué es: el dinero con el que se empieza el periodo actual en caja (histórico acumulado).
+   - Cómo se calcula: todo lo recaudado históricamente menos todo lo retirado de caja. Si no hay históricos, se usa lo cobrado menos lo retirado del periodo.
+
+5) Cartera inicial
+   - Qué es: el total que los clientes deben al inicio del periodo (incluye intereses), es decir, lo que falta por cobrar.
+   - Cómo se calcula: suma de los saldos pendientes de todos los clientes del panel.
+
+6) Ingresos
+   - Qué es: dinero que entró en la ruta actual y que no viene de pagos de clientes.
+   - Cómo se calcula: suma de los ingresos registrados en la ruta.
+
+7) Ventas
+   - Qué es: lo vendido o prestado a nuevos clientes durante la ruta actual.
+   - Cómo se calcula: suma del total pactado con los clientes creados durante la ruta (el valor a pagar por cada nuevo cliente al iniciar).
+
+8) Retiros
+   - Qué es: dinero que se saca de la caja durante la ruta (por ejemplo, para llevarlo a otro lugar).
+   - Cómo se calcula: suma de los retiros de caja registrados en la ruta.
+
+9) Egresos
+   - Qué es: gastos distintos a los retiros de caja (por ejemplo, comisiones y gastos varios).
+   - Cómo se calcula: suma de todos esos gastos registrados en la ruta.
+
+10) Caja final
+   - Qué es: el dinero final que debería haber en caja al cierre del periodo.
+   - Cómo se calcula: Caja inicial + Recaudo actual + Ingresos − Retiros − Egresos.
+
+11) Cartera final
+   - Qué es: lo que quedaría pendiente por cobrar al final del periodo.
+   - Cómo se calcula: Cartera inicial + Ventas − Recaudo actual.
+
+Notas útiles
+- Los pagos “Parcela” y “Abono” disminuyen la deuda del cliente. “No pago” solo registra el incumplimiento, no mueve dinero.
+- Al crear un cliente nuevo, aumenta “Ventas” por el total acordado con ese cliente.
+- Si la ruta no está abierta, algunos totales se calculan con la información disponible de todos los clientes activos.

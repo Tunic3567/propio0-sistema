@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guía del Panel del Administrador</title>
+  <style>
+    :root { --fg:#1f2937; --muted:#4b5563; --accent:#2563eb; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--fg); line-height: 1.6; margin: 2rem; }
+    h1 { font-size: 1.8rem; margin: 0 0 0.5rem; }
+    h2 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; color: var(--accent); }
+    p, li { font-size: 0.98rem; }
+    .muted { color: var(--muted); }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; background: #fff; }
+    ul { margin: 0.25rem 0 0.75rem 1.25rem; }
+    @media print {
+      body { margin: 0.5in; }
+      a[href]:after { content: ""; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Guía para entender los valores del Panel del Administrador</h1>
+  <p class="muted">Esta guía explica, en palabras sencillas, qué significa cada campo y cómo se calcula.</p>
+
+  <div class="card">
+    <h2>Conceptos básicos</h2>
+    <ul>
+      <li><strong>Ruta</strong>: periodo de cobro activo (fecha de apertura y, al terminar, fecha de cierre).</li>
+      <li><strong>Cliente</strong>: persona a la que se vendió o prestó un producto.</li>
+      <li><strong>Cuota (parcela)</strong>: valor a pagar por periodo (día/semana/mes) según el acuerdo.</li>
+      <li><strong>Pagos</strong>: registros de dinero recibido (Parcela, Abono o No pago).</li>
+      <li><strong>Ingresos</strong>: entradas de dinero que no vienen de pagos de clientes.</li>
+      <li><strong>Egresos</strong>: gastos del vendedor (comisiones, gastos varios). <em>Retiros de caja</em> se muestran aparte.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Campos del panel y su cálculo</h2>
+    <ul>
+      <li><strong>Total Clientes</strong>: cantidad de clientes activos (se cuentan los visibles en el panel).</li>
+      <li><strong>Recaudo pretendido del día</strong>: meta diaria; suma de las cuotas de clientes creados antes de abrir la ruta actual.</li>
+      <li><strong>Recaudo actual</strong>: dinero cobrado en la ruta (suma de Pagos tipo Parcela y Abono). Se muestra también el porcentaje sobre la meta.</li>
+      <li><strong>Caja inicial</strong>: dinero con el que se empieza el periodo en caja. Es <em>recaudado acumulado − retiros acumulados</em>.</li>
+      <li><strong>Cartera inicial</strong>: total pendiente por cobrar al inicio (incluye intereses). Suma de saldos pendientes de todos los clientes.</li>
+      <li><strong>Ingresos</strong>: suma de entradas de dinero adicionales registradas en la ruta.</li>
+      <li><strong>Ventas</strong>: total vendido/prestado a nuevos clientes en la ruta (suma del total acordado con esos clientes).</li>
+      <li><strong>Retiros</strong>: dinero retirado de caja en la ruta.</li>
+      <li><strong>Egresos</strong>: gastos distintos a retiros (comisiones, gastos varios).</li>
+      <li><strong>Caja final</strong>: <em>Caja inicial + Recaudo actual + Ingresos − Retiros − Egresos</em>.</li>
+      <li><strong>Cartera final</strong>: <em>Cartera inicial + Ventas − Recaudo actual</em>.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Notas útiles</h2>
+    <ul>
+      <li>“Parcela” y “Abono” disminuyen la deuda del cliente. “No pago” no mueve dinero.</li>
+      <li>Al crear un cliente nuevo, “Ventas” aumenta por el total acordado con ese cliente.</li>
+      <li>Si no hay ruta abierta, algunos totales usan la información de todos los clientes activos.</li>
+    </ul>
+  </div>
+</body>
+</html>

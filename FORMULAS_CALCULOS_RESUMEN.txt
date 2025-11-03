@@ -1,0 +1,272 @@
+========================================
+FORMULAS DE CALCULO PARA RESUMENES
+========================================
+
+Este documento describe todas las formulas utilizadas en el sistema para calcular los resumenes financieros de las rutas.
+
+========================================
+VARIABLES Y CONCEPTOS BASICOS
+========================================
+
+VARIABLES DE ENTRADA:
+- Caja Inicial: Efectivo disponible al inicio de la ruta
+- Cartera Inicial: Deuda total de clientes al inicio de la ruta
+- Recaudado Actual: Dinero recibido de clientes en la ruta actual
+- Recaudado Pretendido: Suma de parcelas que deberian cobrarse segun clientes activos
+- Ingresos: Dinero recibido NO relacionado con ventas (alquileres, servicios, etc.)
+- Ventas: Valor original de productos vendidos a credito (SIN intereses)
+- Intereses: Diferencia entre el saldo inicial del cliente y el valor del producto
+- Egresos: Gastos pagados durante la ruta (EXCEPTO retiros de caja)
+- Retiros: Dinero retirado de la caja durante la ruta (tipo "Retiro de caja")
+
+VARIABLES DE SALIDA:
+- Caja Final: Efectivo disponible al finalizar la ruta
+- Cartera Final: Deuda total de clientes al finalizar la ruta
+
+========================================
+FORMULAS PRINCIPALES
+========================================
+
+1. CAJA FINAL
+---------------
+Formula:
+Caja Final = Caja Inicial + Ingresos + Recaudado - Ventas - Egresos - Retiros
+
+Explicacion:
+- Suma: Caja Inicial (base), Ingresos (dinero extra), Recaudo (pagos de clientes)
+- Resta: Ventas (dinero que sale para financiar clientes), Egresos (gastos), Retiros (dinero retirado)
+
+Nota importante: Las ventas se restan porque aunque se recuperaran mas tarde, representan dinero que sale del bolsillo en el momento de la venta.
+
+2. CARTERA FINAL
+-----------------
+Formula:
+Cartera Final = Ventas + Intereses + Cartera Inicial - Recaudado
+
+Explicacion:
+- Suma: Ventas (deuda nueva), Intereses (ganancia de las ventas), Cartera Inicial (deuda pendiente anterior)
+- Resta: Recaudado (pagos recibidos que reducen la deuda)
+
+Nota importante: Los egresos y retiros NO afectan la cartera, solo la caja.
+
+========================================
+CALCULO DE COMPONENTES
+========================================
+
+3. RECAUDADO ACTUAL
+--------------------
+Formula:
+Recaudado = Suma de todos los pagos tipo 'Parcela' y 'Abono' en la ruta actual
+
+Implementacion:
+- Se filtran los pagos de la ruta actual con tipo 'Parcela' o 'Abono'
+- Se suman todos los valores de esos pagos
+
+4. INGRESOS
+------------
+Formula:
+Ingresos = Suma de todos los ingresos registrados en la ruta actual
+
+Implementacion:
+- Se obtienen todos los documentos de Ingreso asociados a la ruta actual
+- Se suman todos sus valores
+
+5. VENTAS
+----------
+Formula:
+Ventas = Suma del valor original de productos vendidos a credito en la ruta actual
+       = Suma de cliente.valor para clientes creados en la ruta actual
+
+Implementacion:
+- Se filtran clientes creados durante la ruta actual
+- Se suman sus valores (precio original del producto, SIN intereses)
+
+Nota importante: Este valor NO incluye intereses. Los intereses se calculan por separado.
+
+6. INTERESES
+-------------
+Formula:
+Intereses = Suma de intereses de clientes creados en la ruta actual
+          = Suma de cliente.intereses O (cliente.total - cliente.valor) si intereses no existe
+
+Implementacion:
+1. Se filtran clientes creados durante la ruta actual
+2. Para cada cliente:
+   - Si cliente.intereses existe y es valido -> usar ese valor
+   - Si no, calcular como (cliente.total - cliente.valor)
+3. Se suman todos los intereses
+
+Calculo al crear cliente:
+intereses = saldo_inicial - valor
+Donde saldo_inicial es el monto total que el cliente debe pagar y valor es el precio del producto.
+
+7. EGRESOS
+-----------
+Formula:
+Egresos = Suma de todos los egresos que NO son "Retiro de caja"
+
+Implementacion:
+- Se filtran egresos de la ruta con tipo diferente a 'Retiro de caja'
+- Se suman todos sus valores
+
+8. RETIROS
+-----------
+Formula:
+Retiros = Suma de todos los egresos tipo "Retiro de caja"
+
+Implementacion:
+- Se filtran egresos de la ruta con tipo igual a 'Retiro de caja'
+- Se suman todos sus valores
+
+9. RECAUDO PRETENDIDO
+----------------------
+Formula:
+Recaudado Pretendido = Suma de parcelas de clientes activos creados ANTES de la ruta actual
+
+Implementacion:
+- Se filtran clientes activos (no cancelados) creados ANTES de la fecha de apertura de la ruta
+- Se suman todas sus parcelas
+
+Proposito: Indica cuanto dinero se espera recibir de clientes anteriores.
+
+========================================
+INICIALIZACION DE RUTAS
+========================================
+
+10. CAJA INICIAL (al abrir nueva ruta)
+---------------------------------------
+Si existe ruta anterior cerrada:
+  Caja Inicial = Caja Final de la ruta anterior
+Si NO existe ruta anterior (primer dia):
+  Caja Inicial = 0
+
+11. CARTERA INICIAL (al abrir nueva ruta)
+------------------------------------------
+Si existe ruta anterior cerrada:
+  Cartera Inicial = Cartera Final de la ruta anterior
+Si NO existe ruta anterior (primer dia):
+  Cartera Inicial = 0
+
+========================================
+PERSISTENCIA AL CERRAR RUTA
+========================================
+
+12. CAJA FINAL (persistida al cerrar ruta)
+-------------------------------------------
+Al cerrar la ruta:
+1. Calcular: Caja Final = Caja Inicial + Ingresos + Recaudado - Ventas - Egresos - Retiros
+2. Redondear a 2 decimales
+3. Guardar en ruta.cajaFinal
+
+13. CARTERA FINAL (persistida al cerrar ruta)
+----------------------------------------------
+Al cerrar la ruta:
+1. Calcular: Cartera Final = Cartera Inicial + Ventas + Intereses - Recaudado
+2. Redondear a 2 decimales
+3. Guardar en ruta.carteraFinal
+
+========================================
+RESUMEN DE ESTADISTICAS DE CLIENTES
+========================================
+
+14. CLIENTES NUEVOS
+-------------------
+Nuevos = Cantidad de clientes creados en la ruta actual que:
+  - NO son renovados (renovado = false)
+  - NO estan cancelados (cancelado = false)
+
+15. CLIENTES RENOVADOS
+----------------------
+Renovados = Cantidad de clientes creados en la ruta actual que:
+  - SON renovados (renovado = true)
+  - NO estan cancelados (cancelado = false)
+
+16. CLIENTES CANCELADOS
+-----------------------
+Cancelados = Cantidad de clientes creados en la ruta actual que:
+  - Estan cancelados (cancelado = true)
+
+========================================
+DETALLES DE IMPLEMENTACION
+========================================
+
+FILTRADO DE CLIENTES POR RUTA
+Los clientes se consideran "de la ruta actual" si:
+fechaCreacion >= fechaAperturaRuta AND fechaCreacion <= fechaCierreRuta (o fecha actual si esta abierta)
+
+CALCULO DE INTERESES AL CERRAR RUTA
+Al cerrar una ruta, el sistema calcula intereses de dos formas (en orden de prioridad):
+1. Si cliente.intereses existe y es valido -> usar ese valor
+2. Si no, calcular como (cliente.total - cliente.valor)
+
+Esto asegura que se use el valor mas preciso disponible.
+
+REDONDEO
+Todos los valores finales (Caja Final, Cartera Final) se redondean a 2 decimales:
+valorRedondeado = Math.round(valor * 100) / 100
+
+========================================
+EJEMPLO PRACTICO
+========================================
+
+ESCENARIO: PRIMER DIA DE RUTA
+
+Datos iniciales:
+- Caja Inicial: $0 (primer dia)
+- Cartera Inicial: $0 (primer dia)
+
+Transacciones del dia:
+- Ventas: $100 (cliente nuevo con producto de $100)
+- Intereses: $10 (cliente debe pagar $110 en total)
+- Recaudado: $0 (no se cobro nada)
+- Ingresos: $50 (ingreso adicional)
+- Egresos: $20 (gasto operativo)
+- Retiros: $0
+
+Calculos:
+- Caja Final = $0 + $50 + $0 - $100 - $20 - $0 = -$70
+- Cartera Final = $100 + $10 + $0 - $0 = $110
+
+Al cerrar:
+- Caja Final se guarda como: -$70.00
+- Cartera Final se guarda como: $110.00
+
+ESCENARIO: SEGUNDO DIA
+
+Datos iniciales:
+- Caja Inicial: -$70 (del dia anterior)
+- Cartera Inicial: $110 (del dia anterior)
+
+Transacciones del dia:
+- Recaudado: $60 (se cobro parte de la deuda)
+- Ventas: $0 (no hubo nuevas ventas)
+- Intereses: $0
+- Ingresos: $0
+- Egresos: $10
+- Retiros: $0
+
+Calculos:
+- Caja Final = -$70 + $0 + $60 - $0 - $10 - $0 = -$20
+- Cartera Final = $0 + $0 + $110 - $60 = $50
+
+========================================
+NOTAS IMPORTANTES
+========================================
+
+1. Ventas en Caja Final: Las ventas se restan porque representan dinero que sale del bolsillo al financiar al cliente, aunque se recuperara mas tarde.
+
+2. Intereses en Cartera: Los intereses solo afectan la cartera, no la caja, porque representan ganancia futura sobre lo prestado.
+
+3. Egresos vs Retiros: Los retiros son un tipo especial de egreso que se contabiliza por separado para mayor control.
+
+4. Persistencia: Los valores de Caja Final y Cartera Final se guardan al cerrar la ruta y se usan como iniciales para la siguiente ruta.
+
+5. Primera Ruta: Si no hay ruta anterior, tanto Caja Inicial como Cartera Inicial comienzan en $0.
+
+========================================
+ULTIMA ACTUALIZACION
+========================================
+
+Generado a partir del codigo en backend-separado/index.js
+Lineas: 742-920, 925-954, 1020-1068
+
