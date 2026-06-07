@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <NavbarVendedor :rutaAbierta="rutaAbierta" :actualizandoDatos="cargando" :cargandoRuta="cargandoRuta" tituloSeccion="Historial de Clientes" @logout="logout" @cerrar-ruta="cerrarRuta" />
+  <div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-100 dark:bg-slate-900 transition-theme">
+    <NavbarVendedor :rutaAbierta="rutaAbierta" :cargandoRuta="cargandoRuta" :tituloSeccion="$t('nav.clientHistory')" @logout="logout" @cerrar-ruta="cerrarRuta" />
     <div class="p-4 md:p-8">
       <div class="mb-6" v-if="rutaAbierta || cargandoRuta">
         <div class="flex items-center justify-between">
@@ -8,15 +8,15 @@
         </div>
         
         <!-- Filtros -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 mb-4 transition-colors duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-neutral-300 dark:border-gray-600 p-4 mb-4 transition-colors duration-300">
           <div class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-64">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar cliente</label>
+            <div class="flex-1 min-w-0 w-full">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('common.searchClient') }}</label>
               <div class="relative">
                 <input
                   v-model="filtroBusqueda"
                   type="text"
-                  placeholder="Nombre, apellido, cédula o apodo..."
+                  :placeholder="$t('history.searchPlaceholder') || 'Nombre, apellido, Id o apodo...'"
                   class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   @keyup.enter="buscarClientes"
                 />
@@ -33,7 +33,7 @@
                 {{ historialesFiltrados.length }} resultado(s) encontrado(s)
               </p>
               <p v-else-if="filtroBusqueda && historialesFiltrados.length === 0" class="text-sm text-red-600 dark:text-red-400 mt-2">
-                No se encontraron resultados
+                {{ $t('history.noResults') }}
               </p>
             </div>
           </div>
@@ -47,63 +47,20 @@
         <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">Abrir ruta</button>
       </div>
 
-      <!-- Estadísticas -->
-      <div v-if="rutaAbierta || cargandoRuta" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Total Clientes</span>
-          </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ historialesMostrados.length }}</div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Renovaciones Totales</span>
-          </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalRenovaciones }}</div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Última Renovación</span>
-          </div>
-          <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ ultimaRenovacion }}</div>
-        </div>
-      </div>
-
       <!-- Lista de clientes -->
       <div v-if="rutaAbierta || cargandoRuta">
-      <div v-if="cargando" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 text-center transition-colors duration-300">
-        <div class="inline-flex items-center text-gray-900 dark:text-gray-100">
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Cargando historial...
-        </div>
-      </div>
-
-      <div v-else-if="historialesMostrados.length === 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 text-center text-gray-500 dark:text-gray-400 transition-colors duration-300">
+      <div v-if="!cargando && historialesMostrados.length === 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-neutral-300 dark:border-gray-600 p-6 text-center text-gray-500 dark:text-gray-400 transition-colors duration-300">
         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
         <p class="mt-2">No hay clientes en el historial</p>
       </div>
 
-      <div v-else class="space-y-4">
+      <div v-else-if="historialesMostrados.length > 0" class="space-y-4">
         <div
           v-for="historial in historialesMostrados"
           :key="historial._id"
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 hover:shadow-md transition-all duration-300"
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-neutral-300 dark:border-gray-600 p-6 hover:shadow-md transition-all duration-300"
         >
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
               <div class="flex-1 min-w-0">
@@ -130,7 +87,7 @@
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                         </svg>
-                        C.C. {{ historial.cc }}
+                        {{ t('client.id') }} {{ historial.cc }}
                       </span>
                     </div>
                   </div>
@@ -173,19 +130,22 @@
                   </div>
                 </div>
 
-                <!-- Información de renovaciones -->
-                <div class="flex items-center justify-between text-sm">
-                  <div class="flex items-center space-x-4">
-                    <span class="text-gray-800 dark:text-gray-200 font-semibold">
-                      <strong class="text-black dark:text-white">{{ historial.renovacionesCount }}</strong> renovación(es)
-                    </span>
-                    <span class="text-gray-700 dark:text-gray-300 font-medium">
-                      Última: {{ formatearFecha(historial.lastRenovacionAt) }}
-                    </span>
-                    <span class="text-gray-700 dark:text-gray-300 font-medium">
-                      {{ formatearTiempoRelativo(historial.lastRenovacionAt) }}
-                    </span>
-                  </div>
+                <!-- Historial de ventas anteriores: pagos, atrasos, etc. -->
+                <div class="flex flex-wrap items-center gap-3 mt-1">
+                  <button
+                    type="button"
+                    @click="abrirModalVentasHistorial(historial)"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border-2 border-blue-500 dark:border-blue-400 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-colors"
+                  >
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    {{ $t('history.viewSalesHistory') }}
+                    <span class="text-xs font-bold opacity-90 px-2 py-0.5 rounded-full bg-blue-200/80 dark:bg-blue-800/80 text-blue-900 dark:text-blue-100">{{ historial.renovacionesCount }}</span>
+                  </button>
+                  <span class="text-xs text-gray-600 dark:text-gray-400">
+                    {{ formatearFecha(historial.lastRenovacionAt) }} · {{ formatearTiempoRelativo(historial.lastRenovacionAt) }}
+                  </span>
                 </div>
               </div>
               
@@ -214,6 +174,13 @@
       </div>
     </div>
     
+    <HistorialVentasClienteModal
+      :show="!!modalVentasHistorial"
+      :historial="modalVentasHistorial"
+      :refreshing="modalVentasHistorialRefreshing"
+      @close="cerrarModalVentasHistorial"
+    />
+
     <!-- Modal de confirmación para cerrar ruta -->
     <ConfirmModal
       :show="mostrarModalCerrarRuta"
@@ -224,6 +191,68 @@
       @confirm="confirmarCerrarRuta"
       @cancel="cancelarCerrarRuta"
     />
+    
+    <!-- Modal de advertencia: clientes pendientes -->
+    <Teleport to="body">
+      <div v-if="mostrarModalPendientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalPendientes = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-red-600 dark:text-red-400">No se puede cerrar la ruta</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">Hay cliente(s) sin registro de pago en la ruta actual.</p>
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 max-h-64 overflow-y-auto shadow-inner">
+              <ul class="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 space-y-2">
+                <li v-for="(p, idx) in pendientesClientes" :key="p.id || idx" class="font-medium">{{ p.nombres }} {{ p.apellidos }}</li>
+              </ul>
+            </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="mostrarModalPendientes = false" class="px-6 py-2.5 text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">Entendido</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    
+    <!-- Modal de advertencia: caja final negativa -->
+    <Teleport to="body">
+      <div v-if="mostrarModalCajaNegativa" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCajaNegativa = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-red-600 dark:text-red-400">No se puede cerrar la ruta</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{{ mensajeCajaNegativa }}</p>
+            <div v-if="detallesCajaNegativa" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 mb-4 shadow-inner">
+              <p class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">{{ t('modal.details') }}:</p>
+              <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.initialCash') }}:</span> <span class="font-bold">${{ detallesCajaNegativa.cajaInicial?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.income') }}:</span> <span class="font-bold text-red-600">${{ detallesCajaNegativa.ingresos?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.collected') }}:</span> <span class="font-bold text-green-600">${{ detallesCajaNegativa.recaudado?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.sales') }}:</span> <span class="font-bold text-blue-600">${{ detallesCajaNegativa.ventas?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.expenses') }}:</span> <span class="font-bold text-red-600">${{ detallesCajaNegativa.egresos?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.withdrawals') }}:</span> <span class="font-bold text-green-600">${{ detallesCajaNegativa.retiros?.toLocaleString() || '0.00' }}</span></li>
+              </ul>
+            </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="mostrarModalCajaNegativa = false" class="px-6 py-2.5 text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">Entendido</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
     
     <!-- Modal de confirmación para abrir ruta -->
     <ConfirmModal
@@ -238,59 +267,83 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n';
 import NavbarVendedor from '../components/NavbarVendedor.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
-import { consultarEstadoRuta, cerrarRuta as cerrarRutaUtil } from '../utils/rutaUtils.js';
+import HistorialVentasClienteModal from '../components/HistorialVentasClienteModal.vue';
+import { consultarEstadoRuta, cerrarRuta as cerrarRutaUtil, getUserTimezone } from '../utils/rutaUtils.js';
 import API_BASE_URL from '../config/api.js';
+
+const { t } = useI18n();
+const router = useRouter();
 
 const rutaAbierta = ref(false);
 const cargandoRuta = ref(true);
 const mostrarModalCerrarRuta = ref(false);
+const mostrarModalPendientes = ref(false);
+const pendientesClientes = ref([]);
+const mostrarModalCajaNegativa = ref(false);
+const mensajeCajaNegativa = ref('');
+const detallesCajaNegativa = ref(null);
 const mostrarModalAbrirRuta = ref(false);
 let pollingInterval = null;
-
-const emit = defineEmits(['logout']);
 
 const historiales = ref([]);
 const cargando = ref(true);
 const filtroBusqueda = ref('');
-const mostrarResultados = ref(false);
-const pagosClientes = ref({}); // Cache de pagos por cliente
+
+/** Modal historial de ventas (todos los ciclos del cliente) */
+const modalVentasHistorial = ref(null)
+/** Refresco desde API al abrir el modal o al sincronizar pagos */
+const modalVentasHistorialRefreshing = ref(false)
+
+let debounceHistorialTimer = null
+async function abrirModalVentasHistorial(historial) {
+  modalVentasHistorial.value = historial
+  modalVentasHistorialRefreshing.value = true
+  try {
+    const list = await fetchHistorialListRaw()
+    historiales.value = list
+    syncModalHistorialSiAbierto(list)
+  } catch (e) {
+    console.error('Error al sincronizar historial de ventas:', e)
+  } finally {
+    modalVentasHistorialRefreshing.value = false
+  }
+}
+
+function cerrarModalVentasHistorial() {
+  modalVentasHistorial.value = null
+}
 
 const historialesFiltrados = computed(() => {
-  if (!filtroBusqueda.value) return historiales.value;
-  
-  const busqueda = filtroBusqueda.value.toLowerCase();
+  const busqueda = String(filtroBusqueda.value || '').trim().toLowerCase()
+  if (!busqueda) return historiales.value
+
   return historiales.value.filter(historial => {
     const cliente = historial.cliente;
+    const nombres = String(cliente?.nombres || '').toLowerCase()
+    const apellidos = String(cliente?.apellidos || '').toLowerCase()
+    const apodo = String(cliente?.apodo || '').toLowerCase()
+    const cc = String(historial?.cc ?? cliente?.cc ?? '').toLowerCase()
+    const nombreCompleto = `${nombres} ${apellidos}`.trim()
     return (
-      cliente?.nombres?.toLowerCase().includes(busqueda) ||
-      cliente?.apellidos?.toLowerCase().includes(busqueda) ||
-      cliente?.apodo?.toLowerCase().includes(busqueda) ||
-      historial.cc?.toLowerCase().includes(busqueda)
+      nombres.includes(busqueda) ||
+      apellidos.includes(busqueda) ||
+      nombreCompleto.includes(busqueda) ||
+      apodo.includes(busqueda) ||
+      cc.includes(busqueda)
     );
   });
 });
 
 const historialesMostrados = computed(() => {
-  return mostrarResultados.value ? historialesFiltrados.value : historiales.value;
-});
-
-const totalRenovaciones = computed(() => {
-  return historiales.value.reduce((sum, h) => sum + (h.renovacionesCount || 0), 0);
-});
-
-const ultimaRenovacion = computed(() => {
-  if (historiales.value.length === 0) return 'N/A';
-  const masReciente = historiales.value.reduce((latest, h) => {
-    return new Date(h.lastRenovacionAt) > new Date(latest.lastRenovacionAt) ? h : latest;
-  });
-  return formatearFecha(masReciente.lastRenovacionAt);
+  return historialesFiltrados.value
 });
 
 function buscarClientes() {
-  mostrarResultados.value = true;
   // Ocultar teclado virtual en móviles
   if (document.activeElement && document.activeElement.blur) {
     document.activeElement.blur();
@@ -321,23 +374,33 @@ function getEstadoColor(historial) {
   return 'text-gray-600';
 }
 
-async function cargarPagosCliente(clienteId) {
-  if (pagosClientes.value[clienteId]) return; // Ya está en cache
-  
-  try {
-    const baseUrl = location.origin.includes('vercel.app') 
-      ? 'https://sistema-cobranza-backend.onrender.com' 
-      : '';
-    
-    const response = await fetch(`${baseUrl}/api/pagos/cliente/${clienteId}`);
-    if (response.ok) {
-      const pagos = await response.json();
-      pagosClientes.value[clienteId] = pagos;
-    }
-  } catch (error) {
-    console.warn('No se pudieron cargar los pagos del cliente:', error);
-    pagosClientes.value[clienteId] = [];
+/** Lista cruda del endpoint (siempre datos actuales de BD) */
+async function fetchHistorialListRaw() {
+  const vendedorId = localStorage.getItem('vendedorId')
+  if (!vendedorId) throw new Error('No hay sesión de asesor')
+  const response = await fetch(
+    `${API_BASE_URL}/api/historial-clientes/vendedor/${vendedorId}?_t=${Date.now()}`,
+    { cache: 'no-store' }
+  )
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} al cargar historial`)
   }
+  const data = await response.json()
+  return data.historiales || data
+}
+
+/** Si el modal está abierto, sustituir por el registro fresco del mismo cliente */
+function syncModalHistorialSiAbierto(list) {
+  const m = modalVentasHistorial.value
+  if (!m || !Array.isArray(list)) return
+  const cid = String(m.cliente?._id ?? '')
+  const hid = m._id
+  const found = list.find(
+    (h) =>
+      (cid && String(h.cliente?._id) === cid) ||
+      (hid && h._id === hid)
+  )
+  if (found) modalVentasHistorial.value = found
 }
 
 function renovarCliente(cliente) {
@@ -345,7 +408,8 @@ function renovarCliente(cliente) {
   
   // Redirigir a la vista de crear cliente con datos prellenados
   const queryParams = new URLSearchParams({
-    renovar: 'true',
+    renovado: 'true', // Cambiar de 'renovar' a 'renovado' para que coincida con CrearCliente.vue
+    idAnterior: cliente._id, // ID del cliente anterior para marcarlo como cancelado (NO eliminar)
     clienteId: cliente._id,
     nombres: cliente.nombres || '',
     apellidos: cliente.apellidos || '',
@@ -386,43 +450,41 @@ function formatearTiempoRelativo(fecha) {
   return `Hace ${Math.floor(diffDias / 365)} año(s)`;
 }
 
-async function cargarHistorial() {
+async function cargarHistorial(options = {}) {
+  const silent = options.silent === true
   try {
-    cargando.value = true;
-    const vendedorId = localStorage.getItem('vendedorId');
+    if (!silent) cargando.value = true
+    const vendedorId = localStorage.getItem('vendedorId')
     if (!vendedorId) {
-      console.error('No se encontró ID del vendedor');
-      return;
+      console.error('No se encontró ID del asesor')
+      return
     }
-
-    const baseUrl = location.origin.includes('vercel.app') 
-      ? 'https://sistema-cobranza-backend.onrender.com' 
-      : '';
-    
-    console.log('🔍 HISTORIAL FRONTEND - Cargando historial...');
-    console.log(`🔍 HISTORIAL FRONTEND - Base URL: ${baseUrl}`);
-    console.log(`🔍 HISTORIAL FRONTEND - Vendedor ID: ${vendedorId}`);
-    console.log(`🔍 HISTORIAL FRONTEND - URL completa: ${baseUrl}/api/historial-clientes/vendedor/${vendedorId}`);
-    
-    const response = await fetch(`${baseUrl}/api/historial-clientes/vendedor/${vendedorId}`);
-    console.log(`🔍 HISTORIAL FRONTEND - Response status: ${response.status}`);
-    
-    if (!response.ok) {
-      console.error(`❌ HISTORIAL FRONTEND - Error: ${response.status} ${response.statusText}`);
-      throw new Error('Error al cargar historial de clientes');
-    }
-    
-    const data = await response.json();
-    console.log(`🔍 HISTORIAL FRONTEND - Data recibida:`, data);
-    historiales.value = data.historiales || data;
-    
-    // Los pagos ya vienen incluidos del backend, no necesitamos cargarlos por separado
+    const list = await fetchHistorialListRaw()
+    historiales.value = list
+    syncModalHistorialSiAbierto(list)
   } catch (error) {
-    console.error('Error cargando historial de clientes:', error);
-    alert('Error al cargar el historial de clientes');
+    console.error('Error cargando historial de clientes:', error)
+    if (!silent) alert('Error al cargar el historial de clientes')
   } finally {
-    cargando.value = false;
+    if (!silent) cargando.value = false
   }
+}
+
+function scheduleHistorialRecargaSilenciosa() {
+  clearTimeout(debounceHistorialTimer)
+  debounceHistorialTimer = setTimeout(() => {
+    cargarHistorial({ silent: true }).catch(() => {})
+  }, 450)
+}
+
+async function recargarHistorialTrasPago() {
+  clearTimeout(debounceHistorialTimer)
+  await cargarHistorial({ silent: true })
+}
+
+function onVisibilidadVentanaHistorial() {
+  if (document.visibilityState !== 'visible') return
+  scheduleHistorialRecargaSilenciosa()
 }
 
 function cerrarRuta() {
@@ -430,15 +492,34 @@ function cerrarRuta() {
 }
 
 async function confirmarCerrarRuta() {
-  const exito = await cerrarRutaUtil()
-  if (exito) {
+  const vendedorId = localStorage.getItem('vendedorId')
+  if (!vendedorId) return
+  
+  const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vendedorId })
+  })
+  
+  if (res.ok) {
     rutaAbierta.value = false
     mostrarModalCerrarRuta.value = false
     alert('Ruta cerrada exitosamente')
     // Recargar la página para actualizar el estado
     window.location.reload()
   } else {
-    alert('Error al cerrar la ruta')
+    const errorData = await res.json().catch(() => null)
+    mostrarModalCerrarRuta.value = false
+    if (errorData?.error === 'RUTA_CON_CLIENTES_PENDIENTES') {
+      pendientesClientes.value = (errorData.pendientes || [])
+      mostrarModalPendientes.value = true
+    } else if (errorData?.error === 'CAJA_FINAL_NEGATIVA') {
+      mensajeCajaNegativa.value = errorData.msg || 'La caja final está en negativo.'
+      detallesCajaNegativa.value = errorData.detalles || null
+      mostrarModalCajaNegativa.value = true
+    } else {
+      alert(errorData?.msg || errorData?.error || 'Error al cerrar la ruta')
+    }
   }
 }
 
@@ -455,7 +536,7 @@ async function confirmarAbrirRuta() {
   const res = await fetch(`${API_BASE_URL}/api/rutas/abrir`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ vendedorId })
+    body: JSON.stringify({ vendedorId, timezone: getUserTimezone() })
   })
   if (res.ok) {
     rutaAbierta.value = true
@@ -463,7 +544,8 @@ async function confirmarAbrirRuta() {
     alert('Ruta abierta exitosamente')
     window.location.reload()
   } else {
-    alert('No se pudo abrir la ruta')
+    const data = await res.json().catch(() => ({}))
+    alert(data.msg || data.error || 'No se pudo abrir la ruta')
   }
 }
 
@@ -472,11 +554,26 @@ function cancelarAbrirRuta() {
 }
 
 function logout() {
-  emit('logout');
+  try {
+    localStorage.removeItem('rol')
+    localStorage.removeItem('adminId')
+    localStorage.removeItem('vendedorId')
+    localStorage.removeItem('codigoVinculacion')
+    localStorage.removeItem('sessionToken')
+  } catch (_) {}
+  try {
+    router.replace('/')
+    setTimeout(() => {
+      if (location.hash && !location.hash.endsWith('#/')) {
+        location.href = '/'
+      }
+    }, 150)
+  } catch (_) {
+    location.href = '/'
+  }
 }
 
 onMounted(async () => {
-  console.log('🚀 HistorialClientesVendedor - onMounted iniciado')
   
   // Consultar estado de la ruta
   const estadoRuta = await consultarEstadoRuta()
@@ -489,30 +586,51 @@ onMounted(async () => {
   window.addEventListener('cliente-finalizado', actualizarHistorialClientes)
   window.addEventListener('ruta-cerrada', actualizarHistorialClientes)
   window.addEventListener('ruta-abierta', actualizarHistorialClientes)
-  
-  console.log('🛣️ Estado de ruta:', estadoRuta)
-  console.log('🔴 rutaAbierta.value:', rutaAbierta.value)
-  console.log('🟡 cargandoRuta.value:', cargandoRuta.value)
-  console.log('🔵 Props que se pasan a NavbarVendedor:')
-  console.log('  - rutaAbierta:', rutaAbierta.value)
-  console.log('  - cargandoRuta:', cargandoRuta.value)
-  console.log('  - actualizandoDatos:', cargando.value)
-  
-  cargarHistorial();
-});
+  window.addEventListener('pago-registrado', recargarHistorialTrasPago)
+  window.addEventListener('pago-editado', recargarHistorialTrasPago)
+  window.addEventListener('pago-eliminado', recargarHistorialTrasPago)
+  window.addEventListener('actualizar-dashboard', scheduleHistorialRecargaSilenciosa)
+  document.addEventListener('visibilitychange', onVisibilidadVentanaHistorial)
+
+  await cargarHistorial()
+
+  // Si viene un clienteId, abrir automáticamente el modal "Ventas y pagos" de ese cliente
+  try {
+    const hash = window.location.hash
+    const urlParams = new URLSearchParams(hash.split('?')[1] || '')
+    const clienteIdParam = urlParams.get('clienteId')
+    if (clienteIdParam) {
+      const idStr = String(clienteIdParam).trim()
+      const historial = historiales.value.find((h) => String(h?.cliente?._id || '') === idStr)
+      if (historial) {
+        // opcional: mostrar el cliente arriba si el usuario empieza a escribir
+        const nombre = `${historial.cliente?.nombres || ''} ${historial.cliente?.apellidos || ''}`.trim()
+        if (nombre) {
+          filtroBusqueda.value = nombre
+        }
+        await abrirModalVentasHistorial(historial)
+      }
+    }
+  } catch (_) {}
+})
 
 // Función para actualizar historial de clientes cuando sea necesario
 function actualizarHistorialClientes() {
-  console.log('🔄 Actualizando historial de clientes por evento...')
   cargarHistorial()
 }
 
 // Limpiar event listeners al desmontar el componente
 onUnmounted(() => {
+  clearTimeout(debounceHistorialTimer)
   window.removeEventListener('cliente-creado', actualizarHistorialClientes)
   window.removeEventListener('cliente-eliminado', actualizarHistorialClientes)
   window.removeEventListener('cliente-finalizado', actualizarHistorialClientes)
   window.removeEventListener('ruta-cerrada', actualizarHistorialClientes)
   window.removeEventListener('ruta-abierta', actualizarHistorialClientes)
+  window.removeEventListener('pago-registrado', recargarHistorialTrasPago)
+  window.removeEventListener('pago-editado', recargarHistorialTrasPago)
+  window.removeEventListener('pago-eliminado', recargarHistorialTrasPago)
+  window.removeEventListener('actualizar-dashboard', scheduleHistorialRecargaSilenciosa)
+  document.removeEventListener('visibilitychange', onVisibilidadVentanaHistorial)
 })
 </script>

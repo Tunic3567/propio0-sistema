@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-100 dark:bg-slate-900 transition-theme">
       <!-- Header -->
       <nav class="bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center">
         <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Nuevo Cliente</h1>
@@ -7,18 +7,18 @@
           @click="volver"
           class="bg-gray-500 dark:bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition"
         >
-          Volver
+          {{ $t('common.back') }}
         </button>
       </nav>
   
       <!-- Formulario -->
       <div class="p-4">
-        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded shadow p-6">
+        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg border-2 border-neutral-300 dark:border-gray-600 shadow-md p-6">
           <form @submit.prevent="crearCliente">
-            <div class="grid grid-cols-1 md:grid-co+ls-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Nombre(s) -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Nombre(s)</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.name') }}</label>
                 <input
                   v-model="cliente.nombres"
                   type="text"
@@ -29,7 +29,7 @@
   
               <!-- Apellido(s) -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Apellido(s)</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.lastname') }}</label>
                 <input
                   v-model="cliente.apellidos"
                   type="text"
@@ -38,9 +38,9 @@
                 />
               </div>
   
-              <!-- CC -->
+              <!-- Id -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">CC</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.id') }}</label>
                 <input
                   v-model="cliente.cc"
                   type="text"
@@ -51,7 +51,7 @@
   
               <!-- Apodo -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Apodo</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.nickname') }}</label>
                 <input
                   v-model="cliente.apodo"
                   type="text"
@@ -61,7 +61,7 @@
   
               <!-- Celular -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Celular</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.phone') }}</label>
                 <input
                   v-model="cliente.celular"
                   type="tel"
@@ -72,7 +72,7 @@
   
               <!-- Valor del préstamo -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Valor del producto</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.value') }}</label>
                 <input
                   v-model="cliente.valor"
                   type="number"
@@ -85,42 +85,62 @@
   
               <!-- Número de Parcelas -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Número de Parcelas</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('payment.installmentCount') }}</label>
                 <select
                   v-model="cliente.parcelas"
                   class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 >
-                  <option value="">Seleccione</option>
+                  <option value="">{{ $t('common.select') || 'Seleccione' }}</option>
                   <option v-for="n in 99" :key="n" :value="n">{{ n }}</option>
                 </select>
               </div>
 
               <!-- Frecuencia de Pago -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">Frecuencia de Pago</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.paymentFrequency') || 'Frecuencia de Pago' }}</label>
                 <select
                   v-model="cliente.frecuencia"
                   class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 >
-                  <option value="">Seleccione frecuencia</option>
-                  <option value="diaria">Diaria</option>
-                  <option value="semanal">Semanal</option>
-                  <option value="mensual">Mensual</option>
+                  <option value="">{{ $t('client.selectFrequency') || 'Seleccione frecuencia' }}</option>
+                  <option value="diaria">{{ $t('client.daily') || 'Diaria' }}</option>
+                  <option value="semanal">{{ $t('client.weekly') || 'Semanal' }}</option>
+                  <option value="mensual">{{ $t('client.monthly') || 'Mensual' }}</option>
                 </select>
               </div>
             </div>
   
             <!-- Información de interés y total -->
             <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-gray-700 dark:text-gray-300 font-semibold">Interés aplicado:</span>
+              <label class="flex items-center gap-2 mb-2 cursor-pointer select-none">
+                <input
+                  v-model="interesPersonalizadoActivo"
+                  type="checkbox"
+                  class="rounded border-gray-400 dark:border-gray-500 text-blue-600 focus:ring-blue-500"
+                />
+                <span class="text-gray-800 dark:text-gray-200 font-medium">{{ $t('client.customInterest') }}</span>
+              </label>
+              <div v-if="interesPersonalizadoActivo" class="mb-3">
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.customInterestPercent') }}</label>
+                <input
+                  v-model="porcentajeInteresPersonalizado"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  class="w-full md:max-w-xs px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500 appearance-none no-spinner"
+                  @wheel="e => e.target.blur()"
+                />
+              </div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-gray-700 dark:text-gray-300 font-semibold">{{ $t('client.appliedInterest') }}:</span>
                 <span class="text-lg font-bold text-black dark:text-white">
-                  {{ interesAplicado }}%
+                  <template v-if="interesAplicado !== null">{{ interesAplicado }}%</template>
+                  <template v-else>—</template>
                 </span>
               </div>
-              
             </div>
 
             <!-- Total a pagar (como texto resaltado) -->
@@ -133,7 +153,7 @@
 
             <!-- Valor de la parcela -->
             <div class="flex items-end mt-2" v-if="valorParcela">
-              <span class="block text-gray-700 dark:text-gray-300 mb-1 font-semibold mr-2">Valor por parcela:</span>
+              <span class="block text-gray-700 dark:text-gray-300 mb-1 font-semibold mr-2">{{ $t('client.installmentValue') }}:</span>
               <span class="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-4 py-1 rounded shadow">
                 ${{ valorParcela }}
               </span>
@@ -150,7 +170,7 @@
                     @focus="onFocusDireccion('comercial')"
                     @blur="onBlurDireccion('comercial')"
                     type="text"
-                    placeholder="Ingresa la dirección comercial del cliente..."
+                    :placeholder="$t('createClient.form.commercialAddressPlaceholder') || 'Ingresa la dirección comercial del cliente...'"
                     class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                     autocomplete="off"
                   />
@@ -187,7 +207,7 @@
 
             <!-- Dirección Residencial con autocompletado -->
             <div class="mt-6">
-              <label class="block text-gray-700 dark:text-gray-300 mb-2 font-semibold">Dirección Residencial</label>
+              <label class="block text-gray-700 dark:text-gray-300 mb-2 font-semibold">{{ $t('client.residentialAddress') }}</label>
               <div class="relative flex gap-2">
                 <div class="flex-1 relative">
                   <input
@@ -196,7 +216,7 @@
                     @focus="onFocusDireccion('residencial')"
                     @blur="onBlurDireccion('residencial')"
                     type="text"
-                    placeholder="Ingresa la dirección residencial del cliente..."
+                    :placeholder="$t('createClient.form.residentialAddressPlaceholder') || 'Ingresa la dirección residencial del cliente...'"
                     class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                     autocomplete="off"
                   />
@@ -235,9 +255,10 @@
             <div class="mt-6 flex space-x-4">
               <button
                 type="submit"
-                class="flex-1 bg-blue-500 dark:bg-blue-600 text-white py-3 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition"
+                :disabled="creacionEnCurso"
+                class="flex-1 bg-blue-500 dark:bg-blue-600 text-white py-3 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Crear Cliente
+                {{ creacionEnCurso ? $t('payment.saving') : $t('client.create') }}
               </button>
               <button
                 type="button"
@@ -250,14 +271,89 @@
           </form>
         </div>
       </div>
+      
+      <!-- Modal de alerta para Id reportado -->
+      <Teleport to="body">
+        <div v-if="mostrarModalCedulaReportada" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCedulaReportada = false"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-yellow-300/50 dark:border-yellow-700/50 transition-all duration-300">
+            <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-yellow-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+              <div class="flex items-center gap-3 mb-2">
+                <svg class="w-10 h-10 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $t('reports.warning') }}: {{ $t('reports.reportId') }}</h2>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                {{ $t('reports.idReported') }} <strong class="text-yellow-600 dark:text-yellow-400">{{ cliente.cc }}</strong> {{ $t('reports.reportedBefore') }}
+              </p>
+              <div v-if="infoCedulaReportada?.fechaReporte || infoCedulaReportada?.motivo" class="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-gray-700 dark:to-gray-800 border-2 border-yellow-200 dark:border-yellow-700 rounded-xl p-4 mb-4 shadow-inner">
+                <p v-if="infoCedulaReportada?.fechaReporte" class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                  <span class="font-semibold">{{ $t('reports.reportDate') }}:</span> {{ new Date(infoCedulaReportada.fechaReporte).toLocaleDateString() }}
+                </p>
+                <p v-if="infoCedulaReportada?.motivo" class="text-sm text-gray-700 dark:text-gray-300">
+                  <span class="font-semibold">{{ $t('modal.reason') }}:</span> {{ infoCedulaReportada.motivo }}
+                </p>
+              </div>
+              <p class="text-base text-gray-700 dark:text-gray-300 mb-6 font-medium">
+                {{ $t('reports.continueCreation') }}
+              </p>
+              <div class="flex justify-end gap-3">
+                <button 
+                  @click="mostrarModalCedulaReportada = false" 
+                  class="px-5 py-2.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-all duration-200 shadow-sm"
+                >
+                  {{ $t('reports.goBack') }}
+                </button>
+                <button 
+                  @click="continuarConCreacion" 
+                  class="px-5 py-2.5 text-white bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg hover:from-yellow-600 hover:to-yellow-700 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                >
+                  {{ $t('reports.continue') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
+
+      <!-- Modal de éxito (cliente creado) -->
+      <Teleport to="body">
+        <div v-if="mostrarModalExitoCliente" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalExitoCliente"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-green-200/50 dark:border-green-700/50 transition-all duration-300">
+            <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+              <div class="flex items-center gap-3 mb-2">
+                <svg class="w-10 h-10 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $t('client.createdSuccessTitle') }}</h2>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-base text-gray-700 dark:text-gray-300 mb-6 text-center leading-relaxed">{{ mensajeExitoCliente }}</p>
+              <div class="flex justify-center">
+                <button @click="cerrarModalExitoCliente" class="px-6 py-2.5 text-white bg-green-700 hover:bg-green-800 border-2 border-green-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">
+                  {{ $t('common.accept') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
     </div>
   </template>
   
   <script setup>
 
 import API_BASE_URL from '../config/api.js'
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, watch } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
+  
+  const { t } = useI18n()
 // Sin mapa: buscamos/obtenemos ubicación y guardamos coordenadas
   
   const router = useRouter()
@@ -272,7 +368,8 @@ import API_BASE_URL from '../config/api.js'
     direccion_residencial: '',
     valor: '',
     parcelas: '',
-    frecuencia: ''
+    frecuencia: '',
+    renovado: false
   })
 
   // Coordenadas de las direcciones (se envían al backend, pero no se muestran)
@@ -285,9 +382,30 @@ import API_BASE_URL from '../config/api.js'
   const mostrarSugComercial = ref(false)
   const mostrarSugResidencial = ref(false)
   let debounceTimer = null
+  
+  // Estado para modal de Id reportado
+  const mostrarModalCedulaReportada = ref(false)
+  const infoCedulaReportada = ref(null)
+  const datosClienteParaCrear = ref(null) // Almacenar datos del cliente cuando se detecta Id reportado
 
-  // Calcular interés según número de parcelas
+  // Modal de éxito al crear cliente
+  const mostrarModalExitoCliente = ref(false)
+  const mensajeExitoCliente = ref('')
+  /** Evita doble envío / condición de carrera al crear el mismo cliente varias veces */
+  const creacionEnCurso = ref(false)
+
+  /** Interés personalizado: checkbox + % manual; si no, 10% / 20% según cuotas */
+  const interesPersonalizadoActivo = ref(false)
+  const porcentajeInteresPersonalizado = ref('')
+
+  // Calcular interés: personalizado (0–100) o automático según número de parcelas
   const interesAplicado = computed(() => {
+    if (interesPersonalizadoActivo.value) {
+      const raw = String(porcentajeInteresPersonalizado.value ?? '').trim().replace(',', '.')
+      const p = parseFloat(raw)
+      if (!Number.isFinite(p) || p < 0 || p > 100) return null
+      return Math.round(p * 100) / 100
+    }
     const parcelas = parseInt(cliente.value.parcelas) || 0
     return parcelas <= 11 ? 10 : 20
   })
@@ -295,8 +413,10 @@ import API_BASE_URL from '../config/api.js'
   const totalAPagar = computed(() => {
     const valor = parseFloat(cliente.value.valor) || 0
     const parcelas = parseInt(cliente.value.parcelas) || 0
-    const interes = interesAplicado.value / 100
-    return valor > 0 && parcelas > 0 ? (valor + valor * interes).toFixed(2) : ''
+    const i = interesAplicado.value
+    if (valor <= 0 || parcelas <= 0 || i === null) return ''
+    const interes = i / 100
+    return (valor + valor * interes).toFixed(2)
   })
 
   const valorParcela = computed(() => {
@@ -401,44 +521,76 @@ import API_BASE_URL from '../config/api.js'
   }
   
   async function crearCliente() {
-  // Formato de fecha: aa/mm/dd hh:mm
-  const now = new Date();
-  const fecha = `${now.getFullYear().toString().slice(2)}/` +
-    `${String(now.getMonth() + 1).padStart(2, '0')}/` +
-    `${String(now.getDate()).padStart(2, '0')} ` +
-    `${String(now.getHours()).padStart(2, '0')}:` +
-    `${String(now.getMinutes()).padStart(2, '0')}`;
+    if (interesPersonalizadoActivo.value && interesAplicado.value === null) {
+      alert(t('client.customInterestInvalid'))
+      return
+    }
 
-  // Calcular total y parcela
-  const valor = parseFloat(cliente.value.valor) || 0;
-  const parcelas = parseInt(cliente.value.parcelas) || 0;
-  const interes = interesAplicado.value / 100;
-  const total = valor + valor * interes;
-  const valorParcelaCalculado = parcelas > 0 ? (total / parcelas) : 0;
+    // Formato de fecha: aa/mm/dd hh:mm
+    const now = new Date()
+    const fecha = `${now.getFullYear().toString().slice(2)}/` +
+      `${String(now.getMonth() + 1).padStart(2, '0')}/` +
+      `${String(now.getDate()).padStart(2, '0')} ` +
+      `${String(now.getHours()).padStart(2, '0')}:` +
+      `${String(now.getMinutes()).padStart(2, '0')}`
 
-  // Obtener el id del vendedor (ajusta la clave si usas otra)
-  const vendedorId = localStorage.getItem('vendedorId');
+    const valor = parseFloat(cliente.value.valor) || 0
+    const parcelas = parseInt(cliente.value.parcelas) || 0
+    const pct = interesAplicado.value
+    if (pct === null) {
+      alert(t('client.customInterestInvalid'))
+      return
+    }
+    const interes = pct / 100
+    const total = valor + valor * interes
+    const valorParcelaCalculado = parcelas > 0 ? (total / parcelas) : 0
 
-  const nuevoCliente = {
-    ...cliente.value,
-    dias: Number(cliente.value.parcelas), // enviar como 'dias' para el backend
-    frecuencia: cliente.value.frecuencia, // frecuencia de pago
-    interes: interesAplicado.value, // interés aplicado
-    fecha,
-    total: Number(total.toFixed(2)),
-    parcela: Number(valorParcelaCalculado.toFixed(2)),
-    saldo_inicial: Number(total.toFixed(2)),
-    vendedor: vendedorId,
-    renovado: !!cliente.value.renovado,
-    // Coordenadas de las direcciones
-    coordenadas_comercial: coordenadasComercial.value,
-    coordenadas_residencial: coordenadasResidencial.value
-  };
-  // Eliminar el campo 'parcelas' si existe
-  delete nuevoCliente.parcelas;
+    const vendedorId = localStorage.getItem('vendedorId')
 
+    const nuevoCliente = {
+      ...cliente.value,
+      dias: Number(cliente.value.parcelas),
+      frecuencia: cliente.value.frecuencia,
+      interes: pct,
+      fecha,
+      total: Number(total.toFixed(2)),
+      parcela: Number(valorParcelaCalculado.toFixed(2)),
+      saldo_inicial: Number(total.toFixed(2)),
+      vendedor: vendedorId,
+      renovado: !!cliente.value.renovado,
+      coordenadas_comercial: coordenadasComercial.value,
+      coordenadas_residencial: coordenadasResidencial.value
+    }
+    delete nuevoCliente.parcelas
+
+    if (creacionEnCurso.value) return
+    creacionEnCurso.value = true
+    try {
+      if (cliente.value.cc) {
+        try {
+          const codigoVinculacion = localStorage.getItem('codigoVinculacion')
+          if (codigoVinculacion) {
+            const resVerificar = await fetch(`${API_BASE_URL}/api/cedulas/verificar/${cliente.value.cc}?codigoVinculacion=${encodeURIComponent(codigoVinculacion)}`)
+            const dataVerificar = await resVerificar.json()
+            if (dataVerificar.reportada) {
+              infoCedulaReportada.value = dataVerificar
+              datosClienteParaCrear.value = nuevoCliente
+              mostrarModalCedulaReportada.value = true
+              return
+            }
+          }
+        } catch (e) {
+          console.error('Error al verificar Id reportado:', e)
+        }
+      }
+      await procederConCreacion(nuevoCliente)
+    } finally {
+      creacionEnCurso.value = false
+    }
+  }
+
+async function procederConCreacion(nuevoCliente) {
   try {
-    console.log('📤 Enviando datos del cliente:', nuevoCliente);
     const res = await fetch(`${API_BASE_URL}/api/clientes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -446,17 +598,27 @@ import API_BASE_URL from '../config/api.js'
     });
     
     const data = await res.json();
-    console.log('📥 Respuesta del servidor:', data);
-    
     if (res.ok) {
-      // Si es renovación, eliminar el cliente anterior
+      // Si es renovación, marcar el cliente anterior como cancelado (NO eliminar)
+      // Esto preserva los pagos y valores para el cálculo correcto del resumen
       if (route.query.idAnterior) {
-        await fetch(`${API_BASE_URL}/api/clientes/${route.query.idAnterior}`, {
-          method: 'DELETE'
-        });
+        try {
+          await fetch(`${API_BASE_URL}/api/clientes/${route.query.idAnterior}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              cancelado: true,
+              historial: true,
+              fechaEntradaHistorial: new Date()
+            })
+          });
+        } catch (e) {
+          // Si falla, no es crítico - el cliente nuevo ya se creó
+        }
       }
-      alert(`Cliente ${cliente.value.nombres} ${cliente.value.apellidos} creado exitosamente`);
-      router.push('/vendedor');
+      const nombreCompleto = `${cliente.value.nombres || ''} ${cliente.value.apellidos || ''}`.trim() || t('client.title');
+      mensajeExitoCliente.value = t('client.createdSuccessMessage', { name: nombreCompleto });
+      mostrarModalExitoCliente.value = true;
     } else {
       const mensajeError = data.detalles || data.error || 'Error desconocido al crear cliente';
       console.error('❌ Error al crear cliente:', data);
@@ -468,18 +630,60 @@ import API_BASE_URL from '../config/api.js'
   }
 }
 
-onMounted(() => {
-  // Si hay datos en la query, autocompleta el formulario
-  const q = route.query
-  if (q.nombres) cliente.value.nombres = q.nombres
-  if (q.apellidos) cliente.value.apellidos = q.apellidos
-  if (q.cc) cliente.value.cc = q.cc
-  if (q.apodo) cliente.value.apodo = q.apodo
-  if (q.celular) cliente.value.celular = q.celular
-  if (q.direccion) cliente.value.direccion = q.direccion
-  if (q.direccion_residencial) cliente.value.direccion_residencial = q.direccion_residencial
-  if (q.renovado) cliente.value.renovado = true
-})
+function cerrarModalExitoCliente() {
+  mostrarModalExitoCliente.value = false;
+  window.dispatchEvent(new CustomEvent('actualizar-dashboard'));
+  router.push('/vendedor');
+}
+
+async function continuarConCreacion() {
+  if (creacionEnCurso.value) return
+  creacionEnCurso.value = true
+  try {
+    mostrarModalCedulaReportada.value = false
+    if (datosClienteParaCrear.value) {
+      const datos = datosClienteParaCrear.value
+      datosClienteParaCrear.value = null
+      await procederConCreacion(datos)
+    }
+  } finally {
+    creacionEnCurso.value = false
+  }
+}
+
+  /** Lee query (renovación u otros); tolera string | string[] de vue-router */
+  function qStr(key) {
+    const v = route.query[key]
+    if (v === undefined || v === null) return ''
+    return Array.isArray(v) ? String(v[0] ?? '') : String(v)
+  }
+
+  function aplicarQueryDesdeRuta() {
+    if (route.path !== '/crear-cliente') return
+    const q = route.query
+    if (!q || Object.keys(q).length === 0) return
+    if (qStr('nombres')) cliente.value.nombres = qStr('nombres')
+    if (qStr('apellidos')) cliente.value.apellidos = qStr('apellidos')
+    if (qStr('cc')) cliente.value.cc = qStr('cc')
+    if (qStr('apodo')) cliente.value.apodo = qStr('apodo')
+    if (qStr('celular')) cliente.value.celular = qStr('celular')
+    if (qStr('direccion')) cliente.value.direccion = qStr('direccion')
+    if (qStr('direccion_residencial')) cliente.value.direccion_residencial = qStr('direccion_residencial')
+    if (qStr('valor')) cliente.value.valor = qStr('valor')
+    if (qStr('parcelas')) cliente.value.parcelas = qStr('parcelas')
+    if (qStr('frecuencia')) cliente.value.frecuencia = qStr('frecuencia')
+    if (q.renovado === 'true' || q.renovado === true) cliente.value.renovado = true
+  }
+
+  onMounted(() => {
+    aplicarQueryDesdeRuta()
+  })
+
+  // Si ya estabas en Crear cliente y vuelves con query nueva (p. ej. desde Pagos), onMounted no se repite
+  watch(
+    () => route.fullPath,
+    () => aplicarQueryDesdeRuta()
+  )
   </script>
 
   <style>

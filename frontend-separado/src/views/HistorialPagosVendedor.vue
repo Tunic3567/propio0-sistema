@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <NavbarVendedor :rutaAbierta="rutaAbierta" :actualizandoDatos="loading" :cargandoRuta="cargandoRuta" tituloSeccion="Historial de Pagos" @logout="logout" @cerrar-ruta="cerrarRuta" />
+  <div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-100 dark:bg-slate-900 transition-theme">
+    <NavbarVendedor :rutaAbierta="rutaAbierta" :cargandoRuta="cargandoRuta" :tituloSeccion="$t('nav.paymentHistory')" @logout="logout" @cerrar-ruta="cerrarRuta" />
     <div class="p-4 md:p-8">
       <div class="mb-6" v-if="rutaAbierta || cargandoRuta">
         <div class="flex items-center justify-between">
@@ -8,86 +8,37 @@
         </div>
         
         <!-- Filtros -->
-        <div v-if="rutaAbierta || cargandoRuta" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 mb-4 transition-colors duration-300">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por cliente:</label>
-              <select v-model="clienteFiltro" @change="filtrarPagos" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                <option value="">Todos los clientes</option>
-                <option v-for="cliente in clientes" :key="cliente._id" :value="cliente._id">
-                  {{ cliente.nombres }} {{ cliente.apellidos }}
-                  <span v-if="cliente.apodo">({{ cliente.apodo }})</span>
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por tipo:</label>
-              <select v-model="tipoFiltro" @change="filtrarPagos" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                <option value="">Todos los tipos</option>
-                <option value="Parcela">Parcela</option>
-                <option value="Abono">Abono</option>
-                <option value="No pago">No pago</option>
-                <option value="No aplica">No aplica</option>
-              </select>
-            </div>
+        <div v-if="rutaAbierta || cargandoRuta" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-neutral-300 dark:border-gray-600 p-4 mb-4 transition-colors duration-300">
+          <div class="max-w-xl">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por cliente:</label>
+            <select v-model="clienteFiltro" @change="filtrarPagos" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              <option value="">{{ $t('history.allClients') || 'Todos los clientes' }}</option>
+              <option v-for="cliente in clientes" :key="cliente._id" :value="cliente._id">
+                {{ cliente.nombres }} {{ cliente.apellidos }}
+                <span v-if="cliente.apodo">({{ cliente.apodo }})</span>
+              </option>
+            </select>
           </div>
         </div>
       </div>
 
       <!-- Aviso cuando la ruta está cerrada -->
       <div v-if="!rutaAbierta && !cargandoRuta" class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6 text-center transition-colors duration-300">
-        <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">Ruta cerrada</p>
-        <p class="text-yellow-700 dark:text-yellow-300 mb-4">Para continuar, debes abrir una ruta.</p>
-        <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">Abrir ruta</button>
-      </div>
-
-      <!-- Estadísticas -->
-      <div v-if="rutaAbierta || cargandoRuta" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <CurrencyDollarIcon class="w-5 h-5 text-green-500" />
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Total Pagos</span>
-          </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ pagosFiltrados.length }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <BanknotesIcon class="w-5 h-5 text-blue-500" />
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Monto Total Pago</span>
-          </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">${{ totalMonto.toFixed(2) }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <ShoppingCartIcon class="w-5 h-5 text-purple-500" />
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Parcelas</span>
-          </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ pagosParcelas }}</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4 transition-colors duration-300">
-          <div class="flex items-center gap-2">
-            <ArrowTrendingUpIcon class="w-5 h-5 text-orange-500" />
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Abonos</span>
-          </div>
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ pagosAbonos }}</div>
-        </div>
+        <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">{{ $t('route.closed') }}</p>
+        <p class="text-yellow-700 dark:text-yellow-300 mb-4">{{ $t('common.mustOpenRoute') }}</p>
+        <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">{{ $t('route.open') }}</button>
       </div>
 
       <!-- Lista de pagos -->
       <div v-if="rutaAbierta || cargandoRuta">
-        <div v-if="loading" class="text-center py-8">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Cargando pagos...</p>
-        </div>
-        
-        <div v-else-if="pagosFiltrados.length === 0" class="text-center py-8">
+        <div v-if="!loading && pagosFiltrados.length === 0" class="text-center py-8">
           <ReceiptRefundIcon class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <p class="text-gray-500 dark:text-gray-400 text-lg">No se encontraron pagos</p>
           <p class="text-gray-400 dark:text-gray-500 text-sm">Intenta ajustar los filtros o registra algunos pagos</p>
         </div>
         
-        <div v-else class="space-y-4">
-          <div v-for="pago in pagosFiltrados" :key="pago._id" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-300">
+        <div v-else-if="pagosFiltrados.length > 0" class="space-y-4">
+          <div v-for="pago in pagosFiltrados" :key="pago._id" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-neutral-300 dark:border-gray-600 hover:shadow-md transition-all duration-300">
             <div class="p-4">
               <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <!-- Información del cliente -->
@@ -115,7 +66,7 @@
                     </div>
                     <div v-if="pago.cliente?.direccion_residencial" class="flex items-center gap-1">
                       <span>🏠</span>
-                      <span class="dark:text-gray-200">{{ pago.cliente.direccion_residencial }}</span>
+                      <span class="dark:text-gray-200">{{ resumirDireccion(pago.cliente.direccion_residencial) }}</span>
                     </div>
                   </div>
                 </div>
@@ -137,6 +88,19 @@
                     </div>
                 </div>
               </div>
+              
+              <!-- Comentarios/Observaciones -->
+              <div v-if="pago.observaciones" class="mt-3 pt-3 border-t border-[#1E293B]/15 dark:border-[#1E293B]/50">
+                <div class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                  <div class="flex-1">
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Comentario:</span>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ pago.observaciones }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -154,6 +118,68 @@
       @cancel="cancelarCerrarRuta"
     />
     
+    <!-- Modal de advertencia: clientes pendientes -->
+    <Teleport to="body">
+      <div v-if="mostrarModalPendientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalPendientes = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-red-600 dark:text-red-400">No se puede cerrar la ruta</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">Hay cliente(s) sin registro de pago en la ruta actual.</p>
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 max-h-64 overflow-y-auto shadow-inner">
+              <ul class="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 space-y-2">
+                <li v-for="(p, idx) in pendientesClientes" :key="p.id || idx" class="font-medium">{{ p.nombres }} {{ p.apellidos }}</li>
+              </ul>
+            </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="mostrarModalPendientes = false" class="px-6 py-2.5 text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">Entendido</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    
+    <!-- Modal de advertencia: caja final negativa -->
+    <Teleport to="body">
+      <div v-if="mostrarModalCajaNegativa" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCajaNegativa = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-red-600 dark:text-red-400">No se puede cerrar la ruta</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{{ mensajeCajaNegativa }}</p>
+            <div v-if="detallesCajaNegativa" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 mb-4 shadow-inner">
+              <p class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">{{ t('modal.details') }}:</p>
+              <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.initialCash') }}:</span> <span class="font-bold">${{ detallesCajaNegativa.cajaInicial?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.income') }}:</span> <span class="font-bold text-red-600">${{ detallesCajaNegativa.ingresos?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.collected') }}:</span> <span class="font-bold text-green-600">${{ detallesCajaNegativa.recaudado?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.sales') }}:</span> <span class="font-bold text-blue-600">${{ detallesCajaNegativa.ventas?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.expenses') }}:</span> <span class="font-bold text-red-600">${{ detallesCajaNegativa.egresos?.toLocaleString() || '0.00' }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ t('summary.withdrawals') }}:</span> <span class="font-bold text-green-600">${{ detallesCajaNegativa.retiros?.toLocaleString() || '0.00' }}</span></li>
+              </ul>
+            </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="mostrarModalCajaNegativa = false" class="px-6 py-2.5 text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">Entendido</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    
     <!-- Modal de confirmación para abrir ruta -->
     <ConfirmModal
       :show="mostrarModalAbrirRuta"
@@ -168,12 +194,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import NavbarVendedor from '../components/NavbarVendedor.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import API_BASE_URL from '../config/api.js'
-import { consultarEstadoRuta, cerrarRuta as cerrarRutaUtil } from '../utils/rutaUtils.js'
+import { consultarEstadoRuta, cerrarRuta as cerrarRutaUtil, getUserTimezone } from '../utils/rutaUtils.js'
+
+const { t } = useI18n()
 import { 
   ReceiptRefundIcon,
   CurrencyDollarIcon,
@@ -189,38 +218,34 @@ const loading = ref(true)
 const pagos = ref([])
 const clientes = ref([])
 const clienteFiltro = ref('')
-const tipoFiltro = ref('')
 const rutaAbierta = ref(false)
 const cargandoRuta = ref(true)
 const mostrarModalCerrarRuta = ref(false)
 const mostrarModalAbrirRuta = ref(false)
+const mostrarModalPendientes = ref(false)
+const pendientesClientes = ref([])
+const mostrarModalCajaNegativa = ref(false)
+const mensajeCajaNegativa = ref('')
+const detallesCajaNegativa = ref(null)
+// Pagos cargados por ID de cliente (para mostrar todos los pagos del cliente al filtrar)
+const pagosPorCliente = ref([])
 let pollingInterval = null
+/** Una sola petición /pagos/vendedor en vuelo (varios eventos seguidos). */
+let cargarPagosVentPromise = null
 
 // Computed properties
 const pagosFiltrados = computed(() => {
-  let filtrados = pagos.value
-
+  // Si hay filtro por cliente: usar lista por ID de cliente (todos los pagos) o filtrar con comparación segura por ID
+  let filtrados
   if (clienteFiltro.value) {
-    filtrados = filtrados.filter(pago => pago.cliente?._id === clienteFiltro.value)
-  }
-
-  if (tipoFiltro.value) {
-    filtrados = filtrados.filter(pago => pago.tipo === tipoFiltro.value)
+    filtrados = pagosPorCliente.value.length
+      ? pagosPorCliente.value
+      : pagos.value.filter(pago => String(pago.cliente?._id || pago.cliente) === String(clienteFiltro.value))
+  } else {
+    filtrados = [...pagos.value]
   }
 
   return filtrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-})
-
-const totalMonto = computed(() => {
-  return pagosFiltrados.value.reduce((sum, pago) => sum + (pago.valor || 0), 0)
-})
-
-const pagosParcelas = computed(() => {
-  return pagosFiltrados.value.filter(pago => pago.tipo === 'Parcela').length
-})
-
-const pagosAbonos = computed(() => {
-  return pagosFiltrados.value.filter(pago => pago.tipo === 'Abono').length
 })
 
 // Funciones
@@ -249,11 +274,39 @@ function formatFecha(fecha) {
   })
 }
 
+// Función para resumir una dirección (mostrar solo calle, barrio, ciudad)
+function resumirDireccion(direccionCompleta) {
+  if (!direccionCompleta) return '';
+  
+  // Dividir por comas
+  const partes = direccionCompleta.split(',').map(p => p.trim());
+  
+  // Si tiene menos de 3 partes, devolver todo
+  if (partes.length <= 3) {
+    return direccionCompleta;
+  }
+  
+  // Tomar las primeras 3 partes (generalmente: calle, barrio, ciudad)
+  // O las primeras 2 si la primera es muy larga
+  if (partes[0].length > 50) {
+    // Si la primera parte es muy larga, tomar solo las primeras 2
+    return partes.slice(0, 2).join(', ');
+  }
+  
+  // Normalmente: calle, barrio, ciudad
+  return partes.slice(0, 3).join(', ');
+}
+
 function filtrarPagos() {
   // Los filtros se aplican automáticamente por los computed properties
 }
 
-async function cargarPagos() {
+// Al cambiar el filtro por cliente, cargar todos los pagos de ese cliente por ID (muestra todos sin depender de ruta)
+watch(clienteFiltro, (nuevoId) => {
+  cargarPagosPorCliente(nuevoId || '')
+})
+
+async function ejecutarCargarPagosHistorialVent() {
   try {
     const vendedorId = localStorage.getItem('vendedorId')
     if (!vendedorId) {
@@ -261,15 +314,12 @@ async function cargarPagos() {
       return
     }
 
-    console.log('📋 Cargando historial de pagos desde la base de datos...')
-    // Forzar recarga desde la base de datos, evitando caché con timestamp
     const timestamp = new Date().getTime()
     const res = await fetch(`${API_BASE_URL}/api/pagos/vendedor/${vendedorId}?_t=${timestamp}`, {
       cache: 'no-store'
     })
     if (res.ok) {
       pagos.value = await res.json()
-      console.log(`✅ Historial de pagos cargado: ${pagos.value.length} pagos`)
     } else {
       console.error('Error al cargar pagos:', res.statusText)
       pagos.value = []
@@ -280,12 +330,20 @@ async function cargarPagos() {
   }
 }
 
+function cargarPagos() {
+  if (!cargarPagosVentPromise) {
+    cargarPagosVentPromise = ejecutarCargarPagosHistorialVent().finally(() => {
+      cargarPagosVentPromise = null
+    })
+  }
+  return cargarPagosVentPromise
+}
+
 async function cargarClientes() {
   try {
     const vendedorId = localStorage.getItem('vendedorId')
     if (!vendedorId) return
 
-    console.log('📋 Cargando clientes desde la base de datos...')
     // Forzar recarga desde la base de datos, evitando caché con timestamp
     const timestamp = new Date().getTime()
     const res = await fetch(`${API_BASE_URL}/api/clientes/vendedor/${vendedorId}?_t=${timestamp}`, {
@@ -294,10 +352,28 @@ async function cargarClientes() {
     if (res.ok) {
       // El backend ya filtra clientes en modo historial
       clientes.value = await res.json()
-      console.log(`📋 Clientes cargados para filtros: ${clientes.value.length} (ya filtrados por backend)`)
     }
   } catch (error) {
     console.error('Error al cargar clientes:', error)
+  }
+}
+
+// Cargar todos los pagos del cliente por ID (para historial al filtrar por cliente)
+async function cargarPagosPorCliente(clienteId) {
+  if (!clienteId) {
+    pagosPorCliente.value = []
+    return
+  }
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pagos/cliente/${clienteId}`, { cache: 'no-store' })
+    if (res.ok) {
+      pagosPorCliente.value = await res.json()
+    } else {
+      pagosPorCliente.value = []
+    }
+  } catch (error) {
+    console.error('Error al cargar pagos del cliente:', error)
+    pagosPorCliente.value = []
   }
 }
 
@@ -306,8 +382,16 @@ function cerrarRuta() {
 }
 
 async function confirmarCerrarRuta() {
-  const exito = await cerrarRutaUtil()
-  if (exito) {
+  const vendedorId = localStorage.getItem('vendedorId')
+  if (!vendedorId) return
+  
+  const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vendedorId })
+  })
+  
+  if (res.ok) {
     mostrarModalCerrarRuta.value = false
     // Recargar estado de ruta y datos desde la base de datos
     const estadoRuta = await consultarEstadoRuta()
@@ -318,7 +402,18 @@ async function confirmarCerrarRuta() {
     window.dispatchEvent(new CustomEvent('ruta-cerrada'))
     alert('Ruta cerrada exitosamente')
   } else {
-    alert('Error al cerrar la ruta')
+    const errorData = await res.json().catch(() => null)
+    mostrarModalCerrarRuta.value = false
+    if (errorData?.error === 'RUTA_CON_CLIENTES_PENDIENTES') {
+      pendientesClientes.value = (errorData.pendientes || [])
+      mostrarModalPendientes.value = true
+    } else if (errorData?.error === 'CAJA_FINAL_NEGATIVA') {
+      mensajeCajaNegativa.value = errorData.msg || 'La caja final está en negativo.'
+      detallesCajaNegativa.value = errorData.detalles || null
+      mostrarModalCajaNegativa.value = true
+    } else {
+      alert(errorData?.msg || errorData?.error || 'Error al cerrar la ruta')
+    }
   }
 }
 
@@ -335,7 +430,7 @@ async function confirmarAbrirRuta() {
   const res = await fetch(`${API_BASE_URL}/api/rutas/abrir`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ vendedorId })
+    body: JSON.stringify({ vendedorId, timezone: getUserTimezone() })
   })
   if (res.ok) {
     mostrarModalAbrirRuta.value = false
@@ -362,6 +457,7 @@ function logout() {
     localStorage.removeItem('adminId')
     localStorage.removeItem('vendedorId')
     localStorage.removeItem('codigoVinculacion')
+    localStorage.removeItem('sessionToken')
   } catch {}
   try { 
     router.replace('/') 
@@ -371,49 +467,39 @@ function logout() {
 }
 
 onMounted(async () => {
-  console.log('🚀 HistorialPagosVendedor - onMounted iniciado')
-  console.log('🔗 URL actual:', window.location.href)
-  console.log('🔗 Hash:', window.location.hash)
-  
   loading.value = true
   cargandoRuta.value = true
-  
-  // Consultar estado de la ruta
-  const estadoRuta = await consultarEstadoRuta()
-  rutaAbierta.value = estadoRuta.abierta
-  cargandoRuta.value = estadoRuta.cargando
-  
-  // Escuchar eventos para actualizar cuando sea necesario
+
   window.addEventListener('pago-registrado', actualizarHistorialPagos)
   window.addEventListener('pago-editado', actualizarHistorialPagos)
   window.addEventListener('pago-eliminado', actualizarHistorialPagos)
   window.addEventListener('ruta-cerrada', actualizarHistorialPagos)
   window.addEventListener('ruta-abierta', actualizarHistorialPagos)
+
+  await Promise.all([
+    consultarEstadoRuta().then((estadoRuta) => {
+      rutaAbierta.value = estadoRuta.abierta
+      cargandoRuta.value = estadoRuta.cargando
+    }),
+    cargarPagos(),
+    cargarClientes()
+  ])
   
-  console.log('🛣️ Estado de ruta:', estadoRuta)
-  console.log('🔴 rutaAbierta.value:', rutaAbierta.value)
-  console.log('🟡 cargandoRuta.value:', cargandoRuta.value)
-  console.log('🔵 Props que se pasan a NavbarVendedor:')
-  console.log('  - rutaAbierta:', rutaAbierta.value)
-  console.log('  - cargandoRuta:', cargandoRuta.value)
-  console.log('  - actualizandoDatos:', loading.value)
-  
-  await Promise.all([cargarPagos(), cargarClientes()])
-  
-  console.log('📊 Datos cargados - Clientes:', clientes.value.length, 'Pagos:', pagos.value.length)
-  
-  // Detectar parámetro de consulta 'cliente' y aplicar filtro automáticamente
+  // Detectar parámetro de consulta y aplicar filtro automáticamente
   // En Vue Router con hash mode, los parámetros están en el hash
   const hash = window.location.hash
   const urlParams = new URLSearchParams(hash.split('?')[1] || '')
+  const clienteIdParam = urlParams.get('clienteId')
   const clienteParam = urlParams.get('cliente')
   
-  console.log('🔍 Parámetro cliente de URL:', clienteParam)
-  
-  if (clienteParam) {
-    console.log(`🔍 Buscando cliente con parámetro: "${clienteParam}"`)
-    console.log(`📋 Clientes disponibles:`, clientes.value.map(c => `${c.nombres} ${c.apellidos}`))
-    
+  if (clienteIdParam) {
+    const idLimpio = String(clienteIdParam).trim()
+    const existe = clientes.value.find(c => String(c?._id || '') === idLimpio)
+    if (existe) {
+      clienteFiltro.value = idLimpio
+      await cargarPagosPorCliente(idLimpio)
+    }
+  } else if (clienteParam) {
     // Buscar el cliente por nombre completo (más flexible)
     const clienteEncontrado = clientes.value.find(cliente => {
       const nombreCompleto = `${cliente.nombres} ${cliente.apellidos}`.toLowerCase()
@@ -423,29 +509,20 @@ onMounted(async () => {
       const coincidenciaExacta = nombreCompleto === parametroLimpio
       const coincidenciaParcial = nombreCompleto.includes(parametroLimpio)
       
-      console.log(`🔍 Comparando: "${nombreCompleto}" con "${parametroLimpio}" - Exacta: ${coincidenciaExacta}, Parcial: ${coincidenciaParcial}`)
-      
       return coincidenciaExacta || coincidenciaParcial
     })
     
     if (clienteEncontrado) {
       clienteFiltro.value = clienteEncontrado._id
-      console.log(`✅ Filtro automático aplicado para cliente: ${clienteEncontrado.nombres} ${clienteEncontrado.apellidos} (ID: ${clienteEncontrado._id})`)
-    } else {
-      console.log(`❌ Cliente no encontrado: ${clienteParam}`)
-      console.log(`📋 Clientes disponibles:`, clientes.value.map(c => `${c.nombres} ${c.apellidos}`))
+      await cargarPagosPorCliente(clienteEncontrado._id)
     }
-  } else {
-    console.log('ℹ️ No hay parámetro de cliente en la URL')
   }
   
   loading.value = false
-  console.log('✅ HistorialPagosVendedor - onMounted completado')
 })
 
 // Función para actualizar historial de pagos cuando sea necesario
 function actualizarHistorialPagos() {
-  console.log('🔄 Actualizando historial de pagos por evento...')
   cargarPagos()
 }
 

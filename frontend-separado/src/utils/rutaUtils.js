@@ -1,37 +1,101 @@
 import API_BASE_URL from '../config/api.js'
+import { isBrowserOffline, isNetworkOrOfflineError, hasLocalSessionSnapshot } from './offlineSession.js'
+
+const RUTA_ACTIVA_SNAPSHOT_PREFIX = 'rutaActivaSnapshot:'
+
+function getRutaSnapshotKey(vendedorId) {
+  return `${RUTA_ACTIVA_SNAPSHOT_PREFIX}${vendedorId || 'local'}`
+}
+
+export function guardarRutaActivaSnapshot(vendedorId, ruta) {
+  if (!ruta) return
+  try {
+    localStorage.setItem(getRutaSnapshotKey(vendedorId), JSON.stringify({ ruta, savedAt: Date.now() }))
+  } catch (_) {}
+}
+
+export function leerRutaActivaSnapshot(vendedorId) {
+  try {
+    const raw = localStorage.getItem(getRutaSnapshotKey(vendedorId))
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed?.ruta || null
+  } catch (_) {
+    return null
+  }
+}
+
+function estadoRutaConfiableOffline(vendedorId) {
+  const rutaGuardada = leerRutaActivaSnapshot(vendedorId)
+  const ruta = rutaGuardada || {
+    _id: `offline-ruta-${vendedorId || 'local'}`,
+    vendedor: vendedorId || null,
+    abierta: true,
+    offline: true,
+    confianzaTemporal: true,
+    fecha: new Date().toISOString()
+  }
+  return {
+    abierta: true,
+    cargando: false,
+    ruta,
+    offline: true,
+    confianzaTemporal: true
+  }
+}
+
+function debeConfiarRutaTemporalmente() {
+  return hasLocalSessionSnapshot()
+}
+
+/** Zona horaria del usuario (navegador) para validar "una ruta por día" en su fecha local */
+export function getUserTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+  } catch {
+    return ''
+  }
+}
 
 export async function consultarEstadoRuta() {
   try {
     const vendedorId = localStorage.getItem('vendedorId')
-    console.log('🔍 consultarEstadoRuta - vendedorId:', vendedorId)
-    
+
     if (!vendedorId) {
-      console.log('❌ consultarEstadoRuta - No hay vendedorId')
+      if (debeConfiarRutaTemporalmente()) return estadoRutaConfiableOffline(vendedorId)
       return { abierta: false, cargando: false }
     }
 
+    if (isBrowserOffline() && debeConfiarRutaTemporalmente()) {
+      return estadoRutaConfiableOffline(vendedorId)
+    }
+
     const url = `${API_BASE_URL}/api/rutas/actual/${vendedorId}`
-    console.log('🔍 consultarEstadoRuta - URL:', url)
-    
     const res = await fetch(url)
-    console.log('🔍 consultarEstadoRuta - Response status:', res.status)
-    
+
     if (res.ok) {
       const ruta = await res.json()
-      console.log('🔍 consultarEstadoRuta - Ruta recibida:', ruta)
-      
-      const resultado = { 
-        abierta: ruta ? ruta.abierta : false, 
+      if (ruta?.abierta) guardarRutaActivaSnapshot(vendedorId, ruta)
+      return {
+        abierta: Boolean(ruta?.abierta),
         cargando: false,
-        ruta: ruta
+        ruta
       }
-      console.log('✅ consultarEstadoRuta - Resultado:', resultado)
-      return resultado
-    } else {
-      console.log('❌ consultarEstadoRuta - Error en response:', res.status)
-      return { abierta: false, cargando: false }
     }
+
+    if (debeConfiarRutaTemporalmente()) {
+      console.warn('⚠️ consultarEstadoRuta - respuesta no válida; se conserva ruta temporal local')
+      return estadoRutaConfiableOffline(vendedorId)
+    }
+
+    return { abierta: false, cargando: false }
   } catch (error) {
+    if (isNetworkOrOfflineError(error) && debeConfiarRutaTemporalmente()) {
+      console.warn('⚠️ consultarEstadoRuta - sin conexión; se confía temporalmente en la ruta local')
+      const vendedorId = localStorage.getItem('vendedorId')
+      return estadoRutaConfiableOffline(vendedorId)
+    }
+
     console.error('❌ consultarEstadoRuta - Error:', error)
     return { abierta: false, cargando: false }
   }
@@ -72,10 +136,12 @@ export async function abrirRuta() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ vendedorId })
+      body: JSON.stringify({ vendedorId, timezone: getUserTimezone() })
     })
 
     if (res.ok) {
+      const ruta = await res.clone().json().catch(() => null)
+      guardarRutaActivaSnapshot(vendedorId, ruta || { abierta: true, vendedor: vendedorId, fecha: new Date().toISOString() })
       return true
     } else {
       console.error('Error abriendo ruta:', res.statusText)

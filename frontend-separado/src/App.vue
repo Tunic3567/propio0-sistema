@@ -1,12 +1,28 @@
 <template>
-  <router-view />
+  <div
+    class="min-h-screen w-full max-w-full min-w-0 overflow-x-hidden touch-pan-y bg-neutral-100 dark:bg-slate-900 text-neutral-800 dark:text-slate-100 transition-theme font-sans [overscroll-behavior-x:none]"
+  >
+    <div class="w-full min-w-0 max-w-full overflow-x-hidden">
+      <router-view />
+    </div>
+    <ScrollToTopButton v-if="showScrollToTopFab" :target="appScrollRoot" />
+  </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useTheme } from './composables/useTheme'
+import { provideAppScrollRoot } from './composables/useAppScrollRoot'
+import ScrollToTopButton from './components/ScrollToTopButton.vue'
 
-// Inicializar tema al cargar la aplicación
+const route = useRoute()
+const appScrollRoot = ref(null)
+provideAppScrollRoot(appScrollRoot)
+
+/** Login / recuperación de contraseña: sin FAB */
+const showScrollToTopFab = computed(() => route.meta.requiresAuth === true)
+
 const { initTheme } = useTheme()
 
 onMounted(() => {

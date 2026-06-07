@@ -1,24 +1,24 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-50 dark:bg-slate-900 transition-theme">
     <NavbarAdmin @logout="logout" />
     
     <div class="max-w-6xl mx-auto p-4">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Ingresos - Panel Administrativo</h1>
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md border-2 border-neutral-200 dark:border-slate-600 p-6 transition-theme">
+        <h1 class="text-2xl font-bold text-neutral-900 dark:text-slate-100 mb-6">{{ $t('nav.income') }} - {{ $t('admin.title') }}</h1>
         
         <!-- Filtros -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h2 class="text-lg font-semibold text-blue-800 mb-4">Filtros</h2>
+        <div class="bg-blue-50 dark:bg-slate-700/50 border-2 border-blue-200 dark:border-slate-600 rounded-xl p-4 mb-6 transition-theme">
+          <h2 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-4">Filtros</h2>
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Vendedor</label>
-              <select 
-                v-model="filtros.vendedor" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label class="block text-sm font-medium text-neutral-700 dark:text-slate-200 mb-2">{{ $t('admin.vendors') }}</label>
+              <select
+                v-model="filtros.vendedor"
+                class="w-full px-3 py-2 border-2 border-neutral-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-neutral-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-theme"
                 @change="aplicarFiltros"
               >
-                <option value="">Todos los vendedores</option>
+                <option value="">{{ $t('admin.allVendors') }}</option>
                 <option v-for="vendedor in vendedores" :key="vendedor._id" :value="vendedor._id">
                   {{ vendedor.nombre }} ({{ vendedor.ciudad }})
                 </option>
@@ -26,13 +26,13 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Ruta</label>
-              <select 
-                v-model="filtros.ruta" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label class="block text-sm font-medium text-neutral-700 dark:text-slate-200 mb-2">{{ $t('admin.routes') }}</label>
+              <select
+                v-model="filtros.ruta"
+                class="w-full px-3 py-2 border-2 border-neutral-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-neutral-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-theme"
                 @change="aplicarFiltros"
               >
-                <option value="">Todas las rutas</option>
+                <option value="">{{ $t('admin.allRoutes') || 'Todas las rutas' }}</option>
                 <option v-for="ruta in rutas" :key="ruta._id" :value="ruta._id">
                   {{ new Date(ruta.fechaApertura).toLocaleDateString('es-ES') }} - {{ ruta.abierta ? 'Abierta' : 'Cerrada' }}
                 </option>
@@ -40,13 +40,13 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-              <select 
-                v-model="filtros.tipo" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label class="block text-sm font-medium text-neutral-700 dark:text-slate-200 mb-2">{{ $t('payment.type') }}</label>
+              <select
+                v-model="filtros.tipo"
+                class="w-full px-3 py-2 border-2 border-neutral-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-neutral-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-theme"
                 @change="aplicarFiltros"
               >
-                <option value="">Todos los tipos</option>
+                <option value="">{{ $t('history.allTypes') }}</option>
                 <option value="Base">Base</option>
                 <option value="Otros ingresos">Otros ingresos</option>
               </select>
@@ -55,50 +55,50 @@
         </div>
         
         <!-- Lista de ingresos -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h2 class="text-lg font-semibold text-green-800 mb-4">Ingresos Registrados</h2>
+        <div class="bg-green-50 dark:bg-slate-700/30 border-2 border-green-200 dark:border-slate-600 rounded-xl p-4 transition-theme">
+          <h2 class="text-lg font-semibold text-green-800 dark:text-green-200 mb-4">Ingresos Registrados</h2>
           
-          <div v-if="ingresos.length === 0" class="text-gray-500 text-center py-8">
-            No hay ingresos que coincidan con los filtros
+          <div v-if="ingresos.length === 0" class="text-neutral-500 dark:text-slate-400 text-center py-8">
+            {{ $t('income.noMatch') || 'No hay ingresos que coincidan con los filtros' }}
           </div>
           
           <div v-else class="space-y-3">
-            <div 
-              v-for="ingreso in ingresos" 
+            <div
+              v-for="ingreso in ingresos"
               :key="ingreso._id"
-              class="bg-white border border-green-200 rounded-lg p-4"
+              class="bg-white dark:bg-slate-700/50 border-2 border-green-200 dark:border-slate-600 rounded-xl p-4 transition-theme"
             >
               <div class="flex justify-between items-start">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-medium text-gray-600">{{ ingreso.tipo }}</span>
-                    <span class="text-xs text-gray-400">{{ new Date(ingreso.fecha).toLocaleString('es-ES') }}</span>
+                    <span class="text-sm font-medium text-neutral-700 dark:text-slate-200">{{ ingreso.tipo }}</span>
+                    <span class="text-xs text-neutral-500 dark:text-slate-400">{{ new Date(ingreso.fecha).toLocaleString('es-ES') }}</span>
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span class="font-medium text-gray-700">Vendedor:</span>
-                      <span class="text-gray-600 ml-2">{{ ingreso.vendedor?.nombre || 'N/A' }}</span>
+                      <span class="font-medium text-neutral-800 dark:text-slate-200">{{ $t('admin.vendors') }}:</span>
+                      <span class="text-neutral-700 dark:text-slate-300 ml-2">{{ ingreso.vendedor?.nombre || 'N/A' }}</span>
                     </div>
                     <div>
-                      <span class="font-medium text-gray-700">Ciudad:</span>
-                      <span class="text-gray-600 ml-2">{{ ingreso.vendedor?.ciudad || 'N/A' }}</span>
+                      <span class="font-medium text-neutral-800 dark:text-slate-200">{{ $t('admin.city') }}:</span>
+                      <span class="text-neutral-700 dark:text-slate-300 ml-2">{{ ingreso.vendedor?.ciudad || 'N/A' }}</span>
                     </div>
                     <div>
-                      <span class="font-medium text-gray-700">Ruta:</span>
-                      <span class="text-gray-600 ml-2">
+                      <span class="font-medium text-neutral-800 dark:text-slate-200">Ruta:</span>
+                      <span class="text-neutral-700 dark:text-slate-300 ml-2">
                         {{ ingreso.ruta ? new Date(ingreso.ruta.fechaApertura).toLocaleDateString('es-ES') : 'N/A' }}
                       </span>
                     </div>
                   </div>
                   
-                  <div v-if="ingreso.descripcion" class="mt-2 text-sm text-gray-600">
-                    <span class="font-medium">Descripción:</span> {{ ingreso.descripcion }}
+                  <div v-if="ingreso.descripcion" class="mt-2 text-sm text-neutral-600 dark:text-slate-300">
+                    <span class="font-medium">{{ $t('income.description') }}:</span> {{ ingreso.descripcion }}
                   </div>
                 </div>
                 
                 <div class="text-right ml-4">
-                  <div class="text-xl font-bold text-green-600">
+                  <div class="text-xl font-bold text-green-700 dark:text-green-400">
                     ${{ ingreso.valor.toFixed(2) }}
                   </div>
                 </div>
@@ -139,18 +139,26 @@ onMounted(async () => {
 
 async function cargarVendedores() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/vendedores`)
+    const codigoVinculacion = localStorage.getItem('codigoVinculacion')
+    const url = codigoVinculacion
+      ? `${API_BASE_URL}/api/vendedores?codigoVinculacion=${encodeURIComponent(codigoVinculacion)}`
+      : `${API_BASE_URL}/api/vendedores`
+    const res = await fetch(url)
     if (res.ok) {
       vendedores.value = await res.json()
     }
   } catch (error) {
-    console.error('Error al cargar vendedores:', error)
+    console.error('Error al cargar asesores:', error)
   }
 }
 
 async function cargarRutas() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/rutas`)
+    const codigoVinculacion = localStorage.getItem('codigoVinculacion')
+    const url = codigoVinculacion
+      ? `${API_BASE_URL}/api/admin/rutas?codigoVinculacion=${encodeURIComponent(codigoVinculacion)}`
+      : `${API_BASE_URL}/api/rutas`
+    const res = await fetch(url)
     if (res.ok) {
       rutas.value = await res.json()
     }
@@ -162,10 +170,12 @@ async function cargarRutas() {
 async function cargarIngresos() {
   try {
     const params = new URLSearchParams()
+    const codigo = localStorage.getItem('codigoVinculacion')
+    if (codigo) params.append('codigoVinculacion', codigo)
     if (filtros.value.vendedor) params.append('vendedor', filtros.value.vendedor)
     if (filtros.value.ruta) params.append('ruta', filtros.value.ruta)
     if (filtros.value.tipo) params.append('tipo', filtros.value.tipo)
-    
+
     const res = await fetch(`${API_BASE_URL}/api/ingresos?${params.toString()}`)
     if (res.ok) {
       ingresos.value = await res.json()
@@ -186,9 +196,9 @@ function logout() {
     localStorage.removeItem('adminId')
     localStorage.removeItem('vendedorId')
     localStorage.removeItem('codigoVinculacion')
+    localStorage.removeItem('sessionToken')
   } catch (e) {
-    console.warn('No se pudo limpiar storage:', e)
-  }
+    }
   try {
     router.replace('/')
     setTimeout(() => {

@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <NavbarVendedor :rutaAbierta="rutaAbierta" :actualizandoDatos="loading" :cargandoRuta="cargandoRuta" tituloSeccion="Egresos" @logout="logout" @cerrar-ruta="cerrarRuta" />
+  <div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-100 dark:bg-slate-900 transition-theme">
+    <NavbarVendedor :rutaAbierta="rutaAbierta" :cargandoRuta="cargandoRuta" :tituloSeccion="$t('nav.expenses')" @logout="logout" @cerrar-ruta="cerrarRuta" />
     <div class="p-4 max-w-lg mx-auto">
       <div class="flex items-center justify-between mb-6" v-if="rutaAbierta || cargandoRuta">
         <!-- Título movido al header -->
@@ -8,60 +8,79 @@
       
       <!-- Aviso cuando la ruta está cerrada -->
       <div v-if="!rutaAbierta && !cargandoRuta" class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6 text-center mb-6 transition-colors duration-300">
-        <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">Ruta cerrada</p>
-        <p class="text-yellow-700 dark:text-yellow-300 mb-4">Para continuar, debes abrir una ruta.</p>
-        <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">Abrir ruta</button>
+        <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">{{ $t('route.closed') }}</p>
+        <p class="text-yellow-700 dark:text-yellow-300 mb-4">{{ $t('common.mustOpenRoute') }}</p>
+        <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">{{ $t('route.open') }}</button>
       </div>
 
-      <form v-if="rutaAbierta || cargandoRuta" @submit.prevent="registrarEgreso" class="bg-white dark:bg-gray-800 rounded shadow p-6 mb-8 transition-colors duration-300">
+      <form v-if="rutaAbierta || cargandoRuta" @submit.prevent="registrarEgreso" class="bg-white dark:bg-gray-800 rounded-lg border-2 border-neutral-300 dark:border-gray-600 shadow-md p-6 mb-8 transition-colors duration-300">
         <div class="mb-4">
-          <label class="block font-semibold mb-1 text-gray-900 dark:text-gray-100">Tipo de movimiento</label>
-          <select v-model="tipo" class="w-full border-2 border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition text-gray-900 dark:text-gray-100">
-            <option value="Retiro de caja" :disabled="yaExiste('Retiro de caja')">💰 Retiro de caja</option>
-            <option value="Comisiones" :disabled="yaExiste('Comisiones')">💼 Comisiones</option>
-            <option value="Gastos varios" :disabled="yaExiste('Gastos varios')">🛒 Gastos varios</option>
+          <label class="block font-semibold mb-1 text-gray-900 dark:text-gray-100">{{ $t('expense.type') }}</label>
+          <select v-model="tipo" class="w-full border-2 border-neutral-400 dark:border-gray-600 rounded-lg px-3 py-2 bg-neutral-50 dark:bg-gray-700 shadow-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition text-gray-900 dark:text-gray-100">
+            <option value="Retiro de caja" :disabled="yaExiste('Retiro de caja')">Retiro de caja</option>
+            <option value="Comisiones" :disabled="yaExiste('Comisiones')">Comisiones</option>
+            <option value="Gasolina" :disabled="yaExiste('Gasolina')">Gasolina</option>
+            <option value="Repuestos" :disabled="yaExiste('Repuestos')">Repuestos</option>
+            <option value="Salario" :disabled="yaExiste('Salario')">Salario</option>
+            <option value="Gastos varios" :disabled="yaExiste('Gastos varios')">Gastos varios</option>
           </select>
-          <p v-if="!puedeCrear" class="text-sm text-red-600 dark:text-red-400 mt-1">Ya registraste los tres tipos de egreso en esta ruta.</p>
+          <p v-if="!puedeCrear" class="text-sm text-red-600 dark:text-red-400 mt-1">Ya registraste todos los tipos de egreso en esta ruta.</p>
         </div>
         <div class="mb-4">
           <label class="block font-semibold mb-1 text-gray-900 dark:text-gray-100">Valor</label>
-          <input v-model.number="valor" type="number" min="1" class="w-full border-2 border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition text-gray-900 dark:text-gray-100" required />
+          <input v-model.number="valor" type="number" min="1" class="no-spinner w-full border-2 border-neutral-400 dark:border-gray-600 rounded-lg px-3 py-2 bg-neutral-50 dark:bg-gray-700 shadow-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition text-gray-900 dark:text-gray-100" required />
         </div>
         <div class="mb-4" v-if="tipo === 'Gastos varios'">
-          <label class="block font-semibold mb-1 text-gray-900 dark:text-gray-100">Descripción</label>
-          <input v-model="descripcion" type="text" class="w-full border-2 border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition text-gray-900 dark:text-gray-100" placeholder="¿En qué se gastó?" required />
+          <label class="block font-semibold mb-1 text-gray-900 dark:text-gray-100">{{ $t('expense.description') }}</label>
+          <input v-model="descripcion" type="text" class="w-full border-2 border-neutral-400 dark:border-gray-600 rounded-lg px-3 py-2 bg-neutral-50 dark:bg-gray-700 shadow-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition text-gray-900 dark:text-gray-100" placeholder="¿En qué se gastó?" required />
         </div>
-        <button type="submit" :disabled="!puedeCrear" class="w-full bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 rounded font-bold hover:bg-green-700 transition">Registrar egreso</button>
+        <button type="submit" :disabled="!puedeCrear || registrando" class="w-full bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 rounded font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
+          <span v-if="registrando" class="inline-flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ t('payment.saving') }}
+          </span>
+          <span v-else>{{ $t('expense.register') }}</span>
+        </button>
       </form>
-      <div v-if="rutaAbierta || cargandoRuta" class="bg-white dark:bg-gray-800 rounded shadow p-6 transition-colors duration-300">
-        <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Movimientos de la ruta activa</h2>
-        <div v-if="loading" class="text-center text-gray-700 dark:text-gray-300">Cargando movimientos...</div>
-        <div v-else-if="egresos.length === 0" class="text-center text-gray-500 dark:text-gray-400">No hay movimientos registrados en esta ruta.</div>
-        <div v-else class="space-y-3">
+      <div v-if="rutaAbierta || cargandoRuta" class="bg-white dark:bg-gray-800 rounded-lg border-2 border-neutral-300 dark:border-gray-600 shadow-md p-6 transition-colors duration-300">
+        <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">{{ $t('expense.registered') }}</h2>
+        <div v-if="!loading && egresos.length === 0" class="text-center text-gray-500 dark:text-gray-400">{{ $t('expense.noMovements') || 'No hay movimientos registrados en esta ruta.' }}</div>
+        <div v-else-if="egresos.length > 0" class="space-y-3">
           <!-- Resumen de movimientos -->
-          <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded p-3 mb-4 transition-colors duration-300">
+          <div class="bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-600 rounded-lg p-3 mb-4 transition-colors duration-300">
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span class="font-semibold text-green-600 dark:text-green-400">💰 Retiros:</span>
-                <span class="ml-2 font-bold text-green-700 dark:text-green-300">${{ calcularTotalRetiros() }}</span>
+                <span class="font-medium text-gray-600 dark:text-gray-400">Retiros:</span>
+                <span class="ml-2 font-semibold text-gray-900 dark:text-gray-100">${{ calcularTotalRetiros() }}</span>
               </div>
               <div>
-                <span class="font-semibold text-red-600 dark:text-red-400">🛒 Egresos:</span>
-                <span class="ml-2 font-bold text-red-700 dark:text-red-300">${{ calcularTotalEgresos() }}</span>
+                <span class="font-medium text-gray-600 dark:text-gray-400">{{ $t('summary.expenses') }}:</span>
+                <span class="ml-2 font-semibold text-gray-900 dark:text-gray-100">${{ calcularTotalEgresos() }}</span>
               </div>
             </div>
           </div>
           
           <!-- Lista de movimientos -->
           <div v-for="e in egresos" :key="e._id" 
-               :class="[
-                 'border rounded p-3 flex flex-col gap-1 transition-colors duration-300',
-                 e.tipo === 'Retiro de caja' ? 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-               ]">
+               class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 flex flex-col gap-1 transition-colors duration-300 bg-gray-50 dark:bg-gray-700/80"
+               :class="{
+                 'border-l-4 border-emerald-500 dark:border-emerald-500/70': e.tipo === 'Retiro de caja',
+                 'border-l-4 border-sky-500 dark:border-sky-500/70': e.tipo === 'Comisiones',
+                 'border-l-4 border-amber-500 dark:border-amber-500/70': e.tipo === 'Gasolina',
+                 'border-l-4 border-orange-500 dark:border-orange-500/70': e.tipo === 'Repuestos',
+                 'border-l-4 border-purple-500 dark:border-purple-500/70': e.tipo === 'Salario',
+                 'border-l-4 border-gray-400 dark:border-gray-500': e.tipo === 'Gastos varios'
+               }">
             <div class="flex items-center gap-2">
-              <span v-if="e.tipo === 'Retiro de caja'" class="text-red-600 dark:text-red-400 font-bold">💰 {{ e.tipo }}</span>
-              <span v-else-if="e.tipo === 'Comisiones'" class="text-blue-600 dark:text-blue-400 font-semibold">💼 {{ e.tipo }}</span>
-              <span v-else class="text-gray-600 dark:text-gray-300 font-semibold">🛒 {{ e.tipo }}</span>
+              <span v-if="e.tipo === 'Retiro de caja'" class="text-emerald-700 dark:text-emerald-400 font-semibold">{{ e.tipo }}</span>
+              <span v-else-if="e.tipo === 'Comisiones'" class="text-sky-700 dark:text-sky-400 font-semibold">{{ e.tipo }}</span>
+              <span v-else-if="e.tipo === 'Gasolina'" class="text-amber-700 dark:text-amber-400 font-semibold">{{ e.tipo }}</span>
+              <span v-else-if="e.tipo === 'Repuestos'" class="text-orange-700 dark:text-orange-400 font-semibold">{{ e.tipo }}</span>
+              <span v-else-if="e.tipo === 'Salario'" class="text-purple-700 dark:text-purple-400 font-semibold">{{ e.tipo }}</span>
+              <span v-else class="text-gray-700 dark:text-gray-300 font-semibold">{{ e.tipo }}</span>
               <span v-if="e.descripcion" class="text-gray-500 dark:text-gray-400 text-sm">- {{ e.descripcion }}</span>
             </div>
             <div class="text-gray-700 dark:text-gray-300">Valor: <span class="font-bold">${{ e.valor }}</span></div>
@@ -75,10 +94,10 @@
           <!-- Modal edición -->
           <div v-if="modal.visible" class="fixed inset-0 bg-black bg-opacity-40 dark:bg-opacity-60 flex items-center justify-center z-50">
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6 w-full max-w-sm">
-              <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Editar egreso</h3>
+              <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">{{ $t('expense.edit') || 'Editar egreso' }}</h3>
               <div class="mb-3">
                 <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Valor</label>
-                <input v-model.number="modal.valor" type="number" min="1" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input v-model.number="modal.valor" type="number" min="1" class="no-spinner w-full border-2 border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200" />
               </div>
               <div class="mb-4">
                 <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
@@ -104,6 +123,59 @@
       @confirm="confirmarCerrarRuta"
       @cancel="cancelarCerrarRuta"
     />
+
+    <!-- Modal de confirmación para eliminar egreso -->
+    <ConfirmModal
+      :show="mostrarModalEliminarEgreso"
+      :title="t('expense.deleteConfirmTitle')"
+      :message="t('expense.deleteConfirmMessage')"
+      :confirmText="t('common.delete')"
+      :cancelText="t('common.cancel')"
+      @confirm="confirmarEliminarEgreso"
+      @cancel="cancelarEliminarEgreso"
+    />
+    
+    <!-- Modal de advertencia: clientes pendientes -->
+    <Teleport to="body">
+      <div v-if="mostrarModalPendientes" class="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-40 dark:bg-black dark:bg-opacity-60 flex items-center justify-center z-[9999]" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4 transition-colors duration-300" style="position: relative; z-index: 10000;">
+          <h2 class="text-lg font-bold mb-2 text-center text-red-600 dark:text-red-400">{{ t('route.negativeCash') }}</h2>
+          <p class="text-gray-700 dark:text-gray-300 text-center mb-4">{{ t('route.pendingClients') }}</p>
+          <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3 max-h-56 overflow-auto">
+            <ul class="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 space-y-1">
+              <li v-for="(p, idx) in pendientesClientes" :key="p.id || idx">{{ p.nombres }} {{ p.apellidos }}</li>
+            </ul>
+          </div>
+          <div class="mt-5 flex justify-center">
+            <button @click="mostrarModalPendientes = false" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">{{ t('common.understood') }}</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    
+    <!-- Modal de advertencia: caja final negativa -->
+    <Teleport to="body">
+      <div v-if="mostrarModalCajaNegativa" class="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-40 dark:bg-black dark:bg-opacity-60 flex items-center justify-center z-[9999]" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md mx-4 transition-colors duration-300" style="position: relative; z-index: 10000;">
+          <h2 class="text-lg font-bold mb-2 text-center text-red-600 dark:text-red-400">{{ t('route.negativeCash') }}</h2>
+          <p class="text-gray-700 dark:text-gray-300 text-center mb-4">{{ mensajeCajaNegativa }}</p>
+          <div v-if="detallesCajaNegativa" class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-3 mb-4">
+            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ t('modal.details') }}:</p>
+            <ul class="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+              <li>{{ t('summary.initialCash') }}: ${{ detallesCajaNegativa.cajaInicial?.toLocaleString() || '0.00' }}</li>
+              <li>{{ t('summary.income') }}: <span class="text-red-600 font-bold">${{ detallesCajaNegativa.ingresos?.toLocaleString() || '0.00' }}</span></li>
+              <li>{{ t('summary.collected') }}: ${{ detallesCajaNegativa.recaudado?.toLocaleString() || '0.00' }}</li>
+              <li>{{ t('summary.sales') }}: ${{ detallesCajaNegativa.ventas?.toLocaleString() || '0.00' }}</li>
+              <li>{{ t('summary.expenses') }}: ${{ detallesCajaNegativa.egresos?.toLocaleString() || '0.00' }}</li>
+              <li>{{ t('summary.withdrawals') }}: <span class="text-green-600 font-bold">${{ detallesCajaNegativa.retiros?.toLocaleString() || '0.00' }}</span></li>
+            </ul>
+          </div>
+          <div class="mt-5 flex justify-center">
+            <button @click="mostrarModalCajaNegativa = false" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">{{ t('common.understood') }}</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
     
     <!-- Modal de confirmación para abrir ruta -->
     <ConfirmModal
@@ -115,6 +187,31 @@
       @confirm="confirmarAbrirRuta"
       @cancel="cancelarAbrirRuta"
     />
+
+    <!-- Modal de éxito (egreso registrado/actualizado/eliminado) -->
+    <Teleport to="body">
+      <div v-if="mostrarModalExitoEgreso" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalExitoEgreso"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-green-200/50 dark:border-green-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-10 h-10 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ tituloModalExitoEgreso }}</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-6 text-center leading-relaxed">{{ mensajeExitoEgreso }}</p>
+            <div class="flex justify-center">
+              <button @click="cerrarModalExitoEgreso" class="px-6 py-2.5 text-white bg-green-700 hover:bg-green-800 border-2 border-green-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">
+                {{ t('common.accept') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -123,9 +220,12 @@ import API_BASE_URL from '../config/api.js'
 
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import NavbarVendedor from '../components/NavbarVendedor.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
-import { consultarEstadoRuta } from '../utils/rutaUtils.js';
+import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js';
+
+const { t } = useI18n();
 
 const tipo = ref('Retiro de caja');
 const valor = ref(0);
@@ -133,7 +233,19 @@ const descripcion = ref('');
 const egresos = ref([]);
 const loading = ref(true);
 const mostrarModalCerrarRuta = ref(false);
+const mostrarModalPendientes = ref(false);
+const pendientesClientes = ref([]);
+const mostrarModalCajaNegativa = ref(false);
+const mensajeCajaNegativa = ref('');
+const detallesCajaNegativa = ref(null);
 const mostrarModalAbrirRuta = ref(false);
+const rutaIdActual = ref(null);
+const mostrarModalExitoEgreso = ref(false);
+const tituloModalExitoEgreso = ref('');
+const mensajeExitoEgreso = ref('');
+const mostrarModalEliminarEgreso = ref(false);
+const egresoAEliminar = ref(null);
+const registrando = ref(false);
 const router = useRouter();
 const rutaAbierta = ref(false);
 const cargandoRuta = ref(true);
@@ -141,15 +253,19 @@ const modal = ref({ visible: false, egreso: null, valor: 0, descripcion: '' })
 const puedeCrear = ref(true)
 let pollingInterval = null
 
+function cerrarModalExitoEgreso() {
+  mostrarModalExitoEgreso.value = false;
+}
+
 function logout() {
   try {
     localStorage.removeItem('rol');
     localStorage.removeItem('adminId');
     localStorage.removeItem('vendedorId');
     localStorage.removeItem('codigoVinculacion');
+    localStorage.removeItem('sessionToken');
   } catch (e) {
-    console.warn('No se pudo limpiar storage:', e);
-  }
+    }
   try {
     router.replace('/');
     setTimeout(() => {
@@ -184,7 +300,18 @@ async function confirmarCerrarRuta() {
     window.dispatchEvent(new CustomEvent('ruta-cerrada'));
     router.push('/vendedor');
   } else {
-    alert('No se pudo cerrar la ruta');
+    const errorData = await res.json().catch(() => null);
+    mostrarModalCerrarRuta.value = false;
+    if (errorData?.error === 'RUTA_CON_CLIENTES_PENDIENTES') {
+      pendientesClientes.value = (errorData.pendientes || []);
+      mostrarModalPendientes.value = true;
+    } else if (errorData?.error === 'CAJA_FINAL_NEGATIVA') {
+      mensajeCajaNegativa.value = errorData.msg || 'La caja final está en negativo.';
+      detallesCajaNegativa.value = errorData.detalles || null;
+      mostrarModalCajaNegativa.value = true;
+    } else {
+      alert(errorData?.msg || errorData?.error || 'No se pudo cerrar la ruta');
+    }
   }
 }
 
@@ -201,7 +328,7 @@ async function confirmarAbrirRuta() {
   const res = await fetch(`${API_BASE_URL}/api/rutas/abrir`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ vendedorId })
+    body: JSON.stringify({ vendedorId, timezone: getUserTimezone() })
   });
   if (res.ok) {
     mostrarModalAbrirRuta.value = false;
@@ -214,7 +341,8 @@ async function confirmarAbrirRuta() {
     window.dispatchEvent(new CustomEvent('ruta-abierta'));
     alert('Ruta abierta exitosamente');
   } else {
-    alert('No se pudo abrir la ruta');
+    const data = await res.json().catch(() => ({}));
+    alert(data.msg || data.error || 'No se pudo abrir la ruta');
   }
 }
 
@@ -250,18 +378,19 @@ async function fetchEgresos() {
   const ruta = estadoRuta.ruta;
   if (!ruta || !ruta._id) {
     egresos.value = [];
+    rutaIdActual.value = null;
     loading.value = false;
     return;
   }
-  console.log('📋 Cargando egresos desde la base de datos...');
+  rutaIdActual.value = ruta._id;
   // Forzar recarga desde la base de datos, evitando caché con timestamp
   const timestamp = new Date().getTime()
   const res = await fetch(`${API_BASE_URL}/api/egresos?vendedor=${vendedorId}&ruta=${ruta._id}&_t=${timestamp}`, {
     cache: 'no-store'
   });
   egresos.value = await res.json();
-  console.log(`✅ Egresos cargados: ${egresos.value.length}`);
-  puedeCrear.value = egresos.value.length < 3;
+  const TIPOS_EGRESO = ['Retiro de caja', 'Comisiones', 'Gasolina', 'Repuestos', 'Salario', 'Gastos varios'];
+  puedeCrear.value = egresos.value.length < TIPOS_EGRESO.length;
   loading.value = false;
 }
 
@@ -271,11 +400,16 @@ onMounted(async () => {
 
 async function registrarEgreso() {
   const vendedorId = localStorage.getItem('vendedorId');
-  const rutaRes = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`);
-  const ruta = await rutaRes.json();
-  if (!ruta || !ruta._id) {
-    alert('No hay ruta activa. Debes abrir una ruta para registrar egresos.');
-    return;
+  let rutaId = rutaIdActual.value;
+  if (!rutaId) {
+    const rutaRes = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`);
+    const ruta = await rutaRes.json();
+    if (!ruta || !ruta._id) {
+      alert('No hay ruta activa. Debes abrir una ruta para registrar egresos.');
+      return;
+    }
+    rutaId = ruta._id;
+    rutaIdActual.value = rutaId;
   }
   if (!valor.value || valor.value <= 0) {
     alert('El valor debe ser mayor a 0');
@@ -285,29 +419,36 @@ async function registrarEgreso() {
     alert('Debes ingresar una descripción para gastos varios');
     return;
   }
+  registrando.value = true;
   const egreso = {
     vendedor: vendedorId,
-    ruta: ruta._id,
+    ruta: rutaId,
     tipo: tipo.value,
     valor: valor.value,
     descripcion: tipo.value === 'Gastos varios' ? descripcion.value : ''
   };
-  const res = await fetch(`${API_BASE_URL}/api/egresos`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(egreso)
-  });
-  if (res.ok) {
-    valor.value = 0;
-    descripcion.value = '';
-    tipo.value = 'Retiro de caja';
-    await fetchEgresos();
-    alert('Egreso registrado correctamente');
-  } else if (res.status === 409) {
-    const data = await res.json();
-    alert(data.error || 'Ya existe un egreso de este tipo en esta ruta');
-  } else {
-    alert('Error al registrar egreso');
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/egresos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(egreso)
+    });
+    if (res.ok) {
+      valor.value = 0;
+      descripcion.value = '';
+      tipo.value = 'Retiro de caja';
+      tituloModalExitoEgreso.value = t('expense.registeredSuccessTitle');
+      mensajeExitoEgreso.value = t('expense.registeredSuccessMessage');
+      mostrarModalExitoEgreso.value = true;
+      fetchEgresos();
+    } else if (res.status === 409) {
+      const data = await res.json();
+      alert(data.error || 'Ya existe un egreso de este tipo en esta ruta');
+    } else {
+      alert(data.detalles ? `${data.error || 'Error al registrar egreso'}: ${data.detalles}` : (data.error || 'Error al registrar egreso'));
+    }
+  } finally {
+    registrando.value = false;
   }
 }
 
@@ -329,20 +470,39 @@ async function guardarEdicion() {
   });
   if (res.ok) {
     modal.value.visible = false;
-    await fetchEgresos();
+    tituloModalExitoEgreso.value = t('expense.updatedSuccessTitle');
+    mensajeExitoEgreso.value = t('expense.updatedSuccessMessage');
+    mostrarModalExitoEgreso.value = true;
+    fetchEgresos();
   } else {
     alert('Error al actualizar egreso');
   }
 }
 
-async function eliminarEgreso(e) {
-  if (!confirm('¿Eliminar este egreso?')) return;
+function eliminarEgreso(e) {
+  egresoAEliminar.value = e;
+  mostrarModalEliminarEgreso.value = true;
+}
+
+async function confirmarEliminarEgreso() {
+  const e = egresoAEliminar.value;
+  mostrarModalEliminarEgreso.value = false;
+  egresoAEliminar.value = null;
+  if (!e?._id) return;
   const res = await fetch(`${API_BASE_URL}/api/egresos/${e._id}`, { method: 'DELETE' });
   if (res.ok) {
-    await fetchEgresos();
+    tituloModalExitoEgreso.value = t('expense.deletedSuccessTitle');
+    mensajeExitoEgreso.value = t('expense.deletedSuccessMessage');
+    mostrarModalExitoEgreso.value = true;
+    fetchEgresos();
   } else {
     alert('Error al eliminar egreso');
   }
+}
+
+function cancelarEliminarEgreso() {
+  mostrarModalEliminarEgreso.value = false;
+  egresoAEliminar.value = null;
 }
 
 onMounted(async () => {
@@ -364,7 +524,6 @@ onMounted(async () => {
 
 // Función para actualizar egresos cuando sea necesario
 function actualizarEgresos() {
-  console.log('🔄 Actualizando egresos por evento...')
   fetchEgresos()
 }
 
@@ -379,4 +538,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Ocultar flechas del input number en todos los navegadores */
+input[type="number"].no-spinner::-webkit-inner-spin-button,
+input[type="number"].no-spinner::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"].no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
 </style> 

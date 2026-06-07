@@ -1,17 +1,17 @@
 <template>
   <button
     @click="toggleTheme"
-    class="relative p-2 rounded-lg transition-all duration-300 ease-in-out
-           bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700
-           text-gray-700 dark:text-gray-300
-           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
-           shadow-sm hover:shadow-md"
+    class="relative h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center shrink-0 rounded-lg transition-theme
+           bg-neutral-100 hover:bg-neutral-200 dark:bg-slate-700 dark:hover:bg-slate-600
+           text-neutral-600 dark:text-slate-200
+           border border-neutral-300 dark:border-slate-600
+           focus:outline-none focus:ring-1 focus:ring-neutral-400 dark:focus:ring-slate-500"
     :title="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
   >
     <!-- Icono de sol (modo claro) -->
     <svg
       v-if="!isDark"
-      class="w-5 h-5 transition-all duration-300"
+      class="w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -27,7 +27,7 @@
     <!-- Icono de luna (modo oscuro) -->
     <svg
       v-else
-      class="w-5 h-5 transition-all duration-300"
+      class="w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -40,13 +40,6 @@
       />
     </svg>
 
-    <!-- Indicador de animación -->
-    <div
-      class="absolute inset-0 rounded-lg transition-all duration-300
-             bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0
-             dark:opacity-20 dark:from-blue-400 dark:to-purple-500"
-      :class="{ 'opacity-10': !isDark }"
-    ></div>
   </button>
 </template>
 

@@ -1,6 +1,6 @@
   <template>
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex flex-col items-center justify-center">
-      <div class="bg-white dark:bg-gray-800 rounded shadow p-6 w-full max-w-md border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+<div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-100 dark:bg-slate-900 transition-theme flex flex-col items-center justify-center px-3 sm:px-4 box-border">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-2 border-neutral-300 dark:border-gray-700 p-6 w-full max-w-md min-w-0 transition-colors duration-300">
         <button
           @click="volver"
           class="mb-4 text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center"
@@ -11,43 +11,43 @@
           </svg>
           Volver
         </button>
-        <h2 class="text-xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">Registrar Pago</h2>
-        <!-- Selección de tipo de pago -->
-        <div class="flex justify-between mb-4">
-          <label v-for="op in opciones" :key="op" class="flex-1 mx-1">
+        <h2 class="text-xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">{{ t('payment.register') }}</h2>
+        <!-- Selección de tipo de pago: en pantallas pequeñas 2 columnas para que el texto no se desborde -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          <label v-for="op in opciones" :key="op.value" class="flex flex-col min-w-0 cursor-pointer">
             <input
               type="radio"
               class="hidden peer"
               v-model="tipo"
-              :value="op"
+              :value="op.value"
             />
             <div
               :class="[
-                'py-2 rounded text-center cursor-pointer font-semibold transition',
-                tipo === op
-                  ? op === 'Parcela'
-                    ? 'bg-blue-600 text-white'
-                    : op === 'Abono'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-red-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-100'
+                'flex items-center justify-center min-h-[2.75rem] py-2 px-1 rounded text-center font-semibold transition border-2 shadow-sm break-words',
+                tipo === op.value
+                  ? op.value === 'Parcela'
+                    ? 'bg-blue-600 border-blue-700 text-white'
+                    : op.value === 'Abono'
+                    ? 'bg-green-600 border-green-700 text-white'
+                    : 'bg-red-600 border-red-700 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 border-neutral-300 dark:border-gray-600 text-gray-800 dark:text-gray-100'
               ]"
             >
-              {{ op }}
+              <span class="leading-tight text-sm sm:text-base">{{ op.label }}</span>
             </div>
           </label>
         </div>
 
         <!-- Formulario -->
         <form class="space-y-4">
-          <!-- Solo mostrar campos si NO es 'No pago' ni 'No aplica' -->
-          <div v-if="tipo !== 'No pago' && tipo !== 'No aplica'">
+          <!-- Solo mostrar campos si NO es 'No pago' -->
+          <div v-if="tipo !== 'No pago'">
             <!-- Valor -->
             <div>
-              <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Valor</label>
+              <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ t('payment.amount') }}</label>
               <input
                 v-if="tipo === 'Abono'"
-                v-model="valor"
+                v-model="valorAbono"
                 type="text"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 required
@@ -64,7 +64,7 @@
 
             <!-- Número de parcelas -->
             <div v-if="tipo === 'Parcela'">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Número de parcelas</label>
+              <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ t('payment.installmentCount') || 'Número de parcelas' }}</label>
               <select v-model.number="numParcelas" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                 <option v-for="n in maxParcelas" :key="n" :value="n">{{ n }}</option>
               </select>
@@ -73,19 +73,19 @@
 
           <!-- Observaciones siempre visible -->
           <div>
-            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Observaciones (opcional)</label>
+            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ t('payment.comment') }} ({{ t('common.optional') || 'opcional' }})</label>
             <textarea v-model="observaciones" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows="2"></textarea>
           </div>
 
           <!-- Saldos siempre visible -->
           <div class="mt-4 text-base">
             <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 mb-2">
-              <span class="font-semibold text-gray-700 dark:text-gray-200">Saldo actual</span>
-              <span class="font-semibold text-red-700">${{ saldoActual }}</span>
+              <span class="font-semibold text-gray-700 dark:text-gray-200">{{ t('client.remainingBalance') }}</span>
+              <span class="font-semibold tabular-nums text-red-600 dark:text-red-300">${{ saldoBaseParaCalculo.toFixed(2) }}</span>
             </div>
             <div class="flex items-center justify-between bg-blue-50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-600 rounded-md px-3 py-2">
-              <span class="font-semibold text-gray-700 dark:text-gray-200">Nuevo saldo</span>
-              <span class="font-semibold text-green-700">${{ parseInt(nuevoSaldo) }}</span>
+              <span class="font-semibold text-gray-700 dark:text-gray-200">{{ t('payment.newBalance') }}</span>
+              <span class="font-semibold text-green-700">${{ nuevoSaldo }}</span>
             </div>
           </div>
 
@@ -93,72 +93,152 @@
           <button
             @click="guardarPago"
             type="button"
-            class="w-full mt-4 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+            :disabled="guardando"
+            class="w-full mt-4 bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 rounded-lg border-2 border-green-800/60 shadow-md transition disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Guardar
+            <span v-if="guardando" class="inline-flex items-center gap-2">
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ t('payment.saving') }}
+            </span>
+            <span v-else>{{ t('common.save') }}</span>
           </button>
         </form>
       </div>
 
       <!-- Modal de renovación -->
-      <div v-if="mostrarModalRenovar" class="fixed inset-0 bg-black bg-opacity-40 dark:bg-opacity-60 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-sm w-full border border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">¿Desea renovar este cliente?</h2>
-          <p class="mb-6 text-center text-gray-700 dark:text-gray-300">El cliente ha finalizado el pago.</p>
-          <div class="flex justify-center gap-4">
-            <button @click="renovarCliente" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Renovar</button>
-            <button @click="finalizarCliente" class="bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition">No, finalizar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal de pago duplicado -->
-      <div v-if="mostrarModalPagoDuplicado" class="fixed inset-0 bg-black bg-opacity-40 dark:bg-opacity-60 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full border border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Pago ya registrado</h2>
-          <p class="mb-4 text-gray-700 dark:text-gray-300">
-            Ya existe un pago registrado para este cliente en esta ruta.
-          </p>
-          <div v-if="pagoExistente" class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Pago existente:</p>
-            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-              <div><span class="font-medium">Tipo:</span> {{ pagoExistente.tipo }}</div>
-              <div><span class="font-medium">Valor:</span> ${{ pagoExistente.valor }}</div>
-              <div v-if="pagoExistente.numParcelas"><span class="font-medium">Parcelas:</span> {{ pagoExistente.numParcelas }}</div>
-              <div v-if="pagoExistente.observaciones"><span class="font-medium">Observaciones:</span> {{ pagoExistente.observaciones }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Fecha: {{ pagoExistente.fecha ? new Date(pagoExistente.fecha).toLocaleString('es-ES') : '-' }}
+      <Teleport to="body">
+        <div v-if="mostrarModalRenovar" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalRenovar = false"></div>
+          <div class="relative z-10 max-h-[min(90dvh,100%)] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-blue-200/50 dark:border-blue-700/50 transition-all duration-300" @click.stop>
+            <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-blue-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+              <div class="flex items-center gap-3 mb-2">
+                <svg class="w-10 h-10 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ t('payment.renewClient') }}</h2>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-base text-gray-700 dark:text-gray-300 mb-6 text-center leading-relaxed">{{ t('payment.clientFinished') }}</p>
+              <div class="flex justify-center gap-3">
+                <button type="button" @click.stop="finalizarCliente" class="px-5 py-2.5 text-neutral-800 dark:text-slate-200 bg-white dark:bg-gray-700 border-2 border-neutral-400 dark:border-slate-500 rounded-lg hover:bg-neutral-100 dark:hover:bg-gray-600 font-semibold transition-all duration-200 shadow-sm">{{ t('payment.finalize') }}</button>
+                <button type="button" @click.stop="renovarCliente" class="px-5 py-2.5 text-white bg-blue-700 hover:bg-blue-800 border-2 border-blue-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">{{ t('payment.renew') }}</button>
               </div>
             </div>
           </div>
-          <p class="mb-6 text-gray-700 dark:text-gray-300">
-            ¿Desea sobrescribir este pago con los nuevos datos?
-          </p>
-          <div class="flex justify-end gap-3">
-            <button @click="cancelarSobrescribir" class="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition">
-              Cancelar
-            </button>
-            <button @click="confirmarSobrescribir" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition">
-              Sobrescribir pago
-            </button>
+        </div>
+      </Teleport>
+
+      <!-- Modal de éxito (pago registrado/actualizado) -->
+      <Teleport to="body">
+        <div v-if="mostrarModalExito" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalExito"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-green-200/50 dark:border-green-700/50 transition-all duration-300">
+            <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+              <div class="flex items-center gap-3 mb-2">
+                <svg class="w-10 h-10 text-green-600 dark:text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ tituloModalExito || t('payment.registeredSuccess') }}</h2>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-base text-gray-700 dark:text-gray-300 mb-6 text-center leading-relaxed">{{ mensajeExito }}</p>
+              <div class="flex justify-center">
+                <button @click="cerrarModalExito" class="px-6 py-2.5 text-white bg-green-700 hover:bg-green-800 border-2 border-green-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">
+                  {{ t('common.accept') }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </Teleport>
+
+      <!-- Modal de pago duplicado -->
+      <Teleport to="body">
+        <div v-if="mostrarModalPagoDuplicado" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cancelarSobrescribir"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-orange-200/50 dark:border-orange-700/50 transition-all duration-300">
+            <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-orange-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+              <div class="flex items-center gap-3 mb-2">
+                <svg class="w-10 h-10 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ t('payment.alreadyRegistered') }}</h2>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                {{ t('payment.paymentExists') }}
+              </p>
+              <div v-if="pagoExistente" class="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-inner">
+                <p class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">{{ t('payment.existingPayment') }}:</p>
+                <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                  <div class="flex justify-between"><span class="font-medium">{{ t('payment.type') }}:</span> <span class="font-bold">{{ pagoExistente.tipo }}</span></div>
+                  <div class="flex justify-between"><span class="font-medium">{{ t('payment.amount') }}:</span> <span class="font-bold text-green-600">${{ pagoExistente.valor }}</span></div>
+                  <div v-if="pagoExistente.numParcelas" class="flex justify-between"><span class="font-medium">{{ t('client.installment') }}:</span> <span class="font-bold">{{ pagoExistente.numParcelas }}</span></div>
+                  <div v-if="pagoExistente.observaciones" class="pt-2 border-t border-gray-300 dark:border-gray-600">
+                    <span class="font-medium">{{ t('payment.observations') }}:</span>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ pagoExistente.observaciones }}</p>
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+                    {{ t('payment.date') }}: {{ pagoExistente.fecha ? new Date(pagoExistente.fecha).toLocaleString(dateLocale.value) : '-' }}
+                  </div>
+                </div>
+              </div>
+              <p class="mb-6 text-base text-gray-700 dark:text-gray-300 font-medium">
+                {{ t('payment.overwriteQuestion') }}
+              </p>
+              <div class="flex justify-end gap-3">
+                <button @click="cancelarSobrescribir" class="px-5 py-2.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-all duration-200 shadow-sm">
+                  {{ t('common.cancel') }}
+                </button>
+                <button @click="confirmarSobrescribir" class="px-5 py-2.5 text-white bg-orange-700 hover:bg-orange-800 border-2 border-orange-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">
+                  {{ t('payment.overwrite') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
     </div>
   </template>
   
   <script setup>
 import API_BASE_URL from '../config/api.js'
+import { enqueueOfflinePago, emitOfflinePagosChanged, getOfflinePendingCount } from '../utils/offlinePagoQueue.js'
+import { consultarEstadoRuta } from '../utils/rutaUtils.js'
 
   import { ref, computed, onMounted, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
   import { useClienteStore } from '../stores/useClienteStore'
+  
+  const { t, locale } = useI18n()
 
   const route = useRoute()
   const router = useRouter()
-  const opciones = ['Parcela', 'Abono', 'No pago', 'No aplica']
+  
+  const dateLocale = computed(() => {
+    const localeMap = {
+      'es': 'es-ES',
+      'pt': 'pt-BR',
+      'en': 'en-US'
+    }
+    return localeMap[locale.value] || 'es-ES'
+  })
+  
+  const opciones = computed(() => [
+    { value: 'Parcela', label: t('payment.types.installment') },
+    { value: 'Abono', label: t('payment.types.payment') },
+    { value: 'No pago', label: t('payment.types.noPayment') }
+  ])
   const tipo = ref('Parcela')
-  const valor = ref(0)
+  /** Texto libre para Abono (vacío al elegir Abono, sin “0” por defecto) */
+  const valorAbono = ref('')
   const numParcelas = ref(1)
   const observaciones = ref('')
 
@@ -166,26 +246,74 @@ import API_BASE_URL from '../config/api.js'
   const cliente = computed(() => clienteStore.clienteSeleccionado)
   const cargando = ref(true)
   const mostrarModalRenovar = ref(false)
+  // Snapshot para que "Renovar" funcione aunque el store se desincronice momentáneamente
+  const clienteRenovarSnapshot = ref(null)
   const mostrarModalPagoDuplicado = ref(false)
-  const pagoExistente = ref(null)
+  const mostrarModalExito = ref(false)
+  const mensajeExito = ref('')
+  const tituloModalExito = ref('')
+  const pagoExistente = ref(null) // Pago existente del cliente en la ruta actual (si lo hay)
+  const rutaIdActual = ref(null)
   const datosPagoPendiente = ref(null)
+  const guardando = ref(false)
 
-  onMounted(() => {
+  onMounted(async () => {
+    // Si el store viene vacío (algunos navegadores/dispositivos), reintentar desde localStorage
     if (!cliente.value) {
-      router.push('/vendedor')
-      return
+      try {
+        const raw = localStorage.getItem('clienteSeleccionado')
+        const parsed = raw ? JSON.parse(raw) : null
+        if (parsed && parsed._id) {
+          clienteStore.setCliente(parsed)
+        }
+      } catch (_) {}
+      if (!cliente.value) {
+        router.push('/vendedor')
+        return
+      }
     }
-    // El resto de la lógica de inicialización si es necesario
+
+    // Detectar si ya existe un pago para este cliente en la ruta ACTUAL
+    try {
+      const vendedorId = localStorage.getItem('vendedorId')
+      const estadoRuta = await consultarEstadoRuta()
+      const rutaData = estadoRuta?.ruta
+      if (rutaData && rutaData._id) {
+        rutaIdActual.value = rutaData._id
+        // Cargar pagos del vendedor y filtrar por cliente + ruta actual
+        const resPagos = await fetch(`${API_BASE_URL}/api/pagos/vendedor/${vendedorId}`)
+        if (resPagos.ok) {
+          const pagosVendedor = await resPagos.json()
+          const existente = pagosVendedor.find(p => String(p.cliente?._id || p.cliente) === String(cliente.value._id) && String(p.ruta?._id || p.ruta) === String(rutaIdActual.value))
+          if (existente) {
+            pagoExistente.value = existente
+          }
+        }
+      }
+    } catch (e) {
+      // No bloquear la UI si falla; simplemente no habrá pre-carga de pago existente
+    }
   })
 
   // Asegurarse de que los campos sean números válidos
   const dias = computed(() => Number(cliente.value.dias) || 0)
   const valorParcela = computed(() => Number(cliente.value.parcela) || 0)
   const saldoActual = computed(() => Number(cliente.value.total) || 0)
+  // Si hay pago existente en la ruta actual, usar su saldo_antes para permitir seleccionar todas las parcelas (incluida la ya pagada)
+  const saldoBaseParaCalculo = computed(() => {
+    if (pagoExistente.value && (pagoExistente.value.saldo_antes !== undefined && pagoExistente.value.saldo_antes !== null)) {
+      return Number(pagoExistente.value.saldo_antes) || saldoActual.value
+    }
+    // Si no viene saldo_antes (por compatibilidad), aproximar sumando el valor del pago existente
+    if (pagoExistente.value && (pagoExistente.value.valor !== undefined)) {
+      return Number(saldoActual.value) + Number(pagoExistente.value.valor || 0)
+    }
+    return saldoActual.value
+  })
   const maxParcelas = computed(() => {
     const diasNum = Number(dias.value) || 1;
     const valorParcelaNum = Number(valorParcela.value) || 1;
-    const saldoNum = Number(saldoActual.value) || 0;
+    const saldoNum = Number(saldoBaseParaCalculo.value) || 0;
     const porSaldo = Math.floor(saldoNum / valorParcelaNum);
     // Siempre al menos 1
     return Math.max(1, Math.min(diasNum, porSaldo));
@@ -198,29 +326,66 @@ import API_BASE_URL from '../config/api.js'
     }
   })
 
+  // Al pasar a Abono, vaciar monto si solo había 0 (mejor UX al escribir el valor)
+  watch(tipo, (t, prev) => {
+    if (t !== 'Abono' || prev === undefined || prev === 'Abono') return
+    const s = String(valorAbono.value ?? '').trim()
+    const n = parseFloat(s)
+    if (s === '' || s === '0' || (!Number.isNaN(n) && n === 0)) {
+      valorAbono.value = ''
+    }
+  })
+
   const valorTotalParcelas = computed(() => {
     if (tipo.value === 'Parcela') {
       return (valorParcela.value * numParcelas.value).toFixed(2);
     }
-    return '0.00'; // Para 'No pago' y 'No aplica'
+    return '0.00'; // Para 'No pago'
   });
 
   const nuevoSaldo = computed(() => {
     let cuotas = numParcelas.value
     if (tipo.value === 'Parcela') {
       cuotas = Math.min(numParcelas.value, maxParcelas.value)
-      return Math.max(0, saldoActual.value - valorParcela.value * cuotas).toFixed(2)
+      return Math.max(0, saldoBaseParaCalculo.value - valorParcela.value * cuotas).toFixed(2)
     }
     if (tipo.value === 'Abono') {
-      return Math.max(0, saldoActual.value - valor.value).toFixed(2)
+      const v = parseFloat(valorAbono.value)
+      const abono = Number.isNaN(v) ? 0 : v
+      return Math.max(0, saldoBaseParaCalculo.value - abono).toFixed(2)
     }
-    return saldoActual.value.toFixed(2)
+    return saldoBaseParaCalculo.value.toFixed(2)
   })
 
   function volver() {
     // Emitir evento personalizado para actualizar el dashboard
     window.dispatchEvent(new CustomEvent('actualizar-dashboard'))
     router.push('/vendedor')
+  }
+
+  function aplicarSaldoLocalOptimista(nuevoSaldo) {
+    if (!cliente.value?._id) return
+    const c = { ...cliente.value, total: Number(nuevoSaldo) }
+    clienteStore.setCliente(c)
+    try {
+      localStorage.setItem('clienteSeleccionado', JSON.stringify(c))
+    } catch (_) {}
+  }
+
+  async function encolarPagoOffline(pago, nuevoSaldoCalc) {
+    await enqueueOfflinePago(pago)
+    aplicarSaldoLocalOptimista(nuevoSaldoCalc)
+    const n = await getOfflinePendingCount()
+    emitOfflinePagosChanged(n)
+    window.dispatchEvent(new CustomEvent('actualizar-dashboard'))
+    if (nuevoSaldoCalc === 0) {
+      clienteRenovarSnapshot.value = cliente.value ? { ...cliente.value, total: 0 } : null
+      mostrarModalRenovar.value = true
+      return
+    }
+    tituloModalExito.value = t('payment.offlineQueuedTitle')
+    mensajeExito.value = t('payment.offlineQueued')
+    mostrarModalExito.value = true
   }
 
   // Actualizar el pago en la base de datos usando la API
@@ -230,60 +395,80 @@ import API_BASE_URL from '../config/api.js'
       return;
     }
 
-    // Obtener la ruta activa del vendedor
+    // Usar ruta en caché (onMounted) para evitar esperar un GET extra; solo consultar si no la tenemos
     const vendedorId = localStorage.getItem('vendedorId');
-    let rutaId = null;
-    try {
-      const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`);
-      const rutaData = await resRuta.json();
-      if (!rutaData || !rutaData._id) {
-        alert('No hay ruta activa. Debes abrir una ruta antes de registrar pagos.');
+    let rutaId = rutaIdActual.value;
+    if (!rutaId) {
+      try {
+        const estadoRuta = await consultarEstadoRuta();
+        const rutaData = estadoRuta?.ruta;
+        if (!rutaData || !rutaData._id) {
+          alert('No hay ruta activa. Debes abrir una ruta antes de registrar pagos.');
+          return;
+        }
+        rutaId = rutaData._id;
+        rutaIdActual.value = rutaId;
+      } catch (e) {
+        alert('Error al consultar la ruta activa');
         return;
       }
-      rutaId = rutaData._id;
-    } catch (e) {
-      alert('Error al consultar la ruta activa');
-      return;
     }
 
     // Validaciones
     if (tipo.value === 'Abono') {
-      const valorNumerico = parseFloat(valor.value);
+      const valorNumerico = parseFloat(valorAbono.value);
       if (isNaN(valorNumerico) || valorNumerico <= 0) {
         alert('El valor del abono debe ser un número mayor que 0');
         return;
       }
-      if (valorNumerico > saldoActual.value) {
-        alert('El valor del abono no puede ser mayor al saldo actual');
+      // Comparar con saldoBaseParaCalculo (mismo que "Saldo restante" en pantalla), no con el total del cliente:
+      // al editar un pago en la ruta actual, el cliente ya tiene saldo reducido pero el abono debe limitarse al saldo antes de este pago.
+      if (valorNumerico > saldoBaseParaCalculo.value) {
+        alert('El valor del abono no puede ser mayor al saldo restante de este pago');
         return;
       }
-      // Actualizar el valor con el número convertido
-      valor.value = valorNumerico;
     }
 
-    // Calcular el nuevo saldo
-    let nuevoSaldoCalc = saldoActual.value;
+    // Calcular el nuevo saldo usando el saldo base (antes del posible pago existente)
+    let nuevoSaldoCalc = saldoBaseParaCalculo.value;
     if (tipo.value === 'Parcela') {
-      nuevoSaldoCalc = saldoActual.value - valorParcela.value * numParcelas.value;
+      nuevoSaldoCalc = saldoBaseParaCalculo.value - valorParcela.value * numParcelas.value;
     } else if (tipo.value === 'Abono') {
-      nuevoSaldoCalc = saldoActual.value - valor.value;
+      const v = parseFloat(valorAbono.value)
+      nuevoSaldoCalc = saldoBaseParaCalculo.value - (Number.isNaN(v) ? 0 : v);
     }
-    // 'No pago' y 'No aplica' no afectan el saldo
+    // 'No pago' no afecta el saldo
     nuevoSaldoCalc = Math.max(0, Number(nuevoSaldoCalc.toFixed(2)))
 
     // 1. Guardar el pago en la base de datos
     const pago = {
       cliente: cliente.value._id,
       tipo: tipo.value,
-      valor: tipo.value === 'Parcela' ? valorParcela.value * numParcelas.value : (tipo.value === 'Abono' ? valor.value : 0),
+      valor: tipo.value === 'Parcela' ? valorParcela.value * numParcelas.value : (tipo.value === 'Abono' ? parseFloat(valorAbono.value) : 0),
       numParcelas: tipo.value === 'Parcela' ? numParcelas.value : undefined,
       observaciones: observaciones.value,
-      saldo_antes: saldoActual.value,
+      saldo_antes: saldoBaseParaCalculo.value,
       saldo_despues: nuevoSaldoCalc,
       fecha: new Date(),
       ruta: rutaId
     };
 
+    const sinRed =
+      typeof navigator !== 'undefined' && navigator.onLine === false
+    if (sinRed) {
+      guardando.value = true
+      try {
+        await encolarPagoOffline(pago, nuevoSaldoCalc)
+      } catch (err) {
+        console.error(err)
+        alert(t('payment.offlineEnqueueFailed'))
+      } finally {
+        guardando.value = false
+      }
+      return
+    }
+
+    guardando.value = true;
     try {
       const resPago = await fetch(`${API_BASE_URL}/api/pagos`, {
         method: 'POST',
@@ -294,7 +479,6 @@ import API_BASE_URL from '../config/api.js'
       if (!resPago.ok) {
         const errorData = await resPago.json();
         if (errorData.codigo === 'PAGO_DUPLICADO' || errorData.codigo === 'PAGO_DUPLICADO_BD') {
-          // Mostrar modal de confirmación para sobrescribir
           pagoExistente.value = errorData.pagoExistente || null;
           datosPagoPendiente.value = pago;
           mostrarModalPagoDuplicado.value = true;
@@ -305,64 +489,86 @@ import API_BASE_URL from '../config/api.js'
         return;
       }
 
-      // 2. Actualizar el saldo del cliente
-      const resCliente = await fetch(`${API_BASE_URL}/api/clientes/${cliente.value._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ total: nuevoSaldoCalc })
-      });
-
-      if (!resCliente.ok) {
-        alert('Pago registrado, pero error al actualizar el saldo del cliente');
-        return;
-      }
+      tituloModalExito.value = ''
+      window.dispatchEvent(new CustomEvent('actualizar-dashboard'));
+      window.dispatchEvent(new CustomEvent('pago-registrado'));
 
       if (nuevoSaldoCalc === 0) {
+        // Guardar snapshot del cliente para que el botón "Renovar" sea robusto
+        clienteRenovarSnapshot.value = cliente.value ? { ...cliente.value } : null
         mostrarModalRenovar.value = true;
         return;
       }
 
-      alert('Pago registrado correctamente');
-      window.dispatchEvent(new CustomEvent('actualizar-dashboard'))
-      router.push('/vendedor');
+      mensajeExito.value = t('payment.registeredOk');
+      mostrarModalExito.value = true;
     } catch (e) {
-      alert('Error de conexión con el servidor');
+      try {
+        await encolarPagoOffline(pago, nuevoSaldoCalc)
+      } catch (e2) {
+        console.error(e, e2)
+        alert(t('payment.offlineEnqueueFailed'))
+      }
+    } finally {
+      guardando.value = false;
     }
   }
 
+  function cerrarModalExito() {
+    tituloModalExito.value = ''
+    mostrarModalExito.value = false;
+    router.push('/vendedor');
+  }
+
   async function renovarCliente() {
-    mostrarModalRenovar.value = false;
-    // Marcar el cliente anterior como cancelado en la base de datos
+    // Usar snapshot (o store/localStorage) para evitar fallos intermitentes en algunos dispositivos
+    let c = clienteRenovarSnapshot.value || cliente.value || clienteStore.clienteSeleccionado
+    if (!c || !c._id) {
+      try {
+        const raw = localStorage.getItem('clienteSeleccionado')
+        const parsed = raw ? JSON.parse(raw) : null
+        if (parsed && parsed._id) c = parsed
+      } catch (_) {}
+    }
+    if (!c || !c._id) {
+      // No sacar al usuario de la pantalla: solo mostrar error (evita “me mandó al dashboard”)
+      alert(t('payment.renewNoClientData'))
+      return
+    }
+    const idStr = String(c._id)
+    const query = {
+      renovado: 'true',
+      idAnterior: idStr,
+      nombres: c.nombres != null ? String(c.nombres) : '',
+      apellidos: c.apellidos != null ? String(c.apellidos) : '',
+      cc: c.cc != null ? String(c.cc) : '',
+      apodo: c.apodo != null ? String(c.apodo) : '',
+      celular: c.celular != null ? String(c.celular) : '',
+      direccion: c.direccion != null ? String(c.direccion) : '',
+      direccion_residencial: c.direccion_residencial != null ? String(c.direccion_residencial) : ''
+    }
+    if (c.valor != null && c.valor !== '') query.valor = String(c.valor)
+    if (c.dias != null && c.dias !== '') query.parcelas = String(c.dias)
+    if (c.frecuencia) query.frecuencia = String(c.frecuencia)
+
+    mostrarModalRenovar.value = false
+    clienteRenovarSnapshot.value = null
     try {
-      await fetch(`${API_BASE_URL}/api/clientes/${cliente.value._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cancelado: true })
-      });
-    } catch (e) {}
-    // Emitir evento para ocultar la tarjeta
-    window.dispatchEvent(new CustomEvent('ocultar-cliente', { detail: cliente.value._id }))
-    // Redirigir a crear cliente con datos actuales y flag renovado
-    router.push({
-      path: '/crear-cliente',
-      query: {
-        nombres: cliente.value.nombres,
-        apellidos: cliente.value.apellidos,
-        cc: cliente.value.cc,
-        apodo: cliente.value.apodo,
-        celular: cliente.value.celular,
-        direccion: cliente.value.direccion,
-        direccion_residencial: cliente.value.direccion_residencial,
-        renovado: 'true',
-        idAnterior: cliente.value._id
-      }
-    })
+      await router.push({ path: '/crear-cliente', query })
+    } catch (e) {
+      console.error('Renovar → crear-cliente:', e)
+      alert(t('payment.renewNavigateError'))
+    }
   }
 
   async function finalizarCliente() {
     mostrarModalRenovar.value = false;
     // Marcar el cliente como cancelado en la base de datos
     try {
+      if (!cliente.value?._id) {
+        router.push('/vendedor')
+        return
+      }
       await fetch(`${API_BASE_URL}/api/clientes/${cliente.value._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -407,31 +613,21 @@ import API_BASE_URL from '../config/api.js'
         return;
       }
 
-      // Actualizar el saldo del cliente
+      // El backend ya actualiza el saldo del cliente al editar el pago (actualizarEstadoCliente)
       const nuevoSaldoCalc = datosPagoPendiente.value.saldo_despues;
-      const resCliente = await fetch(`${API_BASE_URL}/api/clientes/${cliente.value._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ total: nuevoSaldoCalc })
-      });
-
-      if (!resCliente.ok) {
-        alert('Pago actualizado, pero error al actualizar el saldo del cliente');
-        return;
-      }
-
       mostrarModalPagoDuplicado.value = false;
       pagoExistente.value = null;
       datosPagoPendiente.value = null;
+      window.dispatchEvent(new CustomEvent('actualizar-dashboard'));
+      window.dispatchEvent(new CustomEvent('pago-editado'));
 
       if (nuevoSaldoCalc === 0) {
         mostrarModalRenovar.value = true;
         return;
       }
 
-      alert('Pago actualizado correctamente');
-      window.dispatchEvent(new CustomEvent('actualizar-dashboard'))
-      router.push('/vendedor');
+      mensajeExito.value = t('payment.updatedOk');
+      mostrarModalExito.value = true;
     } catch (e) {
       alert('Error de conexión con el servidor');
       console.error('Error al sobrescribir pago:', e);
@@ -445,9 +641,9 @@ import API_BASE_URL from '../config/api.js'
       localStorage.removeItem('adminId')
       localStorage.removeItem('vendedorId')
       localStorage.removeItem('codigoVinculacion')
+      localStorage.removeItem('sessionToken')
     } catch (e) {
-      console.warn('No se pudo limpiar storage:', e)
-    }
+      }
     try {
       router.replace('/')
       setTimeout(() => {

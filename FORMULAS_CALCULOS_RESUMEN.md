@@ -25,7 +25,8 @@ Este documento describe todas las fórmulas utilizadas en el sistema para calcul
 
 ### 1. Caja Final
 ```
-Caja Final = Caja Inicial + Ingresos + Recaudado - Ventas - Egresos - Retiros
+Caja Final = Caja Inicial + Ingresos + Recaudado - Vent
+as - Egresos - Retiros
 ```
 
 **Explicación:**

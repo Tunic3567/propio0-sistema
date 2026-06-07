@@ -1,129 +1,135 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <NavbarVendedor :rutaAbierta="rutaAbierta" :actualizandoDatos="loading" tituloSeccion="Resumen" @logout="logout" @cerrar-ruta="cerrarRuta" />
-    <div class="p-4 md:p-8">
-      <div class="flex items-center justify-between mb-4" v-if="rutaAbierta || cargandoRuta">
-        <!-- Título movido al header -->
-      </div>
+  <!-- Misma idea que login: altura = viewport; el scroll solo dentro del área de contenido -->
+  <div
+    class="h-dvh max-h-dvh min-h-0 w-full max-w-full overflow-x-clip overflow-y-hidden overscroll-none flex flex-col bg-neutral-100 dark:bg-slate-900 transition-theme"
+  >
+    <NavbarVendedor
+      class="shrink-0"
+      :rutaAbierta="rutaAbierta"
+      :cargandoRuta="cargandoRuta"
+      :tituloSeccion="$t('nav.summary')"
+      @logout="logout"
+      @cerrar-ruta="cerrarRuta"
+    />
+    <div
+      ref="resumenVendedorScrollEl"
+      class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pt-0 md:px-6 pb-[max(1rem,env(safe-area-inset-bottom))]"
+    >
       <!-- Aviso cuando la ruta está cerrada -->
       <div v-if="!rutaAbierta && !cargandoRuta" class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6 text-center mb-6 transition-colors duration-300">
-        <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">Ruta cerrada</p>
-        <p class="text-yellow-700 dark:text-yellow-300 mb-4">Para continuar, debes abrir una ruta.</p>
-        <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">Abrir ruta</button>
+        <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">{{ $t('route.closed') }}</p>
+        <p class="text-yellow-700 dark:text-yellow-300 mb-4">{{ $t('common.mustOpenRoute') }}</p>
+        <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">{{ $t('route.open') }}</button>
       </div>
 
       <div v-if="rutaAbierta || cargandoRuta">
-        <!-- Selector de ruta/historial -->
-        <div class="mb-4 flex flex-wrap items-center gap-3" v-if="panel && panel?.rutasDisponibles?.length">
-          <label class="text-sm font-semibold text-gray-900 dark:text-gray-100">Historial de rutas:</label>
-          <select
-            v-model="rutaSeleccionadaId"
-            @change="cargarPorRuta"
-            class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-2 border-blue-400 dark:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        <!-- El asesor solo ve la ruta actual; el historial de días/rutas es solo para admin -->
+        <div v-if="!loading && !panel" class="text-gray-400 dark:text-gray-500">{{ $t('history.noData') }}</div>
+        <div v-else-if="panel" class="resumen-content space-y-2 pt-2">
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.openingDate') }}:</span>
+          <span v-if="panel.ruta?.fechaApertura" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaApertura).toLocaleString('es-ES') }}</span>
+          <span v-else class="resumen-badge-base bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 dark:border dark:border-slate-600">-</span>
+        </div>
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.closingDate') }}:</span>
+          <span v-if="panel.ruta?.fechaCierre" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaCierre).toLocaleString('es-ES') }}</span>
+          <span v-else class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600 italic">{{ $t('route.notClosed') }}</span>
+        </div>
+        <!-- Clientes iniciales (al abrir la ruta) -->
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <UsersIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.initialClients') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">{{ panel.ruta?.clientesIniciales != null ? formatNum(panel.ruta.clientesIniciales) : '–' }}</span>
+        </div>
+        <div class="border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <button
+            type="button"
+            class="flex w-full items-center gap-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            :title="$t('nav.clients')"
+            @click="router.push('/vendedor')"
           >
-            <option v-if="hayRutaAbierta" :value="''">Ruta actual</option>
-            <option v-for="r in rutasOpciones" :key="r._id" :value="r._id" class="font-mono">
-              {{ new Date(r.fechaApertura).toLocaleDateString('es-ES') }}{{ r.fechaCierre ? ' - ' + new Date(r.fechaCierre).toLocaleDateString('es-ES') : '' }}
-            </option>
-          </select>
-        </div>
-        <div v-if="loading" class="text-gray-500 dark:text-gray-400">Cargando...</div>
-        <div v-else-if="!panel" class="text-gray-400 dark:text-gray-500">Sin datos disponibles.</div>
-      <div v-else class="text-xs text-gray-500 dark:text-gray-400 mb-4">
-        Debug: panel={{ !!panel }}, ruta={{ !!panel?.ruta }}, clientes={{ panel?.clientes?.length || 0 }}
-      </div>
-      <div v-else class="space-y-2">
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <CalendarDaysIcon class="w-6 h-6 text-blue-600" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Fecha apertura recaudo:</span>
-          <span class="text-gray-700 dark:text-gray-300 text-base">
-            <span v-if="panel.ruta?.fechaApertura" class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-0.5 rounded font-mono">
-              {{ new Date(panel.ruta.fechaApertura).toLocaleString('es-ES') }}
+            <UsersIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+            <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.totalClients') }}:</span>
+            <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">{{ formatNum(panel.resumen?.total ?? 0) }}</span>
+            <span class="text-gray-600 dark:text-gray-400 text-sm font-normal">
+              ({{ formatNum(panel.resumen?.clientesConPagosRegistrados ?? 0) }} {{ $t('summary.registered') }})
             </span>
-            <span v-else>-</span>
-          </span>
-        </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <CalendarDaysIcon class="w-6 h-6 text-red-600" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Fecha cierre:</span>
-          <span class="text-gray-700 dark:text-gray-300 text-base">
-            <span v-if="panel.ruta?.fechaCierre" class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-0.5 rounded font-mono">
-              {{ new Date(panel.ruta.fechaCierre).toLocaleString('es-ES') }}
-            </span>
-            <span v-else class="italic">No se ha cerrado</span>
-          </span>
-        </div>
-        <div class="border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <div class="flex items-center gap-2 mb-2">
-            <UsersIcon class="w-6 h-6 text-green-500" />
-            <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Total Clientes:</span>
-            <span class="text-gray-900 dark:text-gray-100 text-base font-bold">{{ panel.resumen?.total ?? 0 }}</span>
-          </div>
+            <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+          </button>
           <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-green-500 text-white dark:bg-green-600">
-              Nuevos: {{ panel.resumen?.nuevos ?? 0 }}
+            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#10B98126] text-[#10B981]">
+              {{ $t('summary.newClients') }}: {{ formatNum(panel.resumen?.nuevos ?? 0) }}
             </span>
-            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-blue-500 text-white dark:bg-blue-600">
-              Renovados: {{ panel.resumen?.renovados ?? 0 }}
+            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#6366F126] text-[#6366F1]">
+              {{ $t('summary.renewedClients') }}: {{ formatNum(panel.resumen?.renovados ?? 0) }}
             </span>
-            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-red-500 text-white dark:bg-red-600">
-              Cancelados: {{ panel.resumen?.cancelados ?? 0 }}
+            <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#F43F5E26] text-[#F43F5E]">
+              {{ $t('summary.cancelledClients') }}: {{ formatNum(panel.resumen?.cancelados ?? 0) }}
             </span>
           </div>
         </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <WalletIcon class="w-6 h-6 text-indigo-500" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Cartera inicial:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ carteraInicialCalculada }}</span>
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <BanknotesIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.initialCash') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(panel.ruta?.cajaInicial) || 0, 2) }}</span>
         </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <BanknotesIcon class="w-6 h-6 text-yellow-500" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Caja inicial:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ cajaInicialCalculada }}</span>
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <ChartBarIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.expectedCollected') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.recaudadoPretendido || 0, 2) }}</span>
         </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <ChartBarIcon class="w-6 h-6 text-blue-500" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Recaudo pretendido del día:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.recaudadoPretendido || 0).toFixed(2) }}</span>
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <CurrencyDollarIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.currentCollected') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.recaudado || 0, 2) }}</span>
+          <span class="ml-3 resumen-badge-base bg-teal-50 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200 dark:border dark:border-teal-700/50">{{ formatNum(porcentajeRecaudo, 1) }}%</span>
         </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <CurrencyDollarIcon class="w-6 h-6 text-green-600" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Recaudo actual:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.recaudado || 0).toFixed(2) }}</span>
-          <span class="ml-3 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded font-mono text-sm font-semibold">{{ porcentajeRecaudo }}%</span>
-        </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <ArrowTrendingUpIcon class="w-6 h-6 text-green-500" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Ingresos:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.ingresos || 0).toFixed(2) }}</span>
-        </div>
-        <div class="flex items-center gap-2 border-b-2 border-gray-300 dark:border-gray-600 pb-2 mb-2">
-          <ShoppingCartIcon class="w-6 h-6 text-blue-500" />
+        <button
+          type="button"
+          class="flex w-full items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          :title="$t('summary.goToIncome')"
+          @click="router.push('/ingresos')"
+        >
+          <ArrowTrendingUpIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.income') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.ingresos || 0, 2) }}</span>
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+        </button>
+        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <ShoppingCartIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
           <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Ventas:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.ventas || 0).toFixed(2) }}</span>
-          <span v-if="interesesTotalesRuta > 0" class="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded font-mono text-sm font-semibold">
-            Intereses: ${{ interesesTotalesRuta.toFixed(2) }}
-          </span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.ventas || 0, 2) }}</span>
+          <span v-if="interesesTotalesRuta > 0" class="ml-2 resumen-badge-base bg-teal-50 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200 dark:border dark:border-teal-700/50">{{ $t('summary.interests') }}: ${{ formatNum(interesesTotalesRuta, 2) }}</span>
         </div>
-        <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2">
-          <ReceiptRefundIcon class="w-6 h-6 text-red-400" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Egresos:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.egresos || 0).toFixed(2) }}</span>
-        </div>
-        <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2">
-          <ArrowTrendingDownIcon class="w-6 h-6 text-red-500" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Retiros:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.retiros || 0).toFixed(2) }}</span>
-        </div>
-        <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2">
-          <BanknotesIcon class="w-6 h-6 text-green-700" />
+        <button
+          type="button"
+          class="flex w-full items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          :title="$t('summary.goToExpenses')"
+          @click="router.push('/egresos')"
+        >
+          <ReceiptRefundIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.expenses') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.egresos || 0, 2) }}</span>
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          class="flex w-full items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          :title="$t('summary.goToExpenses')"
+          @click="router.push('/egresos')"
+        >
+          <ArrowTrendingDownIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.withdrawals') }}:</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.retiros || 0, 2) }}</span>
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+        </button>
+        <div class="flex items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <BanknotesIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
           <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Caja final:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.cajaFinal || 0).toFixed(2) }}</span>
-        </div>
-        <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2 mb-2">
-          <WalletIcon class="w-6 h-6 text-indigo-700" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Cartera final:</span>
-          <span class="text-gray-900 dark:text-gray-100 text-base font-bold">${{ (panel.ruta?.carteraFinal || 0).toFixed(2) }}</span>
+          <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.cajaFinal || 0, 2) }}</span>
         </div>
       </div>
       </div>
@@ -140,6 +146,68 @@
       @cancel="cancelarCerrarRuta"
     />
     
+    <!-- Modal de advertencia: clientes pendientes -->
+    <Teleport to="body">
+      <div v-if="mostrarModalPendientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalPendientes = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-red-600 dark:text-red-400">{{ t('route.negativeCash') }}</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{{ t('route.pendingClients') }}</p>
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 max-h-64 overflow-y-auto shadow-inner">
+              <ul class="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 space-y-2">
+                <li v-for="(p, idx) in pendientesClientes" :key="p.id || idx" class="font-medium">{{ p.nombres }} {{ p.apellidos }}</li>
+              </ul>
+            </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="mostrarModalPendientes = false" class="px-6 py-2.5 text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">Entendido</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    
+    <!-- Modal de advertencia: caja final negativa -->
+    <Teleport to="body">
+      <div v-if="mostrarModalCajaNegativa" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCajaNegativa = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h2 class="text-xl font-bold text-red-600 dark:text-red-400">{{ t('route.negativeCash') }}</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <p class="text-base text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{{ mensajeCajaNegativa }}</p>
+            <div v-if="detallesCajaNegativa" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 mb-4 shadow-inner">
+              <p class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">{{ t('modal.details') }}:</p>
+              <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                <li class="flex justify-between"><span class="font-medium">{{ $t('summary.initialCash') }}:</span> <span class="font-bold">${{ formatNum(detallesCajaNegativa.cajaInicial, 2) }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ $t('summary.income') }}:</span> <span class="font-bold text-red-600">${{ formatNum(detallesCajaNegativa.ingresos, 2) }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ $t('summary.collected') }}:</span> <span class="font-bold text-green-600">${{ formatNum(detallesCajaNegativa.recaudado, 2) }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ $t('summary.sales') }}:</span> <span class="font-bold text-blue-600">${{ formatNum(detallesCajaNegativa.ventas, 2) }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ $t('summary.expenses') }}:</span> <span class="font-bold text-red-600">${{ formatNum(detallesCajaNegativa.egresos, 2) }}</span></li>
+                <li class="flex justify-between"><span class="font-medium">{{ $t('summary.withdrawals') }}:</span> <span class="font-bold text-green-600">${{ formatNum(detallesCajaNegativa.retiros, 2) }}</span></li>
+              </ul>
+            </div>
+            <div class="mt-6 flex justify-center">
+              <button @click="mostrarModalCajaNegativa = false" class="px-6 py-2.5 text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">{{ t('common.understood') }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+    
     <!-- Modal de confirmación para abrir ruta -->
     <ConfirmModal
       :show="mostrarModalAbrirRuta"
@@ -154,41 +222,56 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import NavbarVendedor from '../components/NavbarVendedor.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
 import API_BASE_URL from '../config/api.js'
+import { getUserTimezone } from '../utils/rutaUtils.js'
+import { useAppScrollRoot } from '../composables/useAppScrollRoot.js'
+
+const { t, locale } = useI18n()
+
+function formatNum(value, decimals = 0) {
+  const n = Number(value)
+  const loc = (locale && locale.value) || 'es'
+  const localeForNumber = (typeof loc === 'string' && loc.startsWith('es')) ? 'es-ES' : (typeof loc === 'string' && loc.startsWith('pt')) ? 'pt-BR' : 'en-US'
+  if (isNaN(n)) {
+    return decimals === 0 ? '0' : (0).toLocaleString(localeForNumber, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+  }
+  const options = decimals === 0
+    ? { useGrouping: true }
+    : { useGrouping: true, minimumFractionDigits: decimals, maximumFractionDigits: decimals }
+  return n.toLocaleString(localeForNumber, options)
+}
 import { 
   CalendarDaysIcon, 
   UsersIcon, 
   BanknotesIcon, 
-  WalletIcon, 
   ChartBarIcon, 
   CurrencyDollarIcon, 
   ShoppingCartIcon, 
   ArrowTrendingUpIcon, 
   ArrowTrendingDownIcon, 
-  ReceiptRefundIcon 
+  ReceiptRefundIcon,
+  ChevronRightIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const appScrollRoot = useAppScrollRoot()
+const resumenVendedorScrollEl = ref(null)
 const loading = ref(true)
+const cargandoRuta = ref(false)
 const panel = ref(null)
-const rutaSeleccionadaId = ref('')
-const hayRutaAbierta = computed(() => !!panel.value?.ruta && panel.value?.ruta?.abierta)
-const rutasOpciones = computed(() => {
-  // Si hay ruta abierta, filtrar la que no tiene fechaCierre para evitar duplicado de "Ruta actual"
-  const rutas = panel.value?.rutasDisponibles || []
-  if (!rutas.length) return []
-  if (hayRutaAbierta.value) {
-    return rutas.filter(r => !!r.fechaCierre)
-  }
-  return rutas
-})
 const rutaAbierta = ref(true)
 const mostrarModalCerrarRuta = ref(false)
 const mostrarModalAbrirRuta = ref(false)
+const mostrarModalPendientes = ref(false)
+const pendientesClientes = ref([])
+const mostrarModalCajaNegativa = ref(false)
+const mensajeCajaNegativa = ref('')
+const detallesCajaNegativa = ref(null)
 let pollingInterval = null
 // Intereses de ventas realizadas durante la ruta actual (entre fechaApertura y fechaCierre/ahora)
 const interesesTotalesRuta = computed(() => {
@@ -200,17 +283,21 @@ const interesesTotalesRuta = computed(() => {
   const suma = clientes.reduce((acc, c) => {
     const created = c?.createdAt ? new Date(c.createdAt).getTime() : 0
     if (created >= inicio && created <= fin) {
-      return acc + (Number(c.intereses) || 0)
+      const valor = Number(c?.valor) || 0
+      const saldoInicial = Number(c?.saldo_inicial)
+      const total = Number(c?.total)
+      const base = !isNaN(saldoInicial) && saldoInicial > 0 ? saldoInicial : (!isNaN(total) && total > 0 ? total : null)
+      if (base != null) {
+        const interesMonto = Math.max(0, base - valor)
+        return acc + interesMonto
+      }
+      // Fallback final si no vinieron saldos: asumir que c.intereses es porcentaje
+      const interesPct = Number(c?.intereses) || 0
+      return acc + (valor * interesPct) / 100
     }
     return acc
   }, 0)
   return Math.round(suma * 100) / 100
-})
-
-// Cartera inicial ahora viene del backend (cartera final del día anterior)
-const carteraInicialCalculada = computed(() => {
-  const ruta = panel.value?.ruta || {}
-  return (Number(ruta.carteraInicial) || 0).toFixed(2)
 })
 
 // Caja inicial ahora viene del backend (caja final del día anterior)
@@ -223,7 +310,8 @@ const porcentajeRecaudo = computed(() => {
   const recaudado = Number(panel.value?.ruta?.recaudado) || 0
   const pretendido = Number(panel.value?.ruta?.recaudadoPretendido) || 0
   if (pretendido <= 0) return 0
-  return Math.min(999, Math.round((recaudado / pretendido) * 100))
+  const pct = (recaudado / pretendido) * 100
+  return Math.min(999, Math.round(pct * 10) / 10)
 })
 
 const clasePorcentajeRecaudo = computed(() => {
@@ -245,6 +333,7 @@ function logout() {
     localStorage.removeItem('adminId')
     localStorage.removeItem('vendedorId')
     localStorage.removeItem('codigoVinculacion')
+    localStorage.removeItem('sessionToken')
   } catch {}
   try { router.replace('/') } catch { location.href = '/' }
 }
@@ -260,8 +349,19 @@ async function confirmarCerrarRuta() {
     rutaAbierta.value = false
     mostrarModalCerrarRuta.value = false
     router.push('/vendedor') 
-  } else { 
-    alert('No se pudo cerrar la ruta') 
+  } else {
+    const errorData = await res.json().catch(() => null)
+    mostrarModalCerrarRuta.value = false
+    if (errorData?.error === 'RUTA_CON_CLIENTES_PENDIENTES') {
+      pendientesClientes.value = (errorData.pendientes || [])
+      mostrarModalPendientes.value = true
+    } else if (errorData?.error === 'CAJA_FINAL_NEGATIVA') {
+      mensajeCajaNegativa.value = errorData.msg || 'La caja final está en negativo.'
+      detallesCajaNegativa.value = errorData.detalles || null
+      mostrarModalCajaNegativa.value = true
+    } else {
+      alert(errorData?.msg || errorData?.error || 'No se pudo cerrar la ruta')
+    }
   }
 }
 
@@ -275,13 +375,17 @@ function abrirRuta() {
 
 async function confirmarAbrirRuta() {
   const vendedorId = localStorage.getItem('vendedorId')
-  const res = await fetch(`${API_BASE_URL}/api/rutas/abrir`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendedorId }) })
+  const res = await fetch(`${API_BASE_URL}/api/rutas/abrir`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendedorId, timezone: getUserTimezone() }) })
   if (res.ok) { 
     rutaAbierta.value = true
     mostrarModalAbrirRuta.value = false
+    window.dispatchEvent(new CustomEvent('ruta-abierta'))
+    // Recargar el panel inmediatamente
+    await cargarPanel(vendedorId)
     router.push('/vendedor') 
   } else { 
-    alert('No se pudo abrir la ruta') 
+    const data = await res.json().catch(() => ({}))
+    alert(data.msg || data.error || 'No se pudo abrir la ruta')
   }
 }
 
@@ -306,24 +410,27 @@ onMounted(async () => {
   window.addEventListener('egreso-registrado', actualizarResumen)
   window.addEventListener('ruta-cerrada', actualizarResumen)
   window.addEventListener('ruta-abierta', actualizarResumen)
-  
+  document.addEventListener('visibilitychange', onResumenVisibility)
+
+  await nextTick()
+  if (appScrollRoot) appScrollRoot.value = resumenVendedorScrollEl.value
+
   loading.value = false
 })
 
-// Función para cargar el panel
+function onResumenVisibility() {
+  if (document.visibilityState === 'visible') actualizarResumen()
+}
+
+// Función para cargar el panel (siempre ruta actual; el asesor no puede ver otros días)
 async function cargarPanel(vendedorId) {
   try {
-    console.log('Cargando panel para vendedor:', vendedorId)
     const url = new URL(`${API_BASE_URL}/api/vendedores/${vendedorId}/panel`)
-    if (rutaSeleccionadaId.value) {
-      url.searchParams.set('rutaId', rutaSeleccionadaId.value)
-    }
-    const res = await fetch(url)
-    console.log('Respuesta del servidor:', res.status, res.ok)
+    url.searchParams.set('_ts', String(Date.now()))
+    const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
     if (res.ok) {
       panel.value = await res.json()
-      console.log('Datos del panel cargados:', panel.value)
-    } else {
+      } else {
       console.error('Error en la respuesta:', res.statusText)
       panel.value = null
     }
@@ -333,27 +440,8 @@ async function cargarPanel(vendedorId) {
   }
 }
 
-function cargarPorRuta() {
-  const vendedorId = localStorage.getItem('vendedorId')
-  if (!vendedorId) return
-  cargarPanel(vendedorId)
-}
-
-function navegarRuta(delta) {
-  const rutas = panel.value?.rutasDisponibles || []
-  if (!rutas.length) return
-  const currentIndex = rutas.findIndex(r => r._id === rutaSeleccionadaId.value)
-  let nextIndex = currentIndex + delta
-  if (currentIndex === -1) nextIndex = delta < 0 ? rutas.length - 1 : 0
-  if (nextIndex < 0) nextIndex = rutas.length - 1
-  if (nextIndex >= rutas.length) nextIndex = 0
-  rutaSeleccionadaId.value = rutas[nextIndex]?._id || ''
-  cargarPorRuta()
-}
-
 // Función para actualizar resumen cuando sea necesario
 function actualizarResumen() {
-  console.log('🔄 Actualizando resumen por evento...')
   const vendedorId = localStorage.getItem('vendedorId')
   if (vendedorId) {
     cargarPanel(vendedorId)
@@ -362,6 +450,9 @@ function actualizarResumen() {
 
 // Limpiar event listeners al desmontar el componente
 onUnmounted(() => {
+  if (appScrollRoot && appScrollRoot.value === resumenVendedorScrollEl.value) {
+    appScrollRoot.value = null
+  }
   window.removeEventListener('cliente-creado', actualizarResumen)
   window.removeEventListener('cliente-eliminado', actualizarResumen)
   window.removeEventListener('pago-registrado', actualizarResumen)
@@ -370,6 +461,28 @@ onUnmounted(() => {
   window.removeEventListener('egreso-registrado', actualizarResumen)
   window.removeEventListener('ruta-cerrada', actualizarResumen)
   window.removeEventListener('ruta-abierta', actualizarResumen)
+  document.removeEventListener('visibilitychange', onResumenVisibility)
 })
 
 </script>
+
+<style scoped>
+.resumen-content {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Base común de badges: tamaño, padding, números tabulares (colores con Tailwind dark:) */
+.resumen-badge-base {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-radius: 0.5rem;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+</style>

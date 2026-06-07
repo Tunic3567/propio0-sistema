@@ -1,45 +1,186 @@
-/* Estilos globales para modo oscuro */
+/* Estilos globales - Minimalista, modo claro y oscuro */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Scrollbar personalizado para modo oscuro */
-::-webkit-scrollbar {
-  width: 8px;
+:root {
+  --surface: #f5f5f5;
+  --surface-card: #ffffff;
+  --border: #d4d4d4;
+  --text: #111827;
+  --text-muted: #4b5563;
+  /* Primario más intenso en modo claro para mejor contraste */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
-}
-
-/* Mejoras para el modo oscuro */
+/* Modo oscuro ejecutivo: fondos legibles, barras diferenciadas */
 .dark {
+  --surface: #0f172a;
+  --surface-card: #1e293b;
+  --border: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --primary: #94a3b8;
+  --primary-hover: #cbd5e1;
   color-scheme: dark;
 }
 
-/* Transiciones suaves para elementos específicos */
+/* Scrollbar discreto */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-neutral-100 dark:bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-neutral-300 dark:bg-slate-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-neutral-400 dark:bg-slate-500;
+}
+
 .transition-theme {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Efectos de hover mejorados para modo oscuro */
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/*
+ * Evita scroll / “goma” horizontal en móvil (p. ej. iPhone).
+ * - hidden: mejor soporte que clip en Safari antiguo.
+ * - touch-action / overscroll: reduce pan lateral del gesto.
+ * - Evitar 100vw en componentes: en iOS suele ser > ancho útil y provoca overflow.
+ */
+html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  overscroll-behavior-x: none;
+  /* En móvil, applyAdaptiveRootFont() puede fijar font-size inline (rem proporcional al ancho). */
+  /* Evita que Safari ajuste tamaño de texto al rotar / al hacer zoom “suave” */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-.hover-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+body {
+  margin: 0;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  position: relative;
+  touch-action: pan-y;
+  overscroll-behavior-x: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-.dark .hover-lift:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+/*
+ * Safari en iPhone hace zoom automático al enfocar inputs con font-size < 16px.
+ * Forzar mínimo 16px en campos de formulario evita el “salto” de escala y el layout desalineado.
+ */
+@supports (-webkit-touch-callout: none) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
+#app {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+
+/* Botón primario: visible bajo sol, borde definido y contraste alto */
+/* Modo claro: azul (evita el aspecto “negro” del slate-700) */
+.btn-primary-min {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-2.5 transition-colors border border-blue-700/50 shadow-sm;
+}
+.dark .btn-primary-min {
+  @apply bg-slate-400 hover:bg-slate-300 text-slate-900 border-slate-500 shadow-md;
+}
+
+/* Botón secundario (outline): borde visible para uso exterior */
+.btn-outline-visible {
+  @apply border-2 border-neutral-500 bg-white text-neutral-900 font-semibold rounded-lg px-4 py-2.5 transition-colors hover:bg-neutral-100;
+}
+.dark .btn-outline-visible {
+  @apply border-slate-500 bg-slate-800/50 text-slate-200 hover:bg-slate-700;
+}
+
+/* Tarjeta minimalista – modo claro: más contraste con fondo */
+.card-min {
+  @apply bg-white rounded-lg border-2 border-neutral-400 shadow-md transition-theme;
+}
+.dark .card-min {
+  @apply bg-slate-800/50 border-slate-600/70;
+}
+
+
+
+/* Login: jerarquía del mensaje motivacional junto al logo nuevo.
+   Focalizado en el párrafo Tailwind actual visto en Login para evitar tocar formularios. */
+:root {
+  --login-motivation-size: var(--ocd-tweak-login-message-size, clamp(1.02rem, 0.96rem + 0.32vw, 1.2rem));
+  --login-motivation-line: var(--ocd-tweak-login-message-line-height, 1.28);
+  --login-logo-message-gap: var(--ocd-tweak-logo-message-gap, 0.35rem);
+}
+
+#app p.text-center.text-xs.sm\:text-sm.leading-snug,
+#app p.text-center.text-xs.sm\:text-sm.sm\:leading-relaxed {
+  font-size: var(--login-motivation-size) !important;
+  line-height: var(--login-motivation-line) !important;
+  font-weight: var(--ocd-tweak-login-message-weight, 700) !important;
+  margin-block-start: var(--login-logo-message-gap) !important;
+  max-width: min(34rem, calc(100vw - 2rem));
+}
+
+#app :is(div, section, main).flex:has(> img + p.text-center.text-xs.sm\:text-sm) {
+  gap: var(--login-logo-message-gap) !important;
+}
+
+
+
+/* Crear Cliente: los totales deben estar siempre visibles, incluso antes del cálculo. */
+.crear-cliente-fixed-totals {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  color: var(--text);
+}
+
+.crear-cliente-fixed-total-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.crear-cliente-fixed-total-row output {
+  min-width: 6rem;
+  padding: 0.28rem 0.72rem;
+  border-radius: 0.38rem;
+  background: #123f2d;
+  color: var(--ocd-tweak-crear-cliente-total-color, #4ade80);
+  font-size: calc(var(--ocd-tweak-crear-cliente-total-scale, 1) * clamp(1.25rem, 1.05rem + 0.8vw, 1.75rem));
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.crear-cliente-fixed-total-row [data-total-parcela] {
+  background: #1e3a8a;
+  color: var(--ocd-tweak-crear-cliente-parcela-color, #93c5fd);
 }
