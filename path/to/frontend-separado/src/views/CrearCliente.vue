@@ -41,3 +41,10 @@ function handleSubmit() {
   // Handle form submission logic here
 }
 </script>
+
+<style scoped>
+/* Add your custom styles here */
+input[type="number"] {
+  font-size: inherit;
+}
+</style>
