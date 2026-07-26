@@ -57,16 +57,12 @@
 
           <!-- Botones de configuración -->
           <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            <CompartirMensaje />
-            <VendedorNotificationsBell />
-            <ThemeToggle />
-            <LanguageSelector />
             <button
               @click="toggleChat"
               class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-slate-600 transition-theme"
               :title="$t('chatbot.title')"
             >
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-neutral-700 dark:text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                 <rect x="3" y="1" width="18" height="12" rx="2" />
                 <circle cx="8.5" cy="6.5" r="1.2" />
                 <circle cx="15.5" cy="6.5" r="1.2" />
@@ -74,8 +70,12 @@
                 <path d="M12 13v3" stroke-linecap="round" />
                 <circle cx="12" cy="18.5" r="1.2" />
               </svg>
-              <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400 hidden sm:inline">{{ $t('chatbot.title') }}</span>
+              <span class="text-sm font-medium text-neutral-700 dark:text-slate-200 hidden sm:inline">{{ $t('chatbot.title') }}</span>
             </button>
+            <CompartirMensaje />
+            <VendedorNotificationsBell />
+            <ThemeToggle />
+            <LanguageSelector />
           </div>
 
     </div>
