@@ -34,7 +34,8 @@
     "loadDataFailed": "No se pudieron cargar los datos. Revisa tu conexión y pulsa Reintentar o actualiza la página.",
     "retryLoad": "Reintentar",
     "status": "Estado",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "shareText": "Compartir texto"
   },
   "vendorHome": {
     "welcomeHint": "Gestiona tu ruta, pagos y clientes.",
@@ -57,6 +58,7 @@
     "clientHistory": "Historial Clientes",
     "summary": "Resumen",
     "access": "Accesos",
+    "notes": "Notas del Día",
     "logout": "Cerrar Sesión",
     "adminPanel": "Panel Administrativo"
   },
@@ -88,8 +90,8 @@
     "date": "Fecha",
     "creationDate": "Fecha creación",
     "total": "Total",
-    "installment": "Parcela",
-    "installmentValue": "Valor parcela",
+    "installment": "Cuota",
+    "installmentValue": "Valor cuota",
     "initialBalance": "Saldo Inicial",
     "remainingBalance": "Saldo Restante",
     "payment": "Pago",
@@ -99,8 +101,11 @@
     "report": "Reportar",
     "reportClient": "Reportar Cliente",
     "renew": "Renovar Cliente",
-    "pendingInstallments": "Parcelas pendientes",
-    "overdueInstallments": "Parcelas atrasadas",
+    "pendingInstallments": "Cuotas pendientes",
+    "overdueInstallments": "Cuotas atrasadas",
+    "installmentsPaid": "Cuotas pagadas",
+    "clientInfo": "Información del Cliente",
+    "frequency": "Frecuencia",
     "visits": "Visitas",
     "loansWithUs": "Renovaciones",
     "clientsWithoutPayments": "Clientes sin pagos",
@@ -131,7 +136,18 @@
     "appliedInterest": "Interés aplicado",
     "customInterest": "Interés personalizado",
     "customInterestPercent": "Porcentaje de interés (%)",
-    "customInterestInvalid": "Indica un porcentaje de interés válido entre 0 y 100."
+    "customInterestInvalid": "Indica un porcentaje de interés válido entre 0 y 100.",
+    "biweekly": "Quincenal",
+    "paymentDay": "Día de pago",
+    "selectPaymentDay": "Seleccione día",
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado",
+    "sunday": "Domingo",
+    "sortClients": "Ordenar Clientes"
   },
   "payment": {
     "title": "Pagos",
@@ -143,11 +159,12 @@
     "register": "Registrar Pago",
     "edit": "Editar Pago",
     "delete": "Eliminar Pago",
-    "installmentCount": "Número de parcelas",
+    "installmentCount": "Número de cuotas",
     "currentBalance": "Saldo actual",
     "newBalance": "Nuevo saldo",
     "alreadyRegistered": "Pago ya registrado",
     "existingPayment": "Pago existente",
+    "existingPaymentNotice": "Este cliente ya tiene un pago en la ruta actual. Se te solicitará sobrescribirlo al guardar.",
     "renewClient": "¿Desea renovar este cliente?",
     "clientFinished": "El cliente ha finalizado el pago.",
     "finalize": "No, finalizar",
@@ -161,9 +178,9 @@
     "registeredSuccess": "Pago registrado",
     "registeredOk": "Pago registrado correctamente.",
     "updatedOk": "Pago actualizado correctamente.",
-    "recalculateInstallments": "Recalcular parcelas",
-    "recalculateInstallmentsSuccess": "Parcelas recalculadas correctamente.",
-    "recalculateInstallmentsHint": "Útil si cambiaste días o parcela en la base de datos.",
+    "recalculateInstallments": "Recalcular cuotas",
+    "recalculateInstallmentsSuccess": "Cuotas recalculadas correctamente.",
+    "recalculateInstallmentsHint": "Útil si cambiaste días o cuota en la base de datos.",
     "offlineQueued": "Sin conexión: el pago quedó guardado en este dispositivo y se subirá al servidor cuando haya internet.",
     "offlineQueuedTitle": "Pago guardado (sin conexión)",
     "offlineBanner": "{count} pago(s) pendiente(s) de subir al servidor.",
@@ -176,7 +193,7 @@
     "discardOfflineQueueConfirm": "Hay {count} pago(s) guardado(s) solo en este dispositivo. Si los quitas, no se subirán al servidor. ¿Deseas quitarlos?",
     "offlineEnqueueFailed": "No se pudo guardar el pago en la cola local. Inténtalo de nuevo.",
     "types": {
-      "installment": "Parcela",
+      "installment": "Cuota",
       "payment": "Abono",
       "noPayment": "No Pago",
       "notApplicable": "No Aplica"
@@ -302,6 +319,12 @@
     "commercial": "Dirección Comercial",
     "residential": "Dirección Residencial"
   },
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "invalidId": "El Id ya está registrado",
+    "invalidDate": "Fecha inválida",
+    "userAlreadyInUse": "Ese usuario ya está en uso"
+  },
   "createClient": {
     "title": "Crear Cliente",
     "form": {
@@ -318,11 +341,6 @@
       "save": "Guardar Cliente",
       "commercialAddressPlaceholder": "Ingresa la dirección comercial del cliente...",
       "residentialAddressPlaceholder": "Ingresa la dirección residencial del cliente..."
-    },
-    "errors": {
-      "required": "Este campo es obligatorio",
-      "invalidId": "El Id ya está registrado",
-      "invalidDate": "Fecha inválida"
     }
   },
   "records": {
@@ -352,7 +370,7 @@
     "saleCycle": "Venta / ciclo",
     "currentSale": "Actual",
     "previousSale": "Anterior",
-    "overdueInstallments": "Parcelas atrasadas",
+    "overdueInstallments": "Cuotas atrasadas",
     "overdueFromPayments": "Calculado desde pagos",
     "paymentsList": "Pagos registrados",
     "noPaymentsInCycle": "Sin pagos en este ciclo",
@@ -363,6 +381,8 @@
     "close": "Cerrar",
     "syncingPayments": "Sincronizando pagos con el servidor…",
     "cycleVisits": "Visitas en el ciclo",
+    "closedSummaries": "Historial de resúmenes cerrados",
+    "selectClosedRoute": "Selecciona una ruta cerrada",
     "button": "Historial"
   },
   "route": {
@@ -377,13 +397,17 @@
     "current": "Ruta actual",
     "openingDate": "Fecha apertura recaudo",
     "closingDate": "Fecha cierre",
-    "notClosed": "No se ha cerrado"
+    "notClosed": "No se ha cerrado",
+    "closeSummary": "Resumen de Ruta Cerrada",
+    "downloadPng": "Descargar PNG",
+    "shareImage": "Compartir"
   },
   "accessHub": {
     "pageTitle": "Centro de accesos",
     "subtitle": "Tu sesión de administrador y las credenciales de tus asesores, en un solo lugar claro y seguro.",
     "tabSelf": "Mi cuenta",
     "tabSelfHint": "Panel web",
+    "tabLlaves": "Llaves",
     "tabVendors": "Asesores",
     "tabVendorsHint": "App de campo",
     "selfBadge": "Tú",
@@ -442,7 +466,8 @@
     "currentPasswordRequired": "La contraseña actual es obligatoria.",
     "finishUserEditFirst": "Confirma o cancela el cambio de usuario antes de guardar.",
     "finishEmailEditFirst": "Confirma o cancela el cambio de correo antes de guardar.",
-    "userEmptyName": "El usuario no puede estar vacío."
+    "userEmptyName": "El usuario no puede estar vacío.",
+    "pendingUserChangeHint": "Debe ingresar la contraseña actual y hacer clic en «Guardar cambios» para aplicar el cambio."
   },
   "admin": {
     "title": "Panel Administrativo",
@@ -483,6 +508,12 @@
     "reopenLastRouteConfirm": "¿Reabrir la última ruta cerrada de este asesor? Podrás editar pagos, ingresos y egresos de esa ruta. Caja y cartera se recalcularán.",
     "noClosedRouteToReopen": "No hay rutas cerradas para reabrir",
     "routeSummaryHint": "Caja y cartera se sincronizan al cerrar o al modificar movimientos.",
+    "editDates": "Editar fechas",
+    "editRouteDatesTitle": "Editar fechas de la ruta",
+    "openingDate": "Fecha de apertura",
+    "closingDate": "Fecha de cierre",
+    "routeDatesSaved": "Fechas actualizadas correctamente",
+    "dateSaveError": "Error al guardar las fechas",
     "viewMovements": "Movimientos",
     "cashShort": "Caja",
     "walletShort": "Cartera",
@@ -512,6 +543,8 @@
     "movementTypeIncome": "Ingreso",
     "movementTypeExpense": "Egreso",
     "collectionOpeningShort": "Apertura recaudo",
+    "showVendors": "Mostrar asesores",
+    "hideVendors": "Ocultar asesores",
     "notifications": {
       "title": "Actividad",
       "tooltip": "Actividad reciente de tus asesores",
@@ -523,7 +556,8 @@
         "sale": "Venta",
         "client": "Cliente",
         "clientNew": "Cliente nuevo",
-        "clientRenewed": "Renovación"
+        "clientRenewed": "Renovación",
+        "clientEdit": "Modificación"
       },
       "detailSale": "Venta · ${valor}{desc}",
       "detailClient": "Cliente nuevo · {name}{nick} · ${valor}",
@@ -536,7 +570,23 @@
       "confirmDeleteAll": "¿Ocultar todas las notificaciones de la lista? No se borran ventas ni clientes; solo dejan de mostrarse aquí.",
       "confirmDeleteSelected": "¿Ocultar las {n} notificaciones seleccionadas?",
       "deleteError": "No se pudieron actualizar las notificaciones."
-    }
+    },
+    "printRouteSheet": "Imprimir Derrotero",
+    "routeSheetTitle": "Derrotero",
+    "printVendor": "Asesor",
+    "printName": "Nombre",
+    "printId": "Cédula",
+    "printPhone": "Teléfono",
+    "printSale": "Venta",
+    "printInstallment": "Cuota",
+    "printDays": "Días",
+    "printFrequency": "Frecuencia",
+    "printAddress": "Dirección",
+    "printDate": "Fecha de impresión",
+    "printFilter": "Filtro",
+    "printAll": "Todos",
+    "printNoClients": "No hay clientes para imprimir con los filtros actuales.",
+    "printGroup": "Grupo"
   },
   "income": {
     "register": "Registrar Ingreso",
@@ -581,5 +631,15 @@
       "salary": "Salario",
       "various": "Gastos varios"
     }
+  },
+  "chatbot": {
+    "title": "Asistente de ayuda",
+    "subtitle": "Resuelve tus dudas sobre el sistema",
+    "placeholder": "Escribe tu pregunta aquí...",
+    "send": "Enviar",
+    "clearChat": "Limpiar chat",
+    "clearConfirm": "¿Borrar todo el historial?",
+    "errorMessage": "Lo siento, no pude procesar tu consulta. Intenta de nuevo.",
+    "welcomeMessage": "¡Hola! Soy el asistente de ayuda. Puedes preguntarme cómo usar cualquier función del sistema."
   }
 }

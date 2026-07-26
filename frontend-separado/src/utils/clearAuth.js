@@ -8,6 +8,7 @@ export const LOGIN_NOTICE_REVOKED = 'revoked'
 
 export function clearAllAuthLocalStorage() {
   clearAuthSnapshot()
+  try { localStorage.removeItem('chatHistory') } catch (_) {}
 }
 
 /**

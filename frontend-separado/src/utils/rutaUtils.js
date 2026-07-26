@@ -70,8 +70,8 @@ export async function consultarEstadoRuta() {
       return estadoRutaConfiableOffline(vendedorId)
     }
 
-    const url = `${API_BASE_URL}/api/rutas/actual/${vendedorId}`
-    const res = await fetch(url)
+    const url = `${API_BASE_URL}/api/rutas/actual/${vendedorId}?_t=${Date.now()}`
+    const res = await fetch(url, { cache: 'no-store' })
 
     if (res.ok) {
       const ruta = await res.json()
@@ -81,11 +81,6 @@ export async function consultarEstadoRuta() {
         cargando: false,
         ruta
       }
-    }
-
-    if (debeConfiarRutaTemporalmente()) {
-      console.warn('⚠️ consultarEstadoRuta - respuesta no válida; se conserva ruta temporal local')
-      return estadoRutaConfiableOffline(vendedorId)
     }
 
     return { abierta: false, cargando: false }

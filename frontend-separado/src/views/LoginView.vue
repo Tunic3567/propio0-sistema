@@ -370,7 +370,7 @@ const login = async () => {
       if (data.rol === 'superusuario') {
         localStorage.setItem('adminId', data.id || '__SUPER__')
         localStorage.setItem('adminNombre', data.nombre != null ? String(data.nombre).trim() : 'Superusuario')
-        router.push('/admin/repair-resumen')
+        router.push('/admin/super/dashboard')
       } else if (data.rol === 'administrador') {
         localStorage.setItem('adminId', data.id) // Guarda el ID del administrador
         if (data.nombre != null && String(data.nombre).trim() !== '') {
@@ -381,6 +381,7 @@ const login = async () => {
         router.push('/admin')
       } else {
         localStorage.setItem('vendedorId', data.id) // ID del asesor (clave localStorage sin cambiar por compatibilidad API)
+        localStorage.removeItem('clienteSeleccionado')
         router.push('/vendedor')
       }
 } else {

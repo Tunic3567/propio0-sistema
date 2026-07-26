@@ -89,18 +89,6 @@
                 </div>
               </div>
               
-              <!-- Comentarios/Observaciones -->
-              <div v-if="pago.observaciones" class="mt-3 pt-3 border-t border-[#1E293B]/15 dark:border-[#1E293B]/50">
-                <div class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                  </svg>
-                  <div class="flex-1">
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Comentario:</span>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ pago.observaciones }}</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -121,7 +109,7 @@
     <!-- Modal de advertencia: clientes pendientes -->
     <Teleport to="body">
       <div v-if="mostrarModalPendientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalPendientes = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalPendientes = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -149,7 +137,7 @@
     <!-- Modal de advertencia: caja final negativa -->
     <Teleport to="body">
       <div v-if="mostrarModalCajaNegativa" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCajaNegativa = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalCajaNegativa = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">

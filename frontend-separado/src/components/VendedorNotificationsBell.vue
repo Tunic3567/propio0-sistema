@@ -32,7 +32,6 @@
       </span>
     </button>
 
-    <!-- Teleport al body: el nav es z-50; un backdrop en body z-200 quedaba ENCIMA del panel y robaba los clics. -->
     <Teleport to="body">
       <Transition
         enter-active-class="transition ease-out duration-150"
@@ -43,7 +42,6 @@
         leave-to-class="opacity-0 scale-95"
       >
         <div v-show="open" class="fixed inset-0 z-[10100] pointer-events-none flex justify-end items-start pt-[calc(env(safe-area-inset-top,0px)+3.75rem)] pr-3 sm:pr-3">
-          <!-- Capa oscura solo móvil; en sm+ no intercepta clics (el document listener cierra al clic fuera) -->
           <div
             class="absolute inset-0 bg-black/40 sm:bg-transparent pointer-events-auto sm:pointer-events-none"
             aria-hidden="true"
@@ -132,7 +130,6 @@
                     <span class="text-[10px] text-neutral-400 dark:text-slate-500 tabular-nums whitespace-nowrap">{{ formatTime(item.at) }}</span>
                   </div>
                   <p class="text-xs text-neutral-600 dark:text-slate-300 mt-0.5 leading-snug">{{ detailLine(item) }}</p>
-                  <p class="text-[11px] text-neutral-500 dark:text-slate-400 mt-0.5">{{ item.vendedorNombre }}</p>
                 </div>
               </div>
             </div>
@@ -176,11 +173,8 @@ const confirmModal = reactive({
 
 let pollTimer = null
 
-function codigo() {
-  return localStorage.getItem('codigoVinculacion') || ''
-}
-function adminId() {
-  return localStorage.getItem('adminId') || ''
+function vendedorId() {
+  return localStorage.getItem('vendedorId') || ''
 }
 
 const unreadCount = computed(() => {
@@ -225,15 +219,14 @@ function toggleModoSeleccion() {
 }
 
 async function ocultarIds(ids) {
-  const c = codigo()
-  const a = adminId()
-  if (!c || !a || !ids.length) return
+  const vid = vendedorId()
+  if (!vid || !ids.length) return
   deleting.value = true
   try {
-    const res = await fetch(`${API_BASE_URL}/api/admin/notificaciones/ocultar`, {
+    const res = await fetch(`${API_BASE_URL}/api/vendedor/notificaciones/ocultar`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigoVinculacion: c, adminId: a, ids })
+      body: JSON.stringify({ ids })
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
@@ -298,6 +291,11 @@ function formatTime(iso) {
 }
 
 function kindLabel(item) {
+  if (item.tipo === 'edit' && item.kind === 'client') {
+    const key = 'admin.notifications.kinds.clientEdit'
+    const tr = t(key)
+    return tr === key ? 'Modificación' : tr
+  }
   const kind = item.kind
   if (kind === 'client') {
     const renewed = !!(item.payload && item.payload.renovado)
@@ -310,8 +308,8 @@ function kindLabel(item) {
   return tr === key ? kind : tr
 }
 
-/** Color distintivo: nuevo (azul) vs renovación (ámbar / énfasis renovación). */
 function clientKindBadgeClass(item) {
+  if (item.tipo === 'edit' && item.kind === 'client') return 'text-purple-700 dark:text-purple-300'
   if (item.kind !== 'client') return 'text-blue-700 dark:text-blue-300'
   return item.payload?.renovado
     ? 'text-amber-800 dark:text-amber-200'
@@ -320,6 +318,16 @@ function clientKindBadgeClass(item) {
 
 function detailLine(item) {
   const p = item.payload || {}
+  const editDesc = (p.editadoPorAdminDesc || '').trim()
+  if (editDesc) {
+    if (item.kind === 'client') {
+      const nombre = `${String(p.nombres || '').trim()} ${String(p.apellidos || '').trim()}`.trim()
+      const apodo = String(p.apodo || '').trim()
+      const identidad = apodo ? `${nombre} (${apodo})` : nombre
+      return `${identidad} · ${editDesc}`
+    }
+    return editDesc
+  }
   if (item.kind === 'sale') {
     return t('admin.notifications.detailSale', {
       valor: formatMoney(p.valor),
@@ -340,15 +348,12 @@ function detailLine(item) {
 }
 
 async function cargar() {
-  const esSuper = localStorage.getItem('esSuperUsuario') === '1'
-  if (esSuper) { items.value = []; return }
-  const c = codigo()
-  const a = adminId()
-  if (!c || !a) return
+  const vid = vendedorId()
+  if (!vid) return
   loading.value = true
   errorMsg.value = ''
   try {
-    const u = `${API_BASE_URL}/api/admin/actividad-reciente?codigoVinculacion=${encodeURIComponent(c)}&adminId=${encodeURIComponent(a)}&limit=45&days=14`
+    const u = `${API_BASE_URL}/api/vendedor/actividad-reciente?limit=45&days=14`
     const res = await fetch(u, { cache: 'no-store' })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
@@ -367,16 +372,13 @@ async function cargar() {
 }
 
 async function marcarVisto() {
-  const esSuper = localStorage.getItem('esSuperUsuario') === '1'
-  if (esSuper) return
-  const c = codigo()
-  const a = adminId()
-  if (!c || !a) return
+  const vid = vendedorId()
+  if (!vid) return
   try {
-    const res = await fetch(`${API_BASE_URL}/api/admin/notificaciones/marcar-visto`, {
+    const res = await fetch(`${API_BASE_URL}/api/vendedor/notificaciones/marcar-visto`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigoVinculacion: c, adminId: a })
+      body: JSON.stringify({})
     })
     const data = await res.json().catch(() => ({}))
     if (res.ok && data.notificacionesVistasHasta) {
@@ -409,13 +411,12 @@ function onRowClick(item) {
   onItemClick(item)
 }
 
-/** Navega a la pantalla correcta y pasa IDs en la URL para enfocar el registro concreto. */
 function onItemClick(item) {
   open.value = false
   const p = item.payload || {}
   if (item.kind === 'sale') {
     router.push({
-      path: '/admin/resumen',
+      path: '/vendedor/resumen',
       query: {
         vendedorId: p.vendedorId || undefined,
         rutaId: p.rutaId || undefined
@@ -423,7 +424,7 @@ function onItemClick(item) {
     })
     return
   }
-  router.push({ path: '/admin' })
+  router.push({ path: '/vendedor' })
 }
 
 function onDocClick(ev) {

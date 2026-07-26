@@ -14,7 +14,7 @@
     <!-- Modal de confirmación para abrir ruta -->
     <Teleport to="body">
       <div v-if="mostrarModalApertura" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalApertura = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalApertura = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-gray-200/50 dark:border-gray-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -38,7 +38,7 @@
     <!-- Modal de confirmación para cerrar ruta -->
     <Teleport to="body">
       <div v-if="mostrarModalCierre" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCierre = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalCierre = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-gray-200/50 dark:border-gray-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -62,7 +62,7 @@
     <!-- Modal de advertencia: clientes pendientes -->
     <Teleport to="body">
       <div v-if="mostrarModalPendientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalPendientes = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalPendientes = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -90,7 +90,7 @@
     <!-- Modal de advertencia: caja final negativa -->
     <Teleport to="body">
       <div v-if="mostrarModalCajaNegativa" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCajaNegativa = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalCajaNegativa = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -124,7 +124,7 @@
     <!-- Modal de confirmación para reportar Id -->
     <Teleport to="body">
       <div v-if="mostrarModalReportarCedula" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalReportarCedula"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cerrarModalReportarCedula"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-indigo-200/50 dark:border-indigo-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-indigo-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -226,22 +226,14 @@
       ref="vendedorScrollEl"
       class="p-3 md:p-4 w-full max-w-full min-w-0 box-border overflow-x-clip md:overflow-y-auto pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
-      <div v-if="!rutaAbierta && !cargandoRuta" class="flex flex-col items-center justify-center min-h-[300px]">
+      <div v-if="!rutaAbierta" class="flex flex-col items-center justify-center min-h-[300px]">
         <button
-          v-if="!rutaAbierta && !cargandoRuta"
           @click="solicitarAperturaRuta"
           class="btn-primary-min px-6 py-3"
         >
           {{ t('route.open') }}
         </button>
-        <button 
-          v-if="rutaAbierta && !cargandoRuta" 
-          @click="cerrarRuta" 
-          class="bg-neutral-700 hover:bg-neutral-600 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-white px-6 py-3 rounded-lg font-medium border border-neutral-600 dark:border-neutral-500 transition-colors"
-        >
-          {{ t('route.close') }}
-        </button>
-        <div v-if="!rutaAbierta && !cargandoRuta" class="mt-4 text-neutral-500 dark:text-neutral-400">{{ t('common.mustOpenRoute') }}</div>
+        <div class="mt-4 text-neutral-500 dark:text-neutral-400">{{ t('common.mustOpenRoute') }}</div>
       </div>
       <div v-else>
           <div
@@ -260,12 +252,18 @@
             </button>
           </div>
         <div class="flex flex-col gap-2 md:gap-3 mb-3 md:mb-6">
-          <div class="flex justify-between items-center">
+          <div class="flex justify-start items-center gap-2">
         <button
           @click="irACrearCliente"
               class="btn-primary-min"
         >
               {{ t('client.newClient') }}
+        </button>
+        <button
+          @click="abrirOrdenarClientes"
+              class="btn-secondary-min"
+        >
+          {{ t('client.sortClients') }}
         </button>
       </div>
           <!-- Resumen con pagos / no pagos (ruta actual), visible arriba -->
@@ -336,7 +334,7 @@
                 v-model="filtroBusquedaSinPagos"
                 type="text"
                 :placeholder="t('common.searchClientPlaceholder')"
-                class="w-full pl-10 pr-4 py-2 border-2 border-neutral-400 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-neutral-400 focus:border-neutral-500 bg-neutral-50 dark:bg-slate-800/50 text-neutral-900 dark:text-slate-100 shadow-sm"
+                class="w-full pl-10 pr-10 py-2 border-2 border-neutral-400 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-neutral-400 focus:border-neutral-500 bg-neutral-50 dark:bg-slate-800/50 text-neutral-900 dark:text-slate-100 shadow-sm"
                 @keyup.enter="() => {}"
               />
               <button
@@ -345,6 +343,16 @@
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+              <button
+                v-if="filtroBusquedaSinPagos"
+                type="button"
+                @click.stop="filtroBusquedaSinPagos = ''"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-slate-400 hover:text-neutral-600 dark:hover:text-slate-200 transition-colors p-0.5 rounded-full hover:bg-neutral-200 dark:hover:bg-slate-600"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -425,7 +433,7 @@
                 <div class="mt-2 md:mt-3 text-sm text-neutral-800 dark:text-slate-200 divide-y divide-neutral-300 dark:divide-slate-600">
                   <div class="flex items-baseline justify-between py-0.5 md:py-1">
                     <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.sale') }}</span>
-                    <span class="text-black dark:text-white font-bold text-sm md:text-base">${{ c.valor }}</span>
+                    <span class="text-black dark:text-white font-bold text-sm md:text-base">${{ c.valor }} ({{ c.dias }} días)</span>
                   </div>
                   <div class="flex items-baseline justify-between py-0.5 md:py-1">
                     <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.initialBalance') }}</span>
@@ -454,6 +462,31 @@
                           {{ t('client.renewedBadge') }}
                         </span>
                         <span
+                          v-if="c.frecuencia && c.frecuencia.toLowerCase() !== 'diaria'"
+                          class="inline-flex items-center px-2.5 py-1 rounded-lg text-[0.7rem] font-semibold border"
+                          :class="{
+                            'bg-indigo-50 text-indigo-900 border-indigo-400/45 dark:bg-indigo-900/45 dark:text-indigo-100 dark:border-indigo-500/50': c.frecuencia.toLowerCase() === 'semanal',
+                            'bg-cyan-50 text-cyan-900 border-cyan-400/45 dark:bg-cyan-900/45 dark:text-cyan-100 dark:border-cyan-500/50': c.frecuencia.toLowerCase() === 'quincenal',
+                            'bg-amber-50 text-amber-900 border-amber-400/45 dark:bg-amber-900/45 dark:text-amber-100 dark:border-amber-500/50': c.frecuencia.toLowerCase() === 'mensual'
+                          }"
+                        >
+                          {{ c.frecuencia }}
+                        </span>
+                        <span
+                          v-if="textoComparacionRenovacion(c)"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-bold border bg-blue-50 text-blue-800 border-blue-300/60 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-600/50"
+                          :title="textoComparacionRenovacion(c)"
+                        >
+                          {{ textoComparacionRenovacion(c) }}
+                        </span>
+                        <span
+                          v-if="c.finalizadoPendiente === true"
+                          class="inline-flex items-center px-2.5 py-1 rounded-lg text-[0.7rem] font-semibold border bg-red-100 text-red-900 border-red-400/50 dark:bg-red-900/60 dark:text-red-100 dark:border-red-500/60"
+                          title="Este cliente finalizó su pago en esta ruta"
+                        >
+                          Finalizado
+                        </span>
+                        <span
                           v-if="montoPagadoEnRutaActual(c) > 0"
                           class="inline-flex items-center px-2.5 py-1 rounded-lg text-[0.7rem] font-semibold tabular-nums border bg-emerald-50 text-emerald-800 border-emerald-500/40 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700/50"
                           :title="t('client.paidThisRoute')"
@@ -469,22 +502,26 @@
                         </span>
                         <span>${{ valorParcelaVisibleTarjeta(c) }}</span>
                       </span>
-                      <span class="text-xs font-medium leading-tight text-neutral-700 dark:text-slate-300">({{ c.saldo_inicial }}/{{ c.dias }} días)</span>
                     </span>
                   </div>
                   <!-- Info extra desplegable (antes de los botones para que los botones queden abajo) -->
-                  <div v-if="desplegados[i]" class="mt-2 border-t pt-2 text-sm text-neutral-800 dark:text-slate-200 divide-y divide-neutral-300 dark:divide-neutral-500">
+                  <div v-if="desplegados[i]" class="mt-1 border-t pt-1 text-sm text-neutral-800 dark:text-slate-200 divide-y divide-neutral-300 dark:divide-neutral-500">
+                    <div class="flex items-baseline justify-between py-1">
+                      <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.installmentsPaid') }}</span>
+                      <span class="text-black dark:text-white font-bold text-base">{{ calcularParcelasPagadas(c) }}</span>
+                    </div>
                     <div class="flex items-baseline justify-between py-1">
                       <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.pendingInstallments') }}</span>
                       <span class="text-black dark:text-white font-bold text-base">{{ calcularParcelasPendientes(c) }}</span>
                     </div>
                     <div class="flex items-baseline justify-between py-1">
-                      <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.overdueInstallments') }}</span>
-                      <span class="text-black dark:text-white font-bold text-base">{{ calcularParcelasAtrasadas(c) }}</span>
-                    </div>
-                    <div class="flex items-baseline justify-between py-1">
-                      <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.visits') || 'Visitas' }}</span>
-                      <span class="text-black dark:text-white font-bold text-base">{{ c.visitas ?? 0 }}</span>
+                      <div class="flex items-center gap-4">
+                        <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.overdueInstallments') }}</span>
+                        <span class="text-black dark:text-white font-bold">{{ calcularParcelasAtrasadas(c) }}</span>
+                        <span class="text-neutral-400 dark:text-neutral-500">|</span>
+                        <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.visits') || 'Visitas' }}</span>
+                        <span class="text-black dark:text-white font-bold">{{ c.visitas ?? 0 }}</span>
+                      </div>
                     </div>
                     <div class="flex items-baseline justify-between py-1">
                       <span class="font-bold text-neutral-900 dark:text-slate-100">{{ t('client.id') }}</span>
@@ -507,7 +544,7 @@
                       <span class="text-black dark:text-white font-bold text-base">{{ c.fecha }}</span>
                     </div>
                     <!-- Secundarias: misma lógica que admin — grid 3, encima de la fila principal (solo al expandir) -->
-                    <div class="grid grid-cols-3 gap-1 sm:gap-2 pt-1.5 mt-1.5 md:pt-2 md:mt-2 border-t border-neutral-300 dark:border-slate-500 min-w-0 w-full">
+                    <div class="grid grid-cols-3 gap-1 sm:gap-2 pt-1 mt-1 md:pt-1.5 md:mt-1.5 border-t border-neutral-300 dark:border-slate-500 min-w-0 w-full">
                       <button
                         type="button"
                         @click.stop="verPagosCliente(c)"
@@ -623,7 +660,7 @@
                 v-model="filtroBusquedaConPagos"
                 type="text"
                 :placeholder="t('common.searchClientPlaceholder')"
-                class="w-full pl-10 pr-4 py-2 border-2 border-neutral-400 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-neutral-400 focus:border-neutral-500 bg-neutral-50 dark:bg-slate-800/50 text-neutral-900 dark:text-slate-100 shadow-sm"
+                class="w-full pl-10 pr-10 py-2 border-2 border-neutral-400 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-neutral-400 focus:border-neutral-500 bg-neutral-50 dark:bg-slate-800/50 text-neutral-900 dark:text-slate-100 shadow-sm"
                 @keyup.enter="() => {}"
               />
                 <button
@@ -634,6 +671,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
+              <button
+                v-if="filtroBusquedaConPagos"
+                type="button"
+                @click.stop="filtroBusquedaConPagos = ''"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-slate-400 hover:text-neutral-600 dark:hover:text-slate-200 transition-colors p-0.5 rounded-full hover:bg-neutral-200 dark:hover:bg-slate-600"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
               </div>
               <p v-if="filtroBusquedaConPagos && clientesConPagosBuscados.length > 0" class="text-sm text-neutral-600 dark:text-slate-300 mt-2">
                 {{ t('common.searchResultsCount', { count: clientesConPagosBuscados.length }) }}
@@ -740,6 +787,31 @@
                           :title="t('client.renewedBadgeTitle')"
                         >
                           {{ t('client.renewedBadge') }}
+                        </span>
+                        <span
+                          v-if="c.frecuencia && c.frecuencia.toLowerCase() !== 'diaria'"
+                          class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border"
+                          :class="{
+                            'bg-indigo-50 text-indigo-900 border-indigo-400/45 dark:bg-indigo-900/45 dark:text-indigo-100 dark:border-indigo-500/50': c.frecuencia.toLowerCase() === 'semanal',
+                            'bg-cyan-50 text-cyan-900 border-cyan-400/45 dark:bg-cyan-900/45 dark:text-cyan-100 dark:border-cyan-500/50': c.frecuencia.toLowerCase() === 'quincenal',
+                            'bg-amber-50 text-amber-900 border-amber-400/45 dark:bg-amber-900/45 dark:text-amber-100 dark:border-amber-500/50': c.frecuencia.toLowerCase() === 'mensual'
+                          }"
+                        >
+                          {{ c.frecuencia }}
+                        </span>
+                        <span
+                          v-if="textoComparacionRenovacion(c)"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-bold border bg-blue-50 text-blue-800 border-blue-300/60 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-600/50"
+                          :title="textoComparacionRenovacion(c)"
+                        >
+                          {{ textoComparacionRenovacion(c) }}
+                        </span>
+                        <span
+                          v-if="c.finalizadoPendiente === true"
+                          class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border bg-red-100 text-red-900 border-red-400/50 dark:bg-red-900/60 dark:text-red-100 dark:border-red-500/60"
+                          title="Este cliente finalizó su pago en esta ruta"
+                        >
+                          Finalizado
                         </span>
                         <span
                           v-if="montoPagadoEnRutaActual(c) > 0"
@@ -916,6 +988,78 @@
     :refreshing="modalHistorialVentasRefreshing"
     @close="cerrarModalHistorialVentas"
   />
+  <ResumenCierreModal
+    :show="mostrarResumenCierre"
+    v-bind="datosResumenCierre || {}"
+    @close="cerrarResumenCierre"
+  />
+  <!-- Modal Ordenar Clientes -->
+  <Teleport to="body">
+    <div v-if="mostrarOrdenarClientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
+      <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cerrarOrdenarClientes"></div>
+      <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90dvh] flex flex-col overflow-hidden">
+        <div class="shrink-0 flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+          <h2 class="text-lg font-bold text-neutral-900 dark:text-slate-100">{{ t('client.sortClients') || 'Ordenar Clientes' }}</h2>
+          <button @click="cerrarOrdenarClientes" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-slate-300 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="overflow-y-auto overscroll-contain flex-1 p-2 sm:p-4 space-y-1.5">
+          <div
+            v-for="(item, idx) in ordenClientesLista"
+            :key="item.cliente._id"
+            class="flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-neutral-100 dark:hover:bg-slate-700/60 transition-colors"
+          >
+            <button
+              type="button"
+              class="shrink-0 flex flex-col items-center justify-center w-9 h-9 rounded-md hover:bg-neutral-200 dark:hover:bg-slate-600 text-neutral-500 dark:text-slate-400 transition-colors disabled:opacity-20"
+              :disabled="idx === 0"
+              @click="moverArriba(idx)"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+            </button>
+            <input
+              v-model.number="item.posicion"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              :max="ordenClientesLista.length"
+              class="hide-spinners w-12 sm:w-14 text-center font-bold text-sm border border-neutral-300 dark:border-slate-600 rounded-lg bg-white dark:bg-gray-700 text-neutral-900 dark:text-slate-100 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              @change="onPosicionChange(idx)"
+            />
+            <button
+              type="button"
+              class="shrink-0 flex flex-col items-center justify-center w-9 h-9 rounded-md hover:bg-neutral-200 dark:hover:bg-slate-600 text-neutral-500 dark:text-slate-400 transition-colors disabled:opacity-20"
+              :disabled="idx === ordenClientesLista.length - 1"
+              @click="moverAbajo(idx)"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <span class="text-sm font-medium text-neutral-800 dark:text-slate-200 truncate min-w-0 flex-1">
+              {{ item.cliente.nombres }} {{ item.cliente.apellidos }}
+            </span>
+            <span class="text-[11px] text-neutral-400 dark:text-slate-500 shrink-0">
+              {{ item.cliente.cc }}
+            </span>
+          </div>
+        </div>
+        <div class="shrink-0 flex items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-gray-900">
+          <button
+            @click="cerrarOrdenarClientes"
+            class="px-4 py-2.5 text-sm font-semibold text-neutral-700 dark:text-slate-300 bg-white dark:bg-gray-800 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            {{ t('common.cancel') }}
+          </button>
+          <button
+            @click="guardarOrdenClientes"
+            class="px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            {{ t('common.save') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -923,16 +1067,19 @@
 import API_BASE_URL from '../config/api.js'
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js'
 import { fetchPagosAndClientesForVendor } from '../utils/vendedorParallelFetch.js'
-import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted, onActivated, onDeactivated, onUnmounted, watch, computed, nextTick, defineOptions } from 'vue'
+import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import NavbarVendedor from '../components/NavbarVendedor.vue'
 import HistorialVentasClienteModal from '../components/HistorialVentasClienteModal.vue'
+import ResumenCierreModal from '../components/ResumenCierreModal.vue'
 import DashboardClientesDosColumnas from '../components/DashboardClientesDosColumnas.vue'
 import DashboardClientesSeccionDivider from '../components/DashboardClientesSeccionDivider.vue'
 import { useAppScrollRoot } from '../composables/useAppScrollRoot.js'
 // MapaSimple eliminado - ahora usamos botones para abrir Google Maps
 import { useClienteStore } from '../stores/useClienteStore'
+
+defineOptions({ name: 'VendedorDashboard' })
 
 const { t, locale } = useI18n()
 
@@ -960,6 +1107,8 @@ const cargandoRuta = ref(true)
 const mostrarModalApertura = ref(false)
 const mostrarModalCierre = ref(false)
 const mostrarModalPendientes = ref(false)
+const mostrarResumenCierre = ref(false)
+const datosResumenCierre = ref(null)
 const pendientesClientes = ref([])
 const mostrarModalCajaNegativa = ref(false)
 const mensajeCajaNegativa = ref('')
@@ -969,6 +1118,8 @@ const clienteParaReportar = ref(null)
 const motivoReporte = ref('')
 /** none | delays | notFound | other */
 const motivoReportePreset = ref('none')
+const mostrarOrdenarClientes = ref(false)
+const ordenClientesLista = ref([])
 
 const opcionesMotivoReporte = computed(() => {
   void locale.value
@@ -1028,6 +1179,38 @@ function msOrdenCliente(cliente) {
   return null
 }
 
+const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+
+function getHoyDiaSemana() {
+  return DIAS_SEMANA[new Date().getDay()]
+}
+
+function semanaRelativaDesdeInicioRuta() {
+  if (!rutaActualDatos.value?.fechaApertura) return 0
+  const start = new Date(rutaActualDatos.value.fechaApertura)
+  const now = new Date()
+  const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24))
+  return Math.floor(diffDays / 7)
+}
+
+function mostrarClienteHoy(cliente) {
+  // Mostrar siempre clientes creados hoy para que aparezcan el dÃ­a de su creaciÃ³n
+  if (cliente.createdAt) {
+    const creado = new Date(cliente.createdAt).toDateString()
+    if (creado === new Date().toDateString()) return true
+  }
+  const freq = (cliente.frecuencia || 'Diaria').toLowerCase()
+  if (freq === 'diaria' || !freq) return true
+  if (!cliente.diaPago) return true
+  const hoy = getHoyDiaSemana()
+  const diaPago = cliente.diaPago.toLowerCase()
+  if (hoy !== diaPago) return false
+  if (freq === 'semanal') return true
+  if (freq === 'quincenal') return semanaRelativaDesdeInicioRuta() % 2 === 0
+  if (freq === 'mensual') return semanaRelativaDesdeInicioRuta() % 4 === 0
+  return true
+}
+
 function clienteCreadoEnRuta(cliente, rutaDatos) {
   const inicio = rutaDatos?.fechaApertura ? new Date(rutaDatos.fechaApertura).getTime() : null
   const fin = rutaDatos?.fechaCierre ? new Date(rutaDatos.fechaCierre).getTime() : Date.now()
@@ -1046,9 +1229,24 @@ function esClienteRenovadoEnRuta(c) {
   return creadoEnRutaActual(c) && !!c?.renovado && !c?.cancelado
 }
 
+function textoComparacionRenovacion(c) {
+  if (!esClienteRenovadoEnRuta(c) || c.valorPrevioRenovacion == null) return ''
+  const prev = Number(c.valorPrevioRenovacion) || 0
+  const cur = Number(c.valor) || 0
+  const diff = cur - prev
+  if (Math.abs(diff) < 0.01) return '='
+  const fmt = (n) => '$' + Math.abs(n).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return diff > 0 ? `↑ ${fmt(diff)}` : `↓ ${fmt(diff)}`
+}
+
 // Criterio robusto: cualquier registro (cualquier tipo) en la ruta cuenta como visita/registro.
 // El backend impone 1 pago por (cliente, ruta), así que esto es suficiente y evita errores por textos/capitalización.
 function tieneRegistroVisitaEnRutaActual(cliente) {
+  // Clientes creados hoy cuentan como registrados aunque no haya ruta activa
+  if (cliente?.createdAt) {
+    const creado = new Date(cliente.createdAt).toDateString()
+    if (creado === new Date().toDateString()) return true
+  }
   return tienePagoEnRutaActual(cliente) || creadoEnRutaActual(cliente)
 }
 
@@ -1087,8 +1285,10 @@ const clientesEnRuta = computed(() => {
     if (cliente.finalizadoPendiente && !cliente.cancelado && inicio) {
       const clienteCreado = new Date(cliente.createdAt).getTime()
       const creadoEnRutaActual = clienteCreado >= inicio && clienteCreado <= fin
-      if (!creadoEnRutaActual) return false
+      if (!creadoEnRutaActual && !tienePagoEnRutaActual(cliente)) return false
     }
+    // Fase 2: filtrar por día de pago
+    if (!mostrarClienteHoy(cliente)) return false
     return true
   })
 })
@@ -1243,6 +1443,9 @@ function ordenSinPagosComparable(cliente) {
 const clientesSinPagosOrdenados = computed(() => {
   const list = [...clientesSinPagos.value]
   return list.sort((a, b) => {
+    const oa = a.orden || 0
+    const ob = b.orden || 0
+    if (oa !== ob) return oa - ob
     const ha = ordenSinPagosComparable(a)
     const hb = ordenSinPagosComparable(b)
     if (ha !== hb) return ha - hb
@@ -1260,12 +1463,15 @@ function ordenConPagosComparable(cliente) {
 }
 const clientesConPagosOrdenados = computed(() => {
   return [...clientesConPagos.value, ...clientesSoloRegistroSinCobro.value].sort((a, b) => {
-    const oa = ordenConPagosComparable(a)
-    const ob = ordenConPagosComparable(b)
+    const oa = a.orden || 0
+    const ob = b.orden || 0
     if (oa !== ob) return oa - ob
-    const ta = msOrdenCliente(a) || 0
-    const tb = msOrdenCliente(b) || 0
-    return ta - tb
+    const ta = ordenConPagosComparable(a)
+    const tb = ordenConPagosComparable(b)
+    if (ta !== tb) return ta - tb
+    const tta = msOrdenCliente(a) || 0
+    const ttb = msOrdenCliente(b) || 0
+    return tta - ttb
   })
 })
 
@@ -1450,10 +1656,18 @@ function cerrarRuta() {
   mostrarModalCierre.value = true
 }
 
+function cerrarResumenCierre() {
+  mostrarResumenCierre.value = false
+  datosResumenCierre.value = null
+  actualizarDashboard()
+  window.dispatchEvent(new CustomEvent('ruta-cerrada'))
+}
+
 async function confirmarCierreRuta() {
-  // Bloqueo en frontend si hay clientes pendientes
-  if (clientesSinPagos.value.length > 0) {
-    pendientesClientes.value = clientesSinPagos.value.map(c => ({ id: c._id, nombres: c.nombres, apellidos: c.apellidos }))
+  // Fase 3: solo clientes esperados hoy bloquean el cierre
+  const pendientesHoy = clientesSinPagos.value.filter(c => mostrarClienteHoy(c))
+  if (pendientesHoy.length > 0) {
+    pendientesClientes.value = pendientesHoy.map(c => ({ id: c._id, nombres: c.nombres, apellidos: c.apellidos }))
     mostrarModalPendientes.value = true
     return
   }
@@ -1464,10 +1678,25 @@ async function confirmarCierreRuta() {
   });
   if (res.ok) {
     mostrarModalCierre.value = false
-    // Recargar estado de ruta y todos los datos desde la base de datos
-    await actualizarDashboard()
-    // Disparar evento para que otras vistas se actualicen
-    window.dispatchEvent(new CustomEvent('ruta-cerrada'))
+    try {
+      const vid = localStorage.getItem('vendedorId')
+      const panelRes = await fetch(`${API_BASE_URL}/api/vendedores/${vid}/panel?_ts=${Date.now()}`, { cache: 'no-store' })
+      if (panelRes.ok) {
+        const panel = await panelRes.json()
+        datosResumenCierre.value = {
+          vendedorNombre: panel.vendedor?.nombre || '',
+          ruta: panel.ruta || {},
+          resumen: panel.resumen || {}
+        }
+        mostrarResumenCierre.value = true
+      } else {
+        await actualizarDashboard()
+        window.dispatchEvent(new CustomEvent('ruta-cerrada'))
+      }
+    } catch {
+      await actualizarDashboard()
+      window.dispatchEvent(new CustomEvent('ruta-cerrada'))
+    }
   } else {
     const errorData = await res.json().catch(() => null)
     mostrarModalCierre.value = false
@@ -1533,6 +1762,7 @@ function scheduleHistorialModalSync() {
 
 /** No pasar actualizarDashboardEventos directo a addEventListener: el 1er arg sería el Event. */
 function onWindowDashboardSync() {
+  dashboardCargaEnCurso = null
   actualizarDashboardEventos()
   scheduleHistorialModalSync()
 }
@@ -1563,11 +1793,30 @@ onMounted(async () => {
     // La función t() es reactiva, pero podemos forzar un re-render
   })
 
-  syncPollTimer = window.setInterval(() => {
-    if (document.hidden) return
-    actualizarDashboardEventos()
-  }, SYNC_POLL_MS)
   document.addEventListener('visibilitychange', onVendorDashboardVisibility)
+})
+
+onBeforeRouteUpdate(() => {
+  actualizarDashboard()
+  clienteStore.limpiarCliente()
+})
+
+onActivated(() => {
+  dashboardCargaEnCurso = null
+  actualizarDashboard()
+  if (!syncPollTimer) {
+    syncPollTimer = window.setInterval(() => {
+      if (document.hidden) return
+      actualizarDashboardEventos()
+    }, SYNC_POLL_MS)
+  }
+})
+
+onDeactivated(() => {
+  if (syncPollTimer) {
+    clearInterval(syncPollTimer)
+    syncPollTimer = null
+  }
 })
 
 // Watcher para forzar actualización cuando cambie el idioma
@@ -1859,9 +2108,10 @@ function logout() {
   try {
   localStorage.removeItem('rol')
     localStorage.removeItem('adminId')
-  localStorage.removeItem('vendedorId')
+    localStorage.removeItem('vendedorId')
     localStorage.removeItem('codigoVinculacion')
     localStorage.removeItem('sessionToken')
+    localStorage.removeItem('clienteSeleccionado')
   } catch (e) {
   }
   try {
@@ -1901,6 +2151,8 @@ function calcularParcelasPendientes(cliente) {
 }
 
 function calcularParcelasAtrasadas(cliente) {
+  // Fase 4: si hoy no es su día de pago, no contar atrasos
+  if (!mostrarClienteHoy(cliente)) return 0
   const idCli = String(cliente?._id || '')
   const pagosCliente = pagosIndex.value.pagosPorClienteIdMap.get(idCli) || []
   if (!pagosCliente.length) return 0
@@ -1943,12 +2195,125 @@ function calcularParcelasAtrasadas(cliente) {
   return atrasos;
 }
 
+function calcularParcelasPagadas(cliente) {
+  const parcela = parseFloat(cliente.parcela) || 0
+  if (parcela <= 0) return 0
+  const saldoInicial = parseFloat(cliente.saldo_inicial) || 0
+  const pendiente = parseFloat(cliente.total) || 0
+  if (saldoInicial <= 0) return 0
+  const totalParcelas = Math.ceil(saldoInicial / parcela)
+  const pendientes = Math.ceil(pendiente / parcela)
+  return Math.max(0, totalParcelas - pendientes)
+}
+
 function confirmarAperturaRuta() {
   abrirRuta()
+}
+
+/* Ordenar Clientes */
+function ordenTemporalCliente(cliente) {
+  const ms = ordenPrimerEventoEnRutaMs(cliente, rutaActualId.value, rutaActualDatos.value)
+  if (ms >= 0) return ms
+  const ms2 = ordenPrimerEventoEnRutaMs(cliente, rutaAnteriorId.value, rutaAnteriorDatos.value)
+  if (ms2 >= 0) return ms2
+  if (cliente.createdAt) return new Date(cliente.createdAt).getTime()
+  return 0
+}
+
+function abrirOrdenarClientes() {
+  const lista = clientesEnRuta.value
+    .slice()
+    .sort((a, b) => {
+      const oa = a.orden || 0
+      const ob = b.orden || 0
+      if (oa !== ob) return oa - ob
+      return ordenTemporalCliente(a) - ordenTemporalCliente(b)
+    })
+  ordenClientesLista.value = lista.map((cliente, i) => ({
+    cliente,
+    posicion: i + 1
+  }))
+  mostrarOrdenarClientes.value = true
+}
+
+function cerrarOrdenarClientes() {
+  mostrarOrdenarClientes.value = false
+  ordenClientesLista.value = []
+}
+
+function moverArriba(idx) {
+  if (idx <= 0) return
+  const arr = ordenClientesLista.value
+  const tmp = arr[idx]
+  arr[idx] = arr[idx - 1]
+  arr[idx - 1] = tmp
+  renumerarPosiciones()
+}
+
+function moverAbajo(idx) {
+  if (idx >= ordenClientesLista.value.length - 1) return
+  const arr = ordenClientesLista.value
+  const tmp = arr[idx]
+  arr[idx] = arr[idx + 1]
+  arr[idx + 1] = tmp
+  renumerarPosiciones()
+}
+
+function renumerarPosiciones() {
+  ordenClientesLista.value.forEach((item, i) => {
+    item.posicion = i + 1
+  })
+}
+
+function onPosicionChange(idx) {
+  const arr = ordenClientesLista.value
+  const item = arr[idx]
+  let nuevaPos = Math.round(Number(item.posicion))
+  if (isNaN(nuevaPos) || nuevaPos < 1) nuevaPos = 1
+  if (nuevaPos > arr.length) nuevaPos = arr.length
+  if (nuevaPos === idx + 1) return
+  const targetIdx = nuevaPos - 1
+  const removed = arr.splice(idx, 1)[0]
+  arr.splice(targetIdx, 0, removed)
+  renumerarPosiciones()
+}
+
+async function guardarOrdenClientes() {
+  const vendedorId = localStorage.getItem('vendedorId')
+  if (!vendedorId) return
+  const ordenes = ordenClientesLista.value.map((item, i) => ({
+    _id: item.cliente._id,
+    orden: i + 1
+  }))
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/clientes/reordenar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vendedorId, ordenes })
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      alert(data.error || 'Error al guardar el orden')
+      return
+    }
+    cerrarOrdenarClientes()
+    await actualizarDashboard()
+  } catch {
+    alert('Error de conexión al guardar el orden')
+  }
 }
 </script>
 
 <style scoped>
+/* Ocultar spinners del input number */
+.hide-spinners::-webkit-outer-spin-button,
+.hide-spinners::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hide-spinners {
+  -moz-appearance: textfield;
+}
 /* Icono “Ver más”: borde claro + pulso para que se perciba como botón */
 .cliente-expand-icon-ring {
   padding: 2px;

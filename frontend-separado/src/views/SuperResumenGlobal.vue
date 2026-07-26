@@ -1,11 +1,9 @@
 <template>
-  <!-- En móvil scroll natural único; en escritorio sidebar fijo + contenido scroll -->
   <div
     class="min-h-dvh w-full max-w-full overflow-x-clip overscroll-none flex flex-col bg-neutral-50 dark:bg-slate-900 transition-theme"
   >
     <NavbarAdmin class="shrink-0" @logout="logout" />
     <div class="flex flex-col md:flex-row md:flex-1 md:min-h-0 md:overflow-hidden">
-      <!-- Botón toggle del sidebar en móvil -->
       <button
         type="button"
         @click="sidebarAbierto = !sidebarAbierto"
@@ -13,9 +11,8 @@
       >
         <Bars3Icon v-if="!sidebarAbierto" class="w-5 h-5 shrink-0" />
         <XMarkIcon v-else class="w-5 h-5 shrink-0" />
-        {{ sidebarAbierto ? $t('admin.hideVendors') : $t('admin.showVendors') }}
+        {{ sidebarAbierto ? 'Ocultar asesores' : 'Mostrar asesores' }}
       </button>
-      <!-- Menú lateral izquierdo: país / ciudad / asesor -->
       <div
         v-show="sidebarVisible"
         :class="[
@@ -26,7 +23,7 @@
         <div class="flex flex-col flex-1 w-full md:min-h-full py-6 px-4 md:px-5 md:py-8">
           <div class="flex flex-col gap-5 md:gap-6 flex-1">
             <div v-if="arbolPorUbicacion.length === 0" class="text-neutral-500 dark:text-slate-400 italic text-base md:text-lg leading-relaxed">
-              {{ $t('admin.noVendors') }}
+              No hay asesores.
             </div>
             <div v-for="nodoPais in arbolPorUbicacion" :key="nodoPais.key" class="flex flex-col gap-2 md:gap-3">
               <button
@@ -67,7 +64,10 @@
                       @click="seleccionarVendedor(v)"
                     >
                       <UserIcon class="w-6 h-6 md:w-7 md:h-7 text-neutral-500 dark:text-slate-400 flex-shrink-0" />
-                      <span class="truncate leading-snug">{{ v.nombre }}</span>
+                      <span class="truncate leading-snug">
+                        {{ v.nombre }}
+                        <span class="text-xs text-amber-600 dark:text-amber-400 font-normal">({{ v.adminNombre }})</span>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -77,19 +77,17 @@
         </div>
       </div>
 
-      <!-- Panel derecho: resumen del asesor -->
       <div
         ref="resumenAdminMainScrollEl"
         class="bg-neutral-50 dark:bg-neutral-900/50 p-4 md:p-8 md:flex-1 md:min-h-0 md:overflow-y-auto md:border-l border-neutral-200 dark:border-neutral-800 transition-theme"
       >
-
         <transition name="fade">
           <div v-if="vendedorSeleccionado">
             <div class="flex justify-end gap-2 mb-2">
               <button
                 @click="actualizarPanel"
                 class="text-neutral-400 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
-                :title="$t('admin.update')"
+                title="Actualizar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M5.582 9A7.974 7.974 0 0112 4c2.042 0 3.899.767 5.318 2.018M18.418 15A7.974 7.974 0 0112 20a7.974 7.974 0 01-5.318-2.018" />
@@ -100,15 +98,15 @@
             <h2 class="text-lg font-bold mb-3 flex items-center gap-2 text-neutral-900 dark:text-slate-100">
               <UserIcon class="w-6 h-6 text-blue-500 dark:text-blue-400" />
               {{ resumenPanel?.vendedor?.nombre || vendedorSeleccionado.nombre }}
+              <span class="text-sm font-normal text-amber-600 dark:text-amber-400">({{ vendedorSeleccionado.adminNombre }})</span>
             </h2>
 
-            <!-- Selector de historial de rutas (desplegable con columnas Apertura / Cierre) -->
             <div
               v-if="resumenPanel && (resumenPanel?.rutasDisponibles?.length || 0) > 0"
               ref="rutasDropdownRoot"
               class="mb-3 flex flex-wrap items-start gap-3"
             >
-              <label class="text-sm font-semibold text-neutral-800 dark:text-slate-200 shrink-0 pt-2">{{ $t('admin.routes') }}:</label>
+              <label class="text-sm font-semibold text-neutral-800 dark:text-slate-200 shrink-0 pt-2">Rutas:</label>
               <div class="relative flex-1 min-w-[min(100%,18rem)] max-w-2xl">
                 <button
                   type="button"
@@ -137,7 +135,7 @@
                     <div class="grid grid-cols-2 gap-3 text-left">
                       <div class="min-w-0">
                         <div class="text-[0.65rem] font-bold uppercase tracking-wide text-green-600 dark:text-green-400 mb-0.5">
-                          {{ $t('admin.routeOpening') }}:
+                          Apertura:
                         </div>
                         <div class="text-xs sm:text-sm font-mono tabular-nums font-semibold text-green-800 dark:text-green-300 break-words">
                           {{ formatFechaRutaSelect(r.fechaApertura) }}
@@ -145,12 +143,12 @@
                       </div>
                       <div class="min-w-0">
                         <div class="text-[0.65rem] font-bold uppercase tracking-wide text-red-600 dark:text-red-400 mb-0.5">
-                          {{ $t('admin.routeClosing') }}:
+                          Cierre:
                         </div>
                         <div
                           class="text-xs sm:text-sm font-mono tabular-nums font-semibold text-red-800 dark:text-red-300 break-words"
                         >
-                          {{ r.fechaCierre ? formatFechaRutaSelect(r.fechaCierre) : $t('route.notClosed') }}
+                          {{ r.fechaCierre ? formatFechaRutaSelect(r.fechaCierre) : 'No cerrada' }}
                         </div>
                       </div>
                     </div>
@@ -172,7 +170,6 @@
             </div>
 
             <div v-if="resumenPanel" class="space-y-2">
-              <!-- Fecha apertura -->
               <button
                 type="button"
                 class="flex w-full items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -189,120 +186,121 @@
                 </svg>
               </button>
 
-              <!-- Fecha cierre -->
               <button
                 type="button"
                 class="flex w-full items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 @click="abrirModalFechas(resumenPanel.ruta)"
               >
                 <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.closingDate') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Fecha de cierre:</span>
                 <span v-if="resumenPanel.ruta?.fechaCierre" class="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.9375rem] font-semibold tabular-nums bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">
                   {{ new Date(resumenPanel.ruta.fechaCierre).toLocaleString('es-ES') }}
                 </span>
                 <span v-else class="inline-flex items-center px-3 py-1.5 rounded-lg text-[0.9375rem] font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600 italic">
-                  {{ $t('route.notClosed') }}
+                  No cerrada
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
 
-              <!-- Clientes totales -->
               <div class="border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
                 <button
                   type="button"
                   class="flex w-full items-center gap-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                  :title="$t('nav.clients')"
+                  title="Ir a clientes"
                   @click="router.push({ path: '/admin', query: { vendedorId: vendedorSeleccionado?._id || undefined, rutaId: rutaSeleccionadaId || undefined } })"
                 >
                   <UsersIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                  <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.totalClients') }}:</span>
+                  <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Total clientes:</span>
                   <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">{{ formatNum(resumenPanel.clientes?.length ?? 0) }}</span>
                   <span class="text-gray-600 dark:text-gray-400 text-sm font-normal">
-                    ({{ formatNum(resumenPanel.resumen?.clientesConPagosRegistrados ?? 0) }} {{ $t('summary.registered') }})
+                    ({{ formatNum(resumenPanel.resumen?.clientesConPagosRegistrados ?? 0) }} registrados)
                   </span>
                   <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
                 </button>
                 <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#10B98126] text-[#10B981]">
-                    {{ $t('summary.newClients') }}: {{ formatNum(resumenPanel.resumen?.nuevos ?? 0) }}
+                    Nuevos: {{ formatNum(resumenPanel.resumen?.nuevos ?? 0) }}
                   </span>
                   <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#6366F126] text-[#6366F1]">
-                    {{ $t('summary.renewedClients') }}: {{ formatNum(resumenPanel.resumen?.renovados ?? 0) }}
+                    Renovados: {{ formatNum(resumenPanel.resumen?.renovados ?? 0) }}
                   </span>
                   <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#F43F5E26] text-[#F43F5E]">
-                    {{ $t('summary.cancelledClients') }}: {{ formatNum(resumenPanel.resumen?.cancelados ?? 0) }}
+                    Cancelados: {{ formatNum(resumenPanel.resumen?.cancelados ?? 0) }}
                   </span>
                 </div>
               </div>
 
-              <!-- Cartera / Caja inicial -->
               <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
                 <WalletIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.initialPortfolio') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Cartera inicial:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.carteraInicial) || 0, 2) }}</span>
               </div>
               <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
                 <BanknotesIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.initialCash') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Caja inicial:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.cajaInicial) || 0, 2) }}</span>
               </div>
 
-              <!-- Recaudo pretendido / actual -->
-              <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+              <button
+                type="button"
+                class="flex w-full items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                title="Ver detalle del recaudo pretendido"
+                @click="abrirPretendidoDetalle"
+              >
                 <ChartBarIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.expectedCollected') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Recaudo pretendido:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.recaudadoPretendido) || 0, 2) }}</span>
-              </div>
+                <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" />
+              </button>
               <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
                 <CurrencyDollarIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.currentCollected') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Recaudo actual:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.recaudado) || 0, 2) }}</span>
                 <span :class="['ml-3 inline-flex items-center px-3 py-1.5 rounded-lg text-[0.9375rem] font-semibold tabular-nums', clasePorcentajeRecaudo ]">
                   {{ formatNum(porcentajeRecaudo, 1) }}%
                 </span>
               </div>
 
-              <!-- Ingresos / Ventas / Intereses / Egresos / Retiros / Caja / Cartera final -->
               <button
                 type="button"
                 class="flex w-full items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                :title="$t('summary.goToIncome')"
+                title="Ir a Ingresos y Egresos"
                 @click="router.push({ name: 'IngresosEgresosAdmin', query: { vendedor: vendedorSeleccionado?._id || undefined, ruta: rutaSeleccionadaId || undefined } })"
               >
                 <ArrowTrendingUpIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.income') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Ingresos:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.ingresos) || 0, 2) }}</span>
                 <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
               </button>
               <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
                 <ShoppingCartIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.sales') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Ventas:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.ventas) || 0, 2) }}</span>
                 <span v-if="interesesTotalesRuta > 0" class="ml-2 inline-flex items-center px-3 py-1.5 rounded-lg text-[0.9375rem] font-semibold tabular-nums bg-teal-50 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200 dark:border dark:border-teal-700/50">
-                  {{ $t('summary.interests') }}: ${{ formatNum(interesesTotalesRuta, 2) }}
+                  Intereses: ${{ formatNum(interesesTotalesRuta, 2) }}
                 </span>
               </div>
               <button
                 type="button"
                 class="flex w-full items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                :title="$t('summary.goToExpenses')"
+                title="Ir a Ingresos y Egresos"
                 @click="router.push({ name: 'IngresosEgresosAdmin', query: { vendedor: vendedorSeleccionado?._id || undefined, ruta: rutaSeleccionadaId || undefined } })"
               >
                 <ReceiptRefundIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.expenses') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Egresos:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.egresos) || 0, 2) }}</span>
                 <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 class="flex w-full items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                :title="$t('summary.goToExpenses')"
+                title="Ir a Ingresos y Egresos"
                 @click="router.push({ name: 'IngresosEgresosAdmin', query: { vendedor: vendedorSeleccionado?._id || undefined, ruta: rutaSeleccionadaId || undefined } })"
               >
                 <ArrowTrendingDownIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
-                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.withdrawals') }}:</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Retiros:</span>
                 <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(Number(resumenPanel.ruta?.retiros) || 0, 2) }}</span>
                 <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
               </button>
@@ -368,12 +366,153 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal detalle recaudo pretendido -->
+  <Teleport to="body">
+    <div v-if="mostrarPretendidoDetalle" class="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
+      <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cerrarPretendidoDetalle"></div>
+      <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90dvh] flex flex-col overflow-hidden">
+        <div class="shrink-0 flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+          <div>
+            <h2 class="text-lg font-bold text-neutral-900 dark:text-slate-100">Detalle del Recaudo Pretendido</h2>
+            <p v-if="pretendidoDetalleVendedor" class="text-xs text-neutral-500 dark:text-slate-400 mt-0.5">{{ pretendidoDetalleVendedor }}</p>
+          </div>
+          <button @click="cerrarPretendidoDetalle" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-slate-300 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div v-if="pretendidoDetalleCargando" class="flex-1 flex items-center justify-center p-8 text-neutral-500 dark:text-slate-400">Cargando...</div>
+        <div v-else-if="pretendidoDetalleError" class="flex-1 flex items-center justify-center p-8 text-red-500">{{ pretendidoDetalleError }}</div>
+        <div v-else-if="pretendidoDetalleData" class="overflow-y-auto overscroll-contain flex-1 p-2 sm:p-4 space-y-4">
+          <div>
+            <h3 class="text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+              <span class="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+              Sin pago en la ruta ({{ pretendidoDetalleData.sinPagos.length }}) — <span class="tabular-nums">${{ formatNum(pretendidoDetalleData.sumaSinPagos, 2) }}</span>
+            </h3>
+            <div class="space-y-1">
+              <div
+                v-for="(c, i) in pretendidoDetalleData.sinPagos"
+                :key="c._id"
+                class="rounded-lg border border-neutral-200 dark:border-slate-600 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-neutral-50 dark:hover:bg-slate-700/50 transition-colors"
+                  @click="toggleExpandPretendido(c._id)"
+                >
+                  <span class="text-xs text-neutral-400 dark:text-slate-500 w-6 shrink-0 tabular-nums">{{ i + 1 }}</span>
+                  <span class="text-sm font-medium text-neutral-800 dark:text-slate-200 min-w-0 flex-1 truncate">{{ c.nombres }} {{ c.apellidos }}</span>
+                  <span class="text-xs text-neutral-500 dark:text-slate-400 w-20 shrink-0 truncate">{{ c.cc }}</span>
+                  <span class="text-sm font-bold tabular-nums text-green-600 dark:text-green-400 w-20 shrink-0 text-right">${{ formatNum(c.parcela, 2) }}</span>
+                  <span v-if="c.estado === 'finalizado'" class="text-[10px] px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-slate-600 text-neutral-600 dark:text-slate-300 shrink-0">Finalizado</span>
+                  <svg class="w-4 h-4 shrink-0 text-neutral-400 transition-transform" :class="{ 'rotate-180': expandidoPretendido === c._id }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div v-if="expandidoPretendido === c._id" class="px-3 py-2 bg-neutral-50 dark:bg-slate-800/50 border-t border-neutral-200 dark:border-slate-600 text-xs text-neutral-600 dark:text-slate-400 space-y-1">
+                  <div class="flex justify-between"><span>Celular:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ c.celular || '—' }}</span></div>
+                  <div class="flex justify-between"><span>Saldo inicial:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.saldo_inicial, 2) }}</span></div>
+                  <div v-if="c.saldoAntesRuta !== c.saldoRestante" class="flex justify-between"><span>Saldo antes de ruta:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.saldoAntesRuta, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Saldo restante:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.saldoRestante, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Pagado en ruta:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.totalPagadoEnRuta, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Valor parcela:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.parcela, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Cuotas:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ c.totalParcelas || '—' }}</span></div>
+                  <div class="flex justify-between"><span>Estado:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ c.estado }}{{ c.cancelado ? ' · Cancelado' : '' }}{{ c.historial ? ' · Historial' : '' }}</span></div>
+                  <div class="flex justify-between"><span>Creado:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ formatFecha(c.createdAt) }}</span></div>
+                  <div v-if="c.pagos && c.pagos.length > 0" class="mt-2 pt-2 border-t border-neutral-300 dark:border-slate-500">
+                    <div class="text-xs font-semibold text-neutral-700 dark:text-slate-300 mb-1">Pagos en esta ruta:</div>
+                    <div v-for="p in c.pagos" :key="p._id" class="flex items-center justify-between gap-2 py-1.5 px-2 rounded bg-white/60 dark:bg-slate-900/40 mb-1">
+                      <div class="flex items-center gap-2 min-w-0">
+                        <span class="font-medium text-neutral-800 dark:text-slate-200 shrink-0" :class="{
+                          'text-green-600 dark:text-green-400': p.tipo === 'Parcela',
+                          'text-blue-600 dark:text-blue-400': p.tipo === 'Abono',
+                          'text-red-500 dark:text-red-400': p.tipo === 'No pago'
+                        }">{{ p.tipo }}</span>
+                        <span v-if="p.numParcelas" class="text-neutral-500 dark:text-slate-400">x{{ p.numParcelas }}</span>
+                        <span class="text-neutral-400 dark:text-slate-500 truncate">{{ p.observaciones || '' }}</span>
+                      </div>
+                      <div class="flex items-center gap-3 shrink-0">
+                        <span class="tabular-nums text-neutral-800 dark:text-slate-200 font-medium">${{ formatNum(p.valor, 2) }}</span>
+                        <span class="text-neutral-400 dark:text-slate-500">{{ formatFecha(p.fecha) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+              <span class="inline-block w-3 h-3 rounded-full bg-blue-500"></span>
+              Con pago en la ruta ({{ pretendidoDetalleData.conPagos.length }}) — <span class="tabular-nums">${{ formatNum(pretendidoDetalleData.sumaConPagos, 2) }}</span>
+            </h3>
+            <div class="space-y-1">
+              <div
+                v-for="(c, i) in pretendidoDetalleData.conPagos"
+                :key="c._id"
+                class="rounded-lg border border-neutral-200 dark:border-slate-600 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-neutral-50 dark:hover:bg-slate-700/50 transition-colors"
+                  @click="toggleExpandPretendido(c._id)"
+                >
+                  <span class="text-xs text-neutral-400 dark:text-slate-500 w-6 shrink-0 tabular-nums">{{ i + 1 }}</span>
+                  <span class="text-sm font-medium text-neutral-800 dark:text-slate-200 min-w-0 flex-1 truncate">{{ c.nombres }} {{ c.apellidos }}</span>
+                  <span class="text-xs text-neutral-500 dark:text-slate-400 w-20 shrink-0 truncate">{{ c.cc }}</span>
+                  <span class="text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400 w-20 shrink-0 text-right">${{ formatNum(c.parcela, 2) }}</span>
+                  <svg class="w-4 h-4 shrink-0 text-neutral-400 transition-transform" :class="{ 'rotate-180': expandidoPretendido === c._id }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div v-if="expandidoPretendido === c._id" class="px-3 py-2 bg-neutral-50 dark:bg-slate-800/50 border-t border-neutral-200 dark:border-slate-600 text-xs text-neutral-600 dark:text-slate-400 space-y-1">
+                  <div class="flex justify-between"><span>Celular:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ c.celular || '—' }}</span></div>
+                  <div class="flex justify-between"><span>Saldo inicial:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.saldo_inicial, 2) }}</span></div>
+                  <div v-if="c.saldoAntesRuta !== c.saldoRestante" class="flex justify-between"><span>Saldo antes de ruta:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.saldoAntesRuta, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Saldo restante:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.saldoRestante, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Pagado en ruta:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.totalPagadoEnRuta, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Valor parcela:</span><span class="font-medium text-neutral-800 dark:text-slate-200">${{ formatNum(c.parcela, 2) }}</span></div>
+                  <div class="flex justify-between"><span>Cuotas:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ c.totalParcelas || '—' }}</span></div>
+                  <div class="flex justify-between"><span>Estado:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ c.estado }}{{ c.cancelado ? ' · Cancelado' : '' }}{{ c.historial ? ' · Historial' : '' }}</span></div>
+                  <div class="flex justify-between"><span>Creado:</span><span class="font-medium text-neutral-800 dark:text-slate-200">{{ formatFecha(c.createdAt) }}</span></div>
+                  <div v-if="c.pagos && c.pagos.length > 0" class="mt-2 pt-2 border-t border-neutral-300 dark:border-slate-500">
+                    <div class="text-xs font-semibold text-neutral-700 dark:text-slate-300 mb-1">Pagos en esta ruta:</div>
+                    <div v-for="p in c.pagos" :key="p._id" class="flex items-center justify-between gap-2 py-1.5 px-2 rounded bg-white/60 dark:bg-slate-900/40 mb-1">
+                      <div class="flex items-center gap-2 min-w-0">
+                        <span class="font-medium text-neutral-800 dark:text-slate-200 shrink-0" :class="{
+                          'text-green-600 dark:text-green-400': p.tipo === 'Parcela',
+                          'text-blue-600 dark:text-blue-400': p.tipo === 'Abono',
+                          'text-red-500 dark:text-red-400': p.tipo === 'No pago'
+                        }">{{ p.tipo }}</span>
+                        <span v-if="p.numParcelas" class="text-neutral-500 dark:text-slate-400">x{{ p.numParcelas }}</span>
+                        <span class="text-neutral-400 dark:text-slate-500 truncate">{{ p.observaciones || '' }}</span>
+                      </div>
+                      <div class="flex items-center gap-3 shrink-0">
+                        <span class="tabular-nums text-neutral-800 dark:text-slate-200 font-medium">${{ formatNum(p.valor, 2) }}</span>
+                        <span class="text-neutral-400 dark:text-slate-500">{{ formatFecha(p.fecha) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sticky bottom-0 bg-white dark:bg-gray-800 pt-3 border-t border-neutral-200 dark:border-slate-600">
+            <div class="flex items-center justify-between text-sm font-bold text-neutral-900 dark:text-slate-100 px-1">
+              <span>Total recaudo pretendido</span>
+              <span class="tabular-nums">${{ formatNum(pretendidoDetalleData.recaudadoPretendido, 2) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="shrink-0 flex items-center justify-end px-4 sm:px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-gray-900">
+          <button @click="cerrarPretendidoDetalle" class="px-4 py-2.5 text-sm font-semibold text-neutral-700 dark:text-slate-300 bg-white dark:bg-gray-800 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-gray-700 transition-colors">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick, defineOptions } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import API_BASE_URL from '../config/api.js'
 import {
   GlobeAltIcon,
@@ -397,9 +536,6 @@ import {
 import NavbarAdmin from '../components/NavbarAdmin.vue'
 import { useAppScrollRoot } from '../composables/useAppScrollRoot.js'
 
-defineOptions({ name: 'ResumenAdmin' })
-
-const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const appScrollRoot = useAppScrollRoot()
@@ -414,18 +550,15 @@ const sidebarVisible = computed(() => isDesktopView.value || sidebarAbierto.valu
 
 function formatNum(value, decimals = 0) {
   const n = Number(value)
-  const loc = (locale && locale.value) || 'es'
-  const localeForNumber = (typeof loc === 'string' && loc.startsWith('es')) ? 'es-ES' : (typeof loc === 'string' && loc.startsWith('pt')) ? 'pt-BR' : 'en-US'
   if (isNaN(n)) {
-    return decimals === 0 ? '0' : (0).toLocaleString(localeForNumber, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    return decimals === 0 ? '0' : Number(0).toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
   }
   const options = decimals === 0
     ? { useGrouping: true }
     : { useGrouping: true, minimumFractionDigits: decimals, maximumFractionDigits: decimals }
-  return n.toLocaleString(localeForNumber, options)
+  return n.toLocaleString('es-ES', options)
 }
 
-/** Desplegables del menú lateral: país y ciudad (claves del árbol) */
 const sidebarExpanded = reactive({ paises: {}, ciudades: {} })
 
 const vendedores = ref([])
@@ -436,7 +569,6 @@ const rutaSeleccionadaId = ref('')
 const rutasDropdownAbierto = ref(false)
 const rutasDropdownRoot = ref(null)
 
-/** Agrupa asesores por país y ciudad según BD (campos pais, ciudad) */
 const arbolPorUbicacion = computed(() => {
   const list = vendedores.value || []
   const porPais = new Map()
@@ -451,7 +583,7 @@ const arbolPorUbicacion = computed(() => {
     if (!porPais.has(pKey)) {
       porPais.set(pKey, {
         key: pKey,
-        label: rawPais || t('admin.countryUnknown'),
+        label: rawPais || 'País desconocido',
         ciudadesMap: new Map()
       })
     }
@@ -459,7 +591,7 @@ const arbolPorUbicacion = computed(() => {
     if (!nodoPais.ciudadesMap.has(ciudadFullKey)) {
       nodoPais.ciudadesMap.set(ciudadFullKey, {
         key: ciudadFullKey,
-        label: rawCiudad || t('admin.cityUnknown'),
+        label: rawCiudad || 'Ciudad desconocida',
         vendedores: []
       })
     }
@@ -511,16 +643,9 @@ function toggleCiudad(key) {
   sidebarExpanded.ciudades[key] = !isCiudadOpen(key)
 }
 
-function localeForDates() {
-  const loc = (locale && locale.value) || 'es'
-  if (typeof loc === 'string' && loc.startsWith('es')) return 'es-ES'
-  if (typeof loc === 'string' && loc.startsWith('pt')) return 'pt-BR'
-  return 'en-US'
-}
-
 function formatFechaRutaSelect(fecha) {
-  if (!fecha) return '—'
-  return new Date(fecha).toLocaleString(localeForDates(), { dateStyle: 'short', timeStyle: 'short' })
+  if (!fecha) return '\u2014'
+  return new Date(fecha).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })
 }
 
 const etiquetaRutaSeleccionada = computed(() => {
@@ -531,13 +656,12 @@ const etiquetaRutaSeleccionada = computed(() => {
     r = rutas.find(x => String(x._id) === String(resumenPanel.value.ruta._id)) || null
   }
   if (!r && rutas[0]) r = rutas[0]
-  if (!r?.fechaApertura) return '—'
+  if (!r?.fechaApertura) return '\u2014'
   const a = formatFechaRutaSelect(r.fechaApertura)
-  const c = r.fechaCierre ? formatFechaRutaSelect(r.fechaCierre) : t('route.notClosed')
-  return `${a} → ${c}`
+  const c = r.fechaCierre ? formatFechaRutaSelect(r.fechaCierre) : 'No cerrada'
+  return `${a} \u2192 ${c}`
 })
 
-/** Alinea el id seleccionado con la ruta que muestra el panel (evita duplicar "ruta actual" vs misma ruta con fechas). */
 function syncRutaSeleccionadaConPanel() {
   const panel = resumenPanel.value
   if (!panel?.ruta?._id) {
@@ -572,7 +696,6 @@ function cerrarRutasDropdownSiClickFuera(ev) {
   }
 }
 
-// Intereses SOLO de ventas creadas dentro del rango de la ruta del panel seleccionado
 const interesesTotalesRuta = computed(() => {
   const ruta = resumenPanel.value?.ruta
   const clientes = resumenPanel.value?.clientes || []
@@ -590,7 +713,6 @@ const interesesTotalesRuta = computed(() => {
         const interesMonto = Math.max(0, base - valor)
         return acc + interesMonto
       }
-      // Fallback final si no vinieron saldos: asumir que c.intereses es porcentaje
       const interesPct = Number(c?.intereses) || 0
       return acc + (valor * interesPct) / 100
     }
@@ -599,7 +721,6 @@ const interesesTotalesRuta = computed(() => {
   return Math.round(suma * 100) / 100
 })
 
-// Porcentaje de recaudo respecto al pretendido del día (un decimal)
 const porcentajeRecaudo = computed(() => {
   const recaudado = Number(resumenPanel.value?.ruta?.recaudado) || 0
   const pretendido = Number(resumenPanel.value?.ruta?.recaudadoPretendido) || 0
@@ -608,7 +729,6 @@ const porcentajeRecaudo = computed(() => {
   return Math.min(999, Math.round(pct * 10) / 10)
 })
 
-// Badge de color para el porcentaje
 const clasePorcentajeRecaudo = computed(() => {
   const p = Number(porcentajeRecaudo.value) || 0
   if (p >= 100) return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
@@ -640,43 +760,43 @@ function logout() {
 
 onMounted(async () => {
   document.addEventListener('click', cerrarRutasDropdownSiClickFuera)
-  // Refrescar el panel si en el perfil de admin se elimina un cliente
   window.addEventListener('admin-resumen-actualizar', actualizarPanel)
   window.addEventListener('pago-editado', actualizarPanel)
   window.addEventListener('pago-registrado', actualizarPanel)
   try {
-    const codigoVinculacion = localStorage.getItem('codigoVinculacion')
-    const esSuperUsuario = localStorage.getItem('esSuperUsuario') === '1'
-    if (!esSuperUsuario && !codigoVinculacion) {
-      console.error('No se encontró código de vinculación')
-      return
-    }
-    const urlVend = esSuperUsuario
-      ? `${API_BASE_URL}/api/vendedores`
-      : `${API_BASE_URL}/api/vendedores?codigoVinculacion=${encodeURIComponent(codigoVinculacion)}`
-    const resVend = await fetch(urlVend)
-    vendedores.value = resVend.ok ? await resVend.json() : []
-    expandSidebarFromTree()
-    if (vendedores.value.length > 0) {
-      const qV = route.query.vendedorId
-      const qR = route.query.rutaId
-      if (qV && qR) {
-        const v = vendedores.value.find(x => String(x._id) === String(qV))
-        if (v) {
-          await seleccionarVendedor(v)
-          rutaSeleccionadaId.value = String(qR)
-          await actualizarPanel()
-        } else {
-          const primero = arbolPorUbicacion.value[0]?.ciudades[0]?.vendedores[0] || vendedores.value[0]
-          await seleccionarVendedor(primero)
+    const token = localStorage.getItem('sessionToken')
+    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {}
+
+    const [resAdmins, resVendedores] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/admin/super/resumen-global`, { headers: authHeaders }),
+      fetch(`${API_BASE_URL}/api/vendedores`, { headers: authHeaders })
+    ])
+
+    const adminNombreMap = {}
+    if (resAdmins.ok) {
+      const data = await resAdmins.json()
+      if (data.grupos) {
+        for (const g of data.grupos) {
+          adminNombreMap[g.codigoVinculacion] = g.nombre
         }
-      } else {
-        const primero = arbolPorUbicacion.value[0]?.ciudades[0]?.vendedores[0] || vendedores.value[0]
-        await seleccionarVendedor(primero)
       }
     }
+
+    if (resVendedores.ok) {
+      const raw = await resVendedores.json()
+      vendedores.value = raw.map(v => ({
+        ...v,
+        adminNombre: adminNombreMap[v.codigoVinculacion] || 'Admin desconocido'
+      }))
+    }
+
+    expandSidebarFromTree()
+    if (vendedores.value.length > 0) {
+      const primero = arbolPorUbicacion.value[0]?.ciudades[0]?.vendedores[0] || vendedores.value[0]
+      await seleccionarVendedor(primero)
+    }
   } catch (e) {
-    console.error('Error al cargar asesores:', e)
+    console.error('Error al cargar super resumen:', e)
     vendedores.value = []
   }
   await nextTick()
@@ -693,23 +813,6 @@ onUnmounted(() => {
   window.removeEventListener('pago-registrado', actualizarPanel)
 })
 
-/** Solo si ya estabas en Resumen y cambian los query params (p. ej. otra notificación). */
-watch(
-  () => route.fullPath,
-  async (newPath, oldPath) => {
-    if (!oldPath || newPath === oldPath || route.path !== '/admin/resumen') return
-    if (!String(oldPath).includes('/admin/resumen')) return
-    const qV = route.query.vendedorId
-    const qR = route.query.rutaId
-    if (!qV || !qR || !vendedores.value.length) return
-    const v = vendedores.value.find(x => String(x._id) === String(qV))
-    if (!v) return
-    await seleccionarVendedor(v)
-    rutaSeleccionadaId.value = String(qR)
-    await actualizarPanel()
-  }
-)
-
 async function seleccionarVendedor(v) {
   sidebarAbierto.value = false
   rutasDropdownAbierto.value = false
@@ -724,11 +827,9 @@ async function seleccionarVendedor(v) {
       resumenPanel.value = await res.json()
       syncRutaSeleccionadaConPanel()
     } else {
-      console.error('Error en la respuesta:', res.statusText)
       resumenPanel.value = null
     }
   } catch (e) {
-    console.error('Error al cargar panel:', e)
     resumenPanel.value = null
   }
 }
@@ -803,27 +904,86 @@ async function guardarFechas() {
   guardandoFechas.value = true
   modalFechas.error = ''
   try {
-    const cod = localStorage.getItem('codigoVinculacion') || ''
-    const body = { codigoVinculacion: cod }
+    const token = localStorage.getItem('sessionToken')
+    const body = { codigoVinculacion: localStorage.getItem('codigoVinculacion') || '' }
     if (modalFechas.fechaApertura) body.fechaApertura = new Date(modalFechas.fechaApertura).toISOString()
     if (modalFechas.fechaCierre) body.fechaCierre = new Date(modalFechas.fechaCierre).toISOString()
     const res = await fetch(`${API_BASE_URL}/api/admin/rutas/${modalFechas.rutaId}/fechas`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(body)
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
-      modalFechas.error = data.error || t('admin.dateSaveError')
+      modalFechas.error = data.error || 'Error al guardar las fechas'
       return
     }
     cerrarModalFechas()
     await actualizarPanel()
   } catch (e) {
-    modalFechas.error = t('admin.dateSaveError')
+    modalFechas.error = 'Error al guardar las fechas'
   } finally {
     guardandoFechas.value = false
   }
+}
+
+const mostrarPretendidoDetalle = ref(false)
+const pretendidoDetalleCargando = ref(false)
+const pretendidoDetalleError = ref('')
+const pretendidoDetalleData = ref(null)
+const pretendidoDetalleVendedor = ref('')
+const expandidoPretendido = ref(null)
+
+async function abrirPretendidoDetalle() {
+  if (!vendedorSeleccionado.value || !resumenPanel.value?.ruta?._id) return
+  mostrarPretendidoDetalle.value = true
+  pretendidoDetalleCargando.value = true
+  pretendidoDetalleError.value = ''
+  pretendidoDetalleData.value = null
+  pretendidoDetalleVendedor.value = vendedorSeleccionado.value.nombre
+  expandidoPretendido.value = null
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const url = new URL(`${API_BASE_URL}/api/vendedores/${vendedorSeleccionado.value._id}/pretendido-detalle`)
+    if (rutaSeleccionadaId.value) {
+      url.searchParams.set('rutaId', rutaSeleccionadaId.value)
+    } else if (resumenPanel.value?.ruta?._id) {
+      url.searchParams.set('rutaId', resumenPanel.value.ruta._id)
+    }
+    const res = await fetch(url, {
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      pretendidoDetalleError.value = data.error || `Error ${res.status}: No se pudo cargar el detalle`
+      return
+    }
+    pretendidoDetalleData.value = await res.json()
+  } catch (e) {
+    pretendidoDetalleError.value = 'Error de conexión al cargar detalle del recaudo pretendido'
+  } finally {
+    pretendidoDetalleCargando.value = false
+  }
+}
+
+function cerrarPretendidoDetalle() {
+  mostrarPretendidoDetalle.value = false
+  pretendidoDetalleData.value = null
+  pretendidoDetalleError.value = ''
+  expandidoPretendido.value = null
+}
+
+function toggleExpandPretendido(id) {
+  expandidoPretendido.value = expandidoPretendido.value === id ? null : id
+}
+
+function formatFecha(d) {
+  if (!d) return '—'
+  const date = new Date(d)
+  return date.toLocaleDateString('es-CO', { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 </script>
 
@@ -837,4 +997,3 @@ async function guardarFechas() {
   opacity: 0;
 }
 </style>
-

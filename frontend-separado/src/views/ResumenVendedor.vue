@@ -16,27 +16,45 @@
       class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pt-0 md:px-6 pb-[max(1rem,env(safe-area-inset-bottom))]"
     >
       <!-- Aviso cuando la ruta está cerrada -->
-      <div v-if="!rutaAbierta && !cargandoRuta" class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6 text-center mb-6 transition-colors duration-300">
+      <div v-if="!rutaAbierta" class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6 text-center mb-6 transition-colors duration-300">
         <p class="text-yellow-800 dark:text-yellow-200 font-semibold mb-2">{{ $t('route.closed') }}</p>
         <p class="text-yellow-700 dark:text-yellow-300 mb-4">{{ $t('common.mustOpenRoute') }}</p>
         <button @click="abrirRuta" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition-colors">{{ $t('route.open') }}</button>
       </div>
 
-      <div v-if="rutaAbierta || cargandoRuta">
+      <div v-else>
         <!-- El asesor solo ve la ruta actual; el historial de días/rutas es solo para admin -->
         <div v-if="!loading && !panel" class="text-gray-400 dark:text-gray-500">{{ $t('history.noData') }}</div>
         <div v-else-if="panel" class="resumen-content space-y-2 pt-2">
-        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
-          <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.openingDate') }}:</span>
-          <span v-if="panel.ruta?.fechaApertura" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaApertura).toLocaleString('es-ES') }}</span>
-          <span v-else class="resumen-badge-base bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 dark:border dark:border-slate-600">-</span>
+        <div class="border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <div v-if="rutasCerradas.length > 0" role="button" tabindex="0" @click="mostrarHistorialResumenes = true" @keydown.enter="mostrarHistorialResumenes = true" class="flex items-center gap-2 rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+            <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.openingDate') }}:</span>
+            <span v-if="panel.ruta?.fechaApertura" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaApertura).toLocaleString('es-ES') }}</span>
+            <span v-else class="resumen-badge-base bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 dark:border dark:border-slate-600">-</span>
+            <svg class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div v-else class="flex items-center gap-2">
+            <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+            <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.openingDate') }}:</span>
+            <span v-if="panel.ruta?.fechaApertura" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaApertura).toLocaleString('es-ES') }}</span>
+            <span v-else class="resumen-badge-base bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 dark:border dark:border-slate-600">-</span>
+          </div>
         </div>
-        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
-          <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.closingDate') }}:</span>
-          <span v-if="panel.ruta?.fechaCierre" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaCierre).toLocaleString('es-ES') }}</span>
-          <span v-else class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600 italic">{{ $t('route.notClosed') }}</span>
+        <div class="border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+          <div v-if="rutasCerradas.length > 0" role="button" tabindex="0" @click="mostrarHistorialResumenes = true" @keydown.enter="mostrarHistorialResumenes = true" class="flex items-center gap-2 rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+            <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.closingDate') }}:</span>
+            <span v-if="panel.ruta?.fechaCierre" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaCierre).toLocaleString('es-ES') }}</span>
+            <span v-else class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600 italic">{{ $t('route.notClosed') }}</span>
+            <svg class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div v-else class="flex items-center gap-2">
+            <CalendarDaysIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
+            <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('route.closingDate') }}:</span>
+            <span v-if="panel.ruta?.fechaCierre" class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600">{{ new Date(panel.ruta.fechaCierre).toLocaleString('es-ES') }}</span>
+            <span v-else class="resumen-badge-base bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:border dark:border-slate-600 italic">{{ $t('route.notClosed') }}</span>
+          </div>
         </div>
         <!-- Clientes iniciales (al abrir la ruta) -->
         <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
@@ -57,7 +75,7 @@
             <span class="text-gray-600 dark:text-gray-400 text-sm font-normal">
               ({{ formatNum(panel.resumen?.clientesConPagosRegistrados ?? 0) }} {{ $t('summary.registered') }})
             </span>
-            <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+            <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
           </button>
           <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
             <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold bg-[#10B98126] text-[#10B981]">
@@ -96,14 +114,19 @@
           <ArrowTrendingUpIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
           <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.income') }}:</span>
           <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.ingresos || 0, 2) }}</span>
-          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
         </button>
-        <div class="flex items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
+        <button
+          type="button"
+          class="flex w-full items-center gap-2 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          :title="$t('nav.sales')"
+          @click="router.push('/ventas')"
+        >
           <ShoppingCartIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
-          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">Ventas:</span>
+          <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('nav.sales') }}:</span>
           <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.ventas || 0, 2) }}</span>
-          <span v-if="interesesTotalesRuta > 0" class="ml-2 resumen-badge-base bg-teal-50 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200 dark:border dark:border-teal-700/50">{{ $t('summary.interests') }}: ${{ formatNum(interesesTotalesRuta, 2) }}</span>
-        </div>
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
+        </button>
         <button
           type="button"
           class="flex w-full items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2 text-left rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -113,7 +136,7 @@
           <ReceiptRefundIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
           <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.expenses') }}:</span>
           <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.egresos || 0, 2) }}</span>
-          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -124,7 +147,7 @@
           <ArrowTrendingDownIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400 shrink-0" />
           <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">{{ $t('summary.withdrawals') }}:</span>
           <span class="text-lg font-bold tabular-nums tracking-tight text-gray-900 dark:text-slate-100">${{ formatNum(panel.ruta?.retiros || 0, 2) }}</span>
-          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-gray-900 dark:text-slate-100" aria-hidden="true" />
+          <ChevronRightIcon class="w-5 h-5 ml-auto shrink-0 text-black dark:text-slate-100" aria-hidden="true" />
         </button>
         <div class="flex items-center gap-2 border-b border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
           <BanknotesIcon class="w-6 h-6 text-neutral-500 dark:text-slate-400" />
@@ -149,7 +172,7 @@
     <!-- Modal de advertencia: clientes pendientes -->
     <Teleport to="body">
       <div v-if="mostrarModalPendientes" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalPendientes = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalPendientes = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -177,7 +200,7 @@
     <!-- Modal de advertencia: caja final negativa -->
     <Teleport to="body">
       <div v-if="mostrarModalCajaNegativa" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCajaNegativa = false"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalCajaNegativa = false"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-red-200/50 dark:border-red-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -218,18 +241,33 @@
       @confirm="confirmarAbrirRuta"
       @cancel="cancelarAbrirRuta"
     />
+    <ResumenCierreModal
+      :show="mostrarResumenCierre"
+      v-bind="datosResumenCierre || {}"
+      @close="cerrarResumenCierre"
+    />
+    <HistorialResumenesModal
+      :show="mostrarHistorialResumenes"
+      :vendedorId="storedVendedorId"
+      :rutasDisponibles="panel?.rutasDisponibles || []"
+      @close="mostrarHistorialResumenes = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick, defineOptions } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import NavbarVendedor from '../components/NavbarVendedor.vue'
 import ConfirmModal from '../components/ConfirmModal.vue'
+import ResumenCierreModal from '../components/ResumenCierreModal.vue'
+import HistorialResumenesModal from '../components/HistorialResumenesModal.vue'
 import API_BASE_URL from '../config/api.js'
 import { getUserTimezone } from '../utils/rutaUtils.js'
 import { useAppScrollRoot } from '../composables/useAppScrollRoot.js'
+
+defineOptions({ name: 'ResumenVendedor' })
 
 const { t, locale } = useI18n()
 
@@ -264,7 +302,7 @@ const resumenVendedorScrollEl = ref(null)
 const loading = ref(true)
 const cargandoRuta = ref(false)
 const panel = ref(null)
-const rutaAbierta = ref(true)
+const rutaAbierta = ref(false)
 const mostrarModalCerrarRuta = ref(false)
 const mostrarModalAbrirRuta = ref(false)
 const mostrarModalPendientes = ref(false)
@@ -272,34 +310,12 @@ const pendientesClientes = ref([])
 const mostrarModalCajaNegativa = ref(false)
 const mensajeCajaNegativa = ref('')
 const detallesCajaNegativa = ref(null)
+const mostrarResumenCierre = ref(false)
+const datosResumenCierre = ref(null)
+const mostrarHistorialResumenes = ref(false)
+const storedVendedorId = computed(() => localStorage.getItem('vendedorId'))
+const rutasCerradas = computed(() => (panel.value?.rutasDisponibles || []).filter(r => !!r.fechaCierre))
 let pollingInterval = null
-// Intereses de ventas realizadas durante la ruta actual (entre fechaApertura y fechaCierre/ahora)
-const interesesTotalesRuta = computed(() => {
-  const ruta = panel.value?.ruta
-  const clientes = panel.value?.clientes || []
-  if (!ruta || !ruta.fechaApertura) return 0
-  const inicio = new Date(ruta.fechaApertura).getTime()
-  const fin = ruta.fechaCierre ? new Date(ruta.fechaCierre).getTime() : Date.now()
-  const suma = clientes.reduce((acc, c) => {
-    const created = c?.createdAt ? new Date(c.createdAt).getTime() : 0
-    if (created >= inicio && created <= fin) {
-      const valor = Number(c?.valor) || 0
-      const saldoInicial = Number(c?.saldo_inicial)
-      const total = Number(c?.total)
-      const base = !isNaN(saldoInicial) && saldoInicial > 0 ? saldoInicial : (!isNaN(total) && total > 0 ? total : null)
-      if (base != null) {
-        const interesMonto = Math.max(0, base - valor)
-        return acc + interesMonto
-      }
-      // Fallback final si no vinieron saldos: asumir que c.intereses es porcentaje
-      const interesPct = Number(c?.intereses) || 0
-      return acc + (valor * interesPct) / 100
-    }
-    return acc
-  }, 0)
-  return Math.round(suma * 100) / 100
-})
-
 // Caja inicial ahora viene del backend (caja final del día anterior)
 const cajaInicialCalculada = computed(() => {
   const ruta = panel.value?.ruta || {}
@@ -342,13 +358,34 @@ function cerrarRuta() {
   mostrarModalCerrarRuta.value = true
 }
 
+function cerrarResumenCierre() {
+  mostrarResumenCierre.value = false
+  datosResumenCierre.value = null
+  router.push('/vendedor')
+}
+
 async function confirmarCerrarRuta() {
   const vendedorId = localStorage.getItem('vendedorId')
   const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendedorId }) })
-  if (res.ok) { 
+  if (res.ok) {
     rutaAbierta.value = false
     mostrarModalCerrarRuta.value = false
-    router.push('/vendedor') 
+    try {
+      const panelRes = await fetch(`${API_BASE_URL}/api/vendedores/${vendedorId}/panel?_ts=${Date.now()}`, { cache: 'no-store' })
+      if (panelRes.ok) {
+        const panel = await panelRes.json()
+        datosResumenCierre.value = {
+          vendedorNombre: panel.vendedor?.nombre || '',
+          ruta: panel.ruta || {},
+          resumen: panel.resumen || {}
+        }
+        mostrarResumenCierre.value = true
+      } else {
+        router.push('/vendedor')
+      }
+    } catch {
+      router.push('/vendedor')
+    }
   } else {
     const errorData = await res.json().catch(() => null)
     mostrarModalCerrarRuta.value = false
@@ -400,7 +437,7 @@ onMounted(async () => {
   
   // Cargar datos iniciales
   await cargarPanel(vendedorId)
-  
+
   // Escuchar eventos para actualizar cuando sea necesario
   window.addEventListener('cliente-creado', actualizarResumen)
   window.addEventListener('cliente-eliminado', actualizarResumen)
@@ -416,6 +453,12 @@ onMounted(async () => {
   if (appScrollRoot) appScrollRoot.value = resumenVendedorScrollEl.value
 
   loading.value = false
+
+  // Iniciar auto-actualización cada 30 segundos
+  pollingInterval = window.setInterval(() => {
+    const vid = localStorage.getItem('vendedorId')
+    if (vid) cargarPanel(vid)
+  }, 30000)
 })
 
 function onResumenVisibility() {
@@ -430,6 +473,7 @@ async function cargarPanel(vendedorId) {
     const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
     if (res.ok) {
       panel.value = await res.json()
+      rutaAbierta.value = panel.value?.ruta?.abierta === true
       } else {
       console.error('Error en la respuesta:', res.statusText)
       panel.value = null
@@ -462,6 +506,10 @@ onUnmounted(() => {
   window.removeEventListener('ruta-cerrada', actualizarResumen)
   window.removeEventListener('ruta-abierta', actualizarResumen)
   document.removeEventListener('visibilitychange', onResumenVisibility)
+  if (pollingInterval) {
+    window.clearInterval(pollingInterval)
+    pollingInterval = null
+  }
 })
 
 </script>

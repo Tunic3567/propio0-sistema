@@ -1,10 +1,6 @@
 /* Estilos globales - Minimalista, modo claro y oscuro */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-* {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
 :root {
   --surface: #f5f5f5;
   --surface-card: #ffffff;
@@ -109,6 +105,11 @@ body {
 }
 .dark .btn-primary-min {
   @apply bg-slate-400 hover:bg-slate-300 text-slate-900 border-slate-500 shadow-md;
+}
+
+/* Botón secundario: outline sutil, mismo tamaño que primary-min */
+.btn-secondary-min {
+  @apply border-2 border-neutral-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700 font-semibold rounded-lg px-4 py-2.5 transition-colors text-sm;
 }
 
 /* Botón secundario (outline): borde visible para uso exterior */

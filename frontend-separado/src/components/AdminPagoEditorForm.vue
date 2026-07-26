@@ -53,15 +53,6 @@
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ t('payment.comment') }} ({{ t('common.optional') }})</label>
-        <textarea
-          v-model="observaciones"
-          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          rows="2"
-        />
-      </div>
-
       <div class="mt-2 text-base space-y-2">
         <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2">
           <span class="font-semibold text-gray-700 dark:text-gray-200">{{ t('client.remainingBalance') }}</span>
@@ -101,7 +92,6 @@ const opciones = computed(() => [
 const tipo = ref('Parcela')
 const valorAbono = ref('')
 const numParcelas = ref(1)
-const observaciones = ref('')
 
 const dias = computed(() => Number(cliente.value?.dias) || 0)
 const valorParcela = computed(() => Number(cliente.value?.parcela) || 0)
@@ -179,7 +169,6 @@ async function cargarCliente() {
 function inicializarDesdePago() {
   const p = props.pago
   tipo.value = p.tipo || 'Parcela'
-  observaciones.value = p.observaciones || ''
   if (p.tipo === 'Abono') {
     const pv = p.valor != null ? Number(p.valor) : NaN
     valorAbono.value = !Number.isNaN(pv) && pv > 0 ? String(pv) : ''
@@ -262,7 +251,6 @@ function construirBody() {
       valor: valorEnvio,
       // Al pasar de Parcela a Abono/No pago, limpiar cuotas en BD (null ≠ undefined en payload)
       numParcelas: tipo.value === 'Parcela' ? cuotasEfectivas : null,
-      observaciones: observaciones.value,
       saldo_antes: saldoBaseParaCalculo.value,
       saldo_despues: nuevoSaldoNum
     }

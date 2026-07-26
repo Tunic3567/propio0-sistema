@@ -57,8 +57,25 @@
 
           <!-- Botones de configuración -->
           <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <CompartirMensaje />
+            <VendedorNotificationsBell />
             <ThemeToggle />
             <LanguageSelector />
+            <button
+              @click="toggleChat"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-theme"
+              :title="$t('chatbot.title')"
+            >
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <rect x="3" y="1" width="18" height="12" rx="2" />
+                <circle cx="8.5" cy="6.5" r="1.2" />
+                <circle cx="15.5" cy="6.5" r="1.2" />
+                <path d="M6 13v6a2 2 0 002 2h8a2 2 0 002-2v-6" />
+                <path d="M12 13v3" stroke-linecap="round" />
+                <circle cx="12" cy="18.5" r="1.2" />
+              </svg>
+              <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400 hidden sm:inline">{{ $t('chatbot.title') }}</span>
+            </button>
           </div>
 
     </div>
@@ -138,10 +155,10 @@
           @click="navigateTo('/vendedor')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.clients') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.clients') }}</span>
         </button>
 
         <button
@@ -153,10 +170,10 @@
           @click="navigateTo('/ventas')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.sales') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.sales') }}</span>
         </button>
 
         <button
@@ -168,10 +185,10 @@
           @click="navigateTo('/registros')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.records') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.records') }}</span>
         </button>
 
         <button
@@ -183,10 +200,10 @@
           @click="navigateTo('/ingresos')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9a3 3 0 00-3-3H6a3 3 0 00-3 3v3" />
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.income') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.income') }}</span>
         </button>
 
         <button
@@ -198,10 +215,10 @@
           @click="navigateTo('/egresos')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2 2 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C8.095 4.01 7.25 4.973 7.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h6.75c.621 0 1.125-.504 1.125-1.125V9.375a1.125 1.125 0 00-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.expenses') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.expenses') }}</span>
         </button>
 
         <!-- Historial de Clientes -->
@@ -214,10 +231,26 @@
           @click="navigateTo('/historial-clientes')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.clientHistory') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.clientHistory') }}</span>
+        </button>
+
+        <!-- Notas del Día -->
+        <button
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+          :class="[
+            isActive('/notas-dia') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700',
+            !rutaAbiertaLocal ? 'opacity-50 cursor-not-allowed' : ''
+          ]"
+          @click="navigateTo('/notas-dia')"
+          :disabled="!rutaAbiertaLocal"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          <span class="font-semibold text-lg">{{ $t('nav.notes') }}</span>
         </button>
 
         <!-- Resumen dentro del bloque principal -->
@@ -230,10 +263,10 @@
           @click="navigateTo('/resumen')"
           :disabled="!rutaAbiertaLocal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 shrink-0 text-neutral-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
           </svg>
-          <span class="font-semibold text-base">{{ $t('nav.summary') }}</span>
+          <span class="font-semibold text-lg">{{ $t('nav.summary') }}</span>
         </button>
       </div>
 
@@ -273,6 +306,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ThemeToggle from './ThemeToggle.vue';
 import LanguageSelector from './LanguageSelector.vue';
+import CompartirMensaje from './CompartirMensaje.vue';
+import VendedorNotificationsBell from './VendedorNotificationsBell.vue';
+import { toggleChat } from '../chatState.js';
 import API_BASE_URL from '../config/api.js';
 import { clearOfflinePagosPending, emitOfflinePagosChanged, getOfflinePendingCount } from '../utils/offlinePagoQueue.js';
 import { syncAllPendingPagos } from '../utils/syncOfflinePagos.js';

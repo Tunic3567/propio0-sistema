@@ -6,7 +6,7 @@
       role="dialog"
       aria-modal="true"
     >
-      <div class="absolute inset-0 bg-black/55 dark:bg-black/70 backdrop-blur-sm" @click="$emit('close')"></div>
+      <div class="absolute inset-0 bg-black/55 dark:bg-black/70" @click="$emit('close')"></div>
       <div class="relative w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col rounded-2xl border-2 border-neutral-200 dark:border-slate-600 bg-white dark:bg-gray-800 shadow-2xl">
         <div class="px-5 py-4 border-b border-neutral-200 dark:border-slate-600 flex items-start justify-between gap-3">
           <div>

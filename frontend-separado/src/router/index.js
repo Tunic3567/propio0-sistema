@@ -2,7 +2,6 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import Pagos from '../views/Pagos.vue'
-import HistorialPagosAdmin from '../views/HistorialPagosAdmin.vue'
 /** Vistas frecuentes del asesor: carga diferida para acelerar login y primera pintura */
 const VendedorDashboard = () => import('../views/VendedorDashboard.vue')
 const CrearCliente = () => import('../views/CrearCliente.vue')
@@ -17,7 +16,12 @@ const HistorialClientesVendedor = () => import('../views/HistorialClientesVended
 const Ventas = () => import('../views/Ventas.vue')
 import MiCuentaAdmin from '../views/MiCuentaAdmin.vue'
 const RepairResumenAdmin = () => import('../views/RepairResumenAdmin.vue')
+const GestionUsuarios = () => import('../views/GestionUsuarios.vue')
+const SuperResumenGlobal = () => import('../views/SuperResumenGlobal.vue')
+const SuperDashboard = () => import('../views/SuperDashboard.vue')
 import AdminRutas from '../views/AdminRutas.vue'
+import AdminVentas from '../views/AdminVentas.vue'
+const NotasDia = () => import('../views/NotasDia.vue')
 import CrearClienteAdmin from '../views/CrearClienteAdmin.vue'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
@@ -30,6 +34,12 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminDashboard,
+    meta: { requiresAuth: true, role: 'administrador' }
+  },
+  {
+    path: '/admin/ventas',
+    name: 'AdminVentas',
+    component: AdminVentas,
     meta: { requiresAuth: true, role: 'administrador' }
   },
   {
@@ -51,6 +61,24 @@ const routes = [
     meta: { requiresAuth: true, role: 'superusuario' }
   },
   {
+    path: '/admin/super/usuarios',
+    name: 'GestionUsuarios',
+    component: GestionUsuarios,
+    meta: { requiresAuth: true, role: 'superusuario' }
+  },
+  {
+    path: '/admin/super/resumen-global',
+    name: 'SuperResumenGlobal',
+    component: SuperResumenGlobal,
+    meta: { requiresAuth: true, role: 'superusuario' }
+  },
+  {
+    path: '/admin/super/dashboard',
+    name: 'SuperDashboard',
+    component: SuperDashboard,
+    meta: { requiresAuth: true, role: 'superusuario' }
+  },
+  {
     path: '/vendedor',
     name: 'Vendedor',
     component: VendedorDashboard,
@@ -65,9 +93,9 @@ const routes = [
     component: CrearCliente,
     meta: { requiresAuth: true, role: 'vendedor' }
   },
-  { path: '/pagos', name: 'Pagos', component: Pagos, meta: { requiresAuth: true, role: 'vendedor' } },
+  { path: '/pagos', name: 'Pagos', component: Pagos, meta: { requiresAuth: true, role: 'vendedor', adminAccess: true } },
+  { path: '/notas-dia', name: 'NotasDia', component: NotasDia, meta: { requiresAuth: true, role: 'vendedor', adminAccess: true } },
   { path: '/registros', name: 'Registros', component: Registros, meta: { requiresAuth: true, role: 'vendedor' } },
-  { path: '/admin/pagos', name: 'PagosAdmin', component: HistorialPagosAdmin, meta: { requiresAuth: true, role: 'administrador' } },
   { path: '/admin/rutas', name: 'AdminRutas', component: AdminRutas, meta: { requiresAuth: true, role: 'administrador' } },
   { path: '/admin/vendedores', name: 'AdminVendedores', component: MiCuentaAdmin, meta: { requiresAuth: true, role: 'administrador' } },
   { path: '/egresos', name: 'Egresos', component: Egresos, meta: { requiresAuth: true, role: 'vendedor' } },
@@ -117,6 +145,8 @@ router.beforeEach((to, from, next) => {
     }
     if (to.meta.role && to.meta.role !== rol) {
       if (to.meta.role === 'administrador' && rol === 'superusuario') {
+        next()
+      } else if (to.meta.adminAccess && (rol === 'administrador' || rol === 'superusuario') && to.meta.role === 'vendedor') {
         next()
       } else {
         next({ path: '/' })

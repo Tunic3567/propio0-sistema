@@ -56,7 +56,7 @@
       <div class="mt-2 md:mt-3 text-sm text-neutral-800 dark:text-slate-200 divide-y divide-neutral-300 dark:divide-slate-600">
         <div class="flex items-baseline justify-between py-0.5 md:py-1">
           <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.sale') }}</span>
-          <span class="text-black dark:text-white font-bold text-sm md:text-base">${{ cliente.valor }}</span>
+          <span class="text-black dark:text-white font-bold text-sm md:text-base">${{ cliente.valor }} ({{ cliente.dias }} días)</span>
         </div>
         <div class="flex items-baseline justify-between py-0.5 md:py-1">
           <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.initialBalance') }}</span>
@@ -85,6 +85,31 @@
               {{ $t('client.renewedBadge') }}
             </span>
             <span
+              v-if="cliente.frecuencia && cliente.frecuencia.toLowerCase() !== 'diaria'"
+              class="inline-flex items-center px-2.5 py-1 rounded-lg text-[0.7rem] font-semibold border"
+              :class="{
+                'bg-indigo-50 text-indigo-900 border-indigo-400/45 dark:bg-indigo-900/45 dark:text-indigo-100 dark:border-indigo-500/50': cliente.frecuencia.toLowerCase() === 'semanal',
+                'bg-cyan-50 text-cyan-900 border-cyan-400/45 dark:bg-cyan-900/45 dark:text-cyan-100 dark:border-cyan-500/50': cliente.frecuencia.toLowerCase() === 'quincenal',
+                'bg-amber-50 text-amber-900 border-amber-400/45 dark:bg-amber-900/45 dark:text-amber-100 dark:border-amber-500/50': cliente.frecuencia.toLowerCase() === 'mensual'
+              }"
+            >
+              {{ cliente.frecuencia }}
+            </span>
+            <span
+              v-if="textoComparacionRenovacion"
+              class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-bold border bg-blue-50 text-blue-800 border-blue-300/60 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-600/50"
+              :title="textoComparacionRenovacion"
+            >
+              {{ textoComparacionRenovacion }}
+            </span>
+            <span
+              v-if="esFinalizadoPendiente"
+              class="inline-flex items-center px-2.5 py-1 rounded-lg text-[0.7rem] font-semibold border bg-red-100 text-red-900 border-red-400/50 dark:bg-red-900/60 dark:text-red-100 dark:border-red-500/60"
+              title="Este cliente finalizó su pago en esta ruta"
+            >
+              Finalizado
+            </span>
+            <span
               v-if="montoPagadoEnRutaAdmin(cliente) > 0"
               class="inline-flex items-center px-2.5 py-1 rounded-lg text-[0.7rem] font-semibold tabular-nums border bg-emerald-50 text-emerald-800 border-emerald-500/40 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700/50"
               :title="$t('client.paidThisRoute')"
@@ -100,22 +125,26 @@
             </span>
             <span>${{ valorParcelaTarjeta }}</span>
             </span>
-            <span class="text-xs font-medium leading-tight text-neutral-700 dark:text-slate-300">({{ saldoInicialMostrar(cliente) }}/{{ cliente.dias != null && cliente.dias !== '' ? cliente.dias : '–' }} {{ $t('client.days') }})</span>
           </span>
         </div>
 
-        <div v-if="desplegado" class="mt-2 border-t pt-2 text-sm text-neutral-800 dark:text-slate-200 divide-y divide-neutral-300 dark:divide-neutral-500">
+        <div v-if="desplegado" class="mt-1 border-t pt-1 text-sm text-neutral-800 dark:text-slate-200 divide-y divide-neutral-300 dark:divide-neutral-500">
+          <div class="flex items-baseline justify-between py-1">
+            <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.installmentsPaid') }}</span>
+            <span class="text-black dark:text-white font-bold text-base">{{ calcularParcelasPagadas(cliente) }}</span>
+          </div>
           <div class="flex items-baseline justify-between py-1">
             <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.pendingInstallments') }}</span>
             <span class="text-black dark:text-white font-bold text-base">{{ calcularParcelasPendientes(cliente) }}</span>
           </div>
           <div class="flex items-baseline justify-between py-1">
-            <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.overdueInstallments') }}</span>
-            <span class="text-black dark:text-white font-bold text-base">{{ calcularParcelasAtrasadas(cliente) }}</span>
-          </div>
-          <div class="flex items-baseline justify-between py-1">
-            <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.visits') }}</span>
-            <span class="text-black dark:text-white font-bold text-base">{{ cliente.visitas ?? 0 }}</span>
+            <div class="flex items-center gap-4">
+              <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.overdueInstallments') }}</span>
+              <span class="text-black dark:text-white font-bold">{{ calcularParcelasAtrasadas(cliente) }}</span>
+              <span class="text-neutral-400 dark:text-neutral-500">|</span>
+              <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.visits') }}</span>
+              <span class="text-black dark:text-white font-bold">{{ cliente.visitas ?? 0 }}</span>
+            </div>
           </div>
           <div class="flex items-baseline justify-between py-1">
             <span class="font-bold text-neutral-900 dark:text-slate-100">{{ $t('client.id') }}</span>
@@ -175,12 +204,13 @@
 
           <!-- Sin Historial aquí (está en la fila principal). Misma anchura en móvil: grid 3 columnas -->
           <div
-            class="grid grid-cols-3 gap-1 sm:gap-2 pt-1.5 mt-1.5 md:pt-2 md:mt-2 border-t border-neutral-300 dark:border-slate-500 min-w-0 w-full"
+            class="grid grid-cols-3 gap-1 sm:gap-2 pt-1 mt-1 md:pt-1.5 md:mt-1.5 border-t border-neutral-300 dark:border-slate-500 min-w-0 w-full"
           >
             <button
               type="button"
-              @click.stop="$emit('pagos')"
+              @click.stop="!props.accionesBloqueadas && $emit('pagos')"
               class="admin-collapsed-action-btn border border-neutral-400 dark:border-slate-400 bg-neutral-100 dark:bg-slate-600 text-neutral-800 dark:text-slate-100 hover:bg-neutral-200 dark:hover:bg-slate-500"
+              :class="{ 'opacity-40 pointer-events-none': props.accionesBloqueadas }"
             >
               <span class="admin-collapsed-action-inner">
                 <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -218,8 +248,9 @@
         >
           <button
             type="button"
-            @click.stop="$emit('pagos')"
+            @click.stop="!props.accionesBloqueadas && $emit('pagos')"
             class="admin-card-action-btn flex flex-col items-center justify-center gap-0.5 md:gap-1 w-full min-w-0 min-h-[3.1rem] sm:min-h-[3.35rem] md:min-h-[4rem] px-1 py-2 sm:px-2 sm:py-3 rounded-xl text-xs font-semibold box-border transition-all btn-primary-min"
+            :class="{ 'opacity-40 pointer-events-none': props.accionesBloqueadas }"
           >
             <svg class="w-[1.15rem] h-[1.15rem] sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -266,7 +297,11 @@ const props = defineProps({
   /** Mismo criterio que resumen "Nuevos": creado en ruta actual, no renovado, no cancelado */
   esNuevoEnRuta: { type: Boolean, default: false },
   /** Mismo criterio que resumen "Renovados": alta en esta ruta con flag renovado, no cancelado */
-  esRenovadoEnRuta: { type: Boolean, default: false }
+  esRenovadoEnRuta: { type: Boolean, default: false },
+  /** Finalizado pendiente: último pago registrado, saldo en 0, esperando cierre de ruta */
+  esFinalizadoPendiente: { type: Boolean, default: false },
+  /** Bloquea visual y funcionalmente los botones de Pago */
+  accionesBloqueadas: { type: Boolean, default: false }
 })
 
 const formatNum = (n, dec = 2) => {
@@ -274,11 +309,19 @@ const formatNum = (n, dec = 2) => {
   return num.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec })
 }
 
-/** Con "No pago" en la ruta, mismo criterio que vendedor: mostrar 0 junto al badge rojo */
 const valorParcelaTarjeta = computed(() => {
+  return props.cliente?.parcela ?? 0
+})
+
+const textoComparacionRenovacion = computed(() => {
   const c = props.cliente
-  if (c?.esNoPagoEnRutaActual) return formatNum(0, 2)
-  return c?.parcela
+  if (!props.esRenovadoEnRuta || c.valorPrevioRenovacion == null) return ''
+  const prev = Number(c.valorPrevioRenovacion) || 0
+  const cur = Number(c.valor) || 0
+  const diff = cur - prev
+  if (Math.abs(diff) < 0.01) return '='
+  const fmt = (n) => '$' + Math.abs(n).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return diff > 0 ? `↑ ${fmt(diff)}` : `↓ ${fmt(diff)}`
 })
 
 defineEmits(['toggle-desplegar', 'pagos', 'editar', 'oculto', 'mapa-residencial', 'mapa-comercial', 'historial'])
@@ -309,6 +352,17 @@ function calcularParcelasAtrasadas(c) {
   return Number(c.parcelasAtrasadas) || 0
 }
 
+function calcularParcelasPagadas(c) {
+  const parcela = Number(c.parcela) || 0
+  if (parcela <= 0) return 0
+  const saldoInicial = Number(c.saldo_inicial) || 0
+  const pendiente = Number(c.total) || 0
+  if (saldoInicial <= 0) return 0
+  const totalParcelas = Math.ceil(saldoInicial / parcela)
+  const pendientes = Math.ceil(pendiente / parcela)
+  return Math.max(0, totalParcelas - pendientes)
+}
+
 const avatarToneClass = computed(() => {
   const c = props.cliente
   const a = calcularParcelasAtrasadas(c)
@@ -331,9 +385,6 @@ const wrapperClass = computed(() => {
     'flex flex-col items-start rounded-lg border-2 border-neutral-300 dark:border-slate-600/80 p-2 sm:p-2.5 md:p-3 cursor-pointer shadow-sm hover:shadow-md transition-shadow min-w-0',
     i % 2 === 0 ? 'bg-white dark:bg-slate-800/60' : 'bg-neutral-50 dark:bg-slate-800/50'
   ]
-  if (props.variant === 'con') {
-    return [...base, 'border-l-4 border-l-sky-500 dark:border-l-sky-400']
-  }
   const a = calcularParcelasAtrasadas(c)
   const left =
     a >= 6 ? 'border-l-[4px] border-l-red-500 dark:border-l-red-400' : a >= 4 ? 'border-l-[4px] border-l-yellow-500 dark:border-l-yellow-400' : 'border-l-[4px] border-l-emerald-500 dark:border-l-emerald-400'

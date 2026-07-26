@@ -115,7 +115,21 @@
                     <option value="">{{ $t('client.selectFrequency') || 'Seleccione frecuencia' }}</option>
                     <option value="diaria">{{ $t('client.daily') || 'Diaria' }}</option>
                     <option value="semanal">{{ $t('client.weekly') || 'Semanal' }}</option>
+                    <option value="quincenal">{{ $t('client.biweekly') || 'Quincenal' }}</option>
                     <option value="mensual">{{ $t('client.monthly') || 'Mensual' }}</option>
+                  </select>
+                </div>
+                <div v-if="modal.frecuencia && modal.frecuencia !== 'diaria'">
+                  <label class="block text-sm font-medium text-neutral-700 dark:text-slate-300 mb-1">{{ $t('client.paymentDay') || 'Día de pago' }}</label>
+                  <select v-model="modal.diaPago" required class="w-full border-2 border-neutral-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-neutral-900 dark:text-slate-100">
+                    <option value="">{{ $t('client.selectPaymentDay') || 'Seleccione día' }}</option>
+                    <option value="lunes">{{ $t('client.monday') || 'Lunes' }}</option>
+                    <option value="martes">{{ $t('client.tuesday') || 'Martes' }}</option>
+                    <option value="miércoles">{{ $t('client.wednesday') || 'Miércoles' }}</option>
+                    <option value="jueves">{{ $t('client.thursday') || 'Jueves' }}</option>
+                    <option value="viernes">{{ $t('client.friday') || 'Viernes' }}</option>
+                    <option value="sábado">{{ $t('client.saturday') || 'Sábado' }}</option>
+                    <option value="domingo">{{ $t('client.sunday') || 'Domingo' }}</option>
                   </select>
                 </div>
                 <!-- Información calculada -->
@@ -213,7 +227,8 @@ const modal = ref({
   direccion_residencial: '',
   valor: '',
   parcelas: '',
-  frecuencia: ''
+  frecuencia: '',
+  diaPago: ''
 })
 
 // Calcular interés según número de parcelas
@@ -345,7 +360,8 @@ function abrirEditar(c) {
     direccion_residencial: c.direccion_residencial || '',
     valor: c.valor || '',
     parcelas: parcelas || '',
-    frecuencia: frecuencia || 'diaria'
+    frecuencia: frecuencia || 'diaria',
+    diaPago: (c.diaPago || '').toLowerCase()
   }
 }
 
@@ -389,6 +405,7 @@ async function guardarEdicion() {
     valor: Number(valor.toFixed(2)),
     dias: dias,
     frecuencia: frecuenciaCapitalizada,
+    diaPago: (modal.value.diaPago || '').toLowerCase(),
     total: Number(total.toFixed(2)),
     parcela: Number(valorParcelaCalculado.toFixed(2)),
     saldo_inicial: Number(total.toFixed(2)),

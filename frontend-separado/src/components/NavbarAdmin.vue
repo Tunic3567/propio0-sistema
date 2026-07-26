@@ -23,6 +23,21 @@
             <AdminNotificationsBell />
             <ThemeToggle />
             <LanguageSelector />
+            <button
+              @click="toggleChat"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-theme"
+              :title="$t('chatbot.title')"
+            >
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <rect x="3" y="1" width="18" height="12" rx="2" />
+                <circle cx="8.5" cy="6.5" r="1.2" />
+                <circle cx="15.5" cy="6.5" r="1.2" />
+                <path d="M6 13v6a2 2 0 002 2h8a2 2 0 002-2v-6" />
+                <path d="M12 13v3" stroke-linecap="round" />
+                <circle cx="12" cy="18.5" r="1.2" />
+              </svg>
+              <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400 hidden sm:inline">{{ $t('chatbot.title') }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -63,84 +78,142 @@
 
       <!-- Navegación principal -->
       <div class="p-4 space-y-2 flex-1 overflow-y-auto overscroll-contain sidebar-scroll">
-        <h3 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Navegación</h3>
-        
+        <template v-if="!esSuperUsuario">
+          <h3 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Navegación</h3>
+          
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isActive('/admin') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/admin')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4V6a4 4 0 00-8 0v4m12 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 012-2h12a2 2 0 012 2z" />
+            </svg>
+            <span class="text-base font-semibold">Clientes</span>
+          </button>
+
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isActive('/admin/ventas') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/admin/ventas')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <span class="text-base font-semibold">{{ $t('nav.sales') }}</span>
+          </button>
+
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isActive('/admin/rutas') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/admin/rutas')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            <span class="text-base font-semibold">{{ $t('admin.routesPlural') }}</span>
+          </button>
+
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isAccessHubActive ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/admin/mi-cuenta')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span class="text-base font-semibold">{{ $t('nav.access') }}</span>
+          </button>
+
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isActive('/admin/movimientos') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/admin/movimientos')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+            </svg>
+            <span class="text-base font-semibold">{{ $t('admin.incomeExpenseNav') }}</span>
+          </button>
+
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isActive('/notas-dia') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/notas-dia')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            <span class="text-base font-semibold">{{ $t('nav.notes') }}</span>
+          </button>
+
+          <button
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            :class="[
+              isActive('/admin/resumen') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            ]"
+            @click="navigateTo('/admin/resumen')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+            </svg>
+            <span class="text-base font-semibold">{{ $t('nav.summary') }}</span>
+          </button>
+        </template>
+
+        <!-- Superusuario: gestión de usuarios -->
         <button
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+          v-if="esSuperUsuario"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left border border-amber-400/60 dark:border-amber-600/50"
           :class="[
-            isActive('/admin') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            isActive('/admin/super/usuarios') ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-950 dark:text-amber-100 border-l-2 border-amber-600' : 'text-amber-900 dark:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/30'
           ]"
-          @click="navigateTo('/admin')"
+          @click="navigateTo('/admin/super/usuarios')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4V6a4 4 0 00-8 0v4m12 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 012-2h12a2 2 0 012 2z" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
           </svg>
-          <span>Clientes</span>
+          <span class="text-base font-semibold">Usuarios</span>
         </button>
 
         <button
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+          v-if="esSuperUsuario"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left border border-amber-400/60 dark:border-amber-600/50"
           :class="[
-            isActive('/admin/pagos') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            isActive('/admin/super/resumen-global') ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-950 dark:text-amber-100 border-l-2 border-amber-600' : 'text-amber-900 dark:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/30'
           ]"
-          @click="navigateTo('/admin/pagos')"
+          @click="navigateTo('/admin/super/resumen-global')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 7v7m0 0h4m-4 0H8" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span>{{ $t('nav.paymentHistory') }}</span>
+          <span class="text-base font-semibold">Resumen global</span>
         </button>
 
         <button
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+          v-if="esSuperUsuario"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left border border-amber-400/60 dark:border-amber-600/50"
           :class="[
-            isActive('/admin/movimientos') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
+            isActive('/admin/super/dashboard') ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-950 dark:text-amber-100 border-l-2 border-amber-600' : 'text-amber-900 dark:text-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/30'
           ]"
-          @click="navigateTo('/admin/movimientos')"
+          @click="navigateTo('/admin/super/dashboard')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zm12 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
           </svg>
-          <span>{{ $t('admin.incomeExpenseNav') }}</span>
-        </button>
-
-        <button
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
-          :class="[
-            isActive('/admin/rutas') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
-          ]"
-          @click="navigateTo('/admin/rutas')"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-          </svg>
-          <span>{{ $t('admin.routesPlural') }}</span>
-        </button>
-
-        <button
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
-          :class="[
-            isAccessHubActive ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
-          ]"
-          @click="navigateTo('/admin/mi-cuenta')"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span>{{ $t('nav.access') }}</span>
-        </button>
-
-        <button
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
-          :class="[
-            isActive('/admin/resumen') ? 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 border-l-2 border-neutral-600 dark:border-slate-400' : 'text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700'
-          ]"
-          @click="navigateTo('/admin/resumen')"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-          </svg>
-          <span>{{ $t('nav.summary') }}</span>
+          <span class="text-base font-semibold">Dashboard</span>
         </button>
 
         <button
@@ -165,7 +238,7 @@
             @click="logout"
             class="w-full flex items-center gap-3 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
             </svg>
             <span>Cerrar sesión</span>
@@ -184,6 +257,7 @@ import { useI18n } from 'vue-i18n';
 import LanguageSelector from './LanguageSelector.vue';
 import ThemeToggle from './ThemeToggle.vue';
 import AdminNotificationsBell from './AdminNotificationsBell.vue';
+import { toggleChat } from '../chatState.js';
 import API_BASE_URL from '../config/api.js';
 
 const emit = defineEmits(['logout']);
@@ -217,6 +291,8 @@ const esSuperUsuario = computed(() => {
 async function cargarNombreAdminSidebar() {
   const cached = localStorage.getItem('adminNombre');
   if (cached) nombreAdminSidebar.value = cached;
+  const esSuper = localStorage.getItem('esSuperUsuario') === '1';
+  if (esSuper) return;
   const adminId = localStorage.getItem('adminId');
   const codigoVinculacion = localStorage.getItem('codigoVinculacion');
   if (!adminId || !codigoVinculacion) return;
@@ -264,7 +340,10 @@ function unlockBodyScroll() {
 const tituloHeader = computed(() => {
   if (route.path === '/admin' || route.path === '/admin/') return t('nav.clients');
   if (route.path.startsWith('/admin/crear-cliente')) return 'Nuevo cliente';
+  if (route.path.startsWith('/admin/super/resumen-global')) return 'Resumen global';
+  if (route.path.startsWith('/admin/super/usuarios')) return 'Gestión de usuarios';
   if (route.path.startsWith('/admin/repair-resumen')) return 'Reparar resumen (emergencia)';
+  if (route.path.startsWith('/admin/ventas')) return t('nav.sales');
   if (route.path.startsWith('/admin/resumen')) return t('nav.summary') || 'Resumen';
   if (route.path.startsWith('/admin/rutas')) return 'Rutas';
   if (route.path.startsWith('/admin/pagos')) return t('nav.paymentHistory');
@@ -272,6 +351,7 @@ const tituloHeader = computed(() => {
   if (route.path.startsWith('/admin/mi-cuenta') || route.path.startsWith('/admin/vendedores')) return t('nav.access');
   if (route.path.startsWith('/admin/ingresos')) return t('nav.income');
   if (route.path.startsWith('/admin/egresos')) return t('nav.expenses');
+  if (route.path.startsWith('/notas-dia')) return t('nav.notes');
   return t('admin.title') || 'Panel Administrativo';
 });
 

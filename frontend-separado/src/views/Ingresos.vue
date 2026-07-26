@@ -247,7 +247,7 @@
     <!-- Modal de éxito (ingreso registrado/actualizado/eliminado) -->
     <Teleport to="body">
       <div v-if="mostrarModalExitoIngreso" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalExitoIngreso"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cerrarModalExitoIngreso"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-green-200/50 dark:border-green-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -262,6 +262,80 @@
             <div class="flex justify-center">
               <button @click="cerrarModalExitoIngreso" class="px-6 py-2.5 text-white bg-green-700 hover:bg-green-800 border-2 border-green-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">
                 {{ t('common.accept') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Banner reingreso solicitud llave -->
+    <Teleport to="body">
+      <div v-if="solicitudExitosa && !mostrarModalLlave" class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-md px-4">
+        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-lg px-4 py-3 shadow-lg cursor-pointer" @click="reabrirModalLlaveIngreso">
+          <p class="text-sm font-medium text-amber-800 dark:text-amber-200 text-center">Solicitud de llave enviada — Haz clic para ver el estado</p>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal de Llave necesaria (ingreso) -->
+    <Teleport to="body">
+      <div v-if="mostrarModalLlave" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalLlave = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-amber-300/50 dark:border-amber-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-amber-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-10 h-10 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Llave requerida</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-4">
+            <template v-if="estadoLlave === 'pendiente'">
+              <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                Este ingreso de <strong>${{ formatNumLlave(datosLlave.venta, 0) }}</strong> excede el tope de <strong>${{ formatNumLlave(datosLlave.tope, 0) }}</strong> configurado por tu administrador.
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Solicita una llave para continuar con el registro del ingreso.</p>
+              <button
+                type="button"
+                :disabled="solicitandoLlave"
+                class="w-full py-2.5 px-4 rounded-lg text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
+                @click="solicitarLlaveIngreso"
+              >
+                {{ solicitandoLlave ? 'Solicitando…' : 'Solicitar llave al administrador' }}
+              </button>
+              <p v-if="solicitudExitosa" class="text-sm text-green-600 dark:text-green-400 text-center">Solicitud enviada. Espera el código de tu administrador.</p>
+            </template>
+            <template v-else-if="estadoLlave === 'esperando'">
+              <p class="text-sm text-green-600 dark:text-green-400 text-center font-medium">Solicitud enviada correctamente</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Espera el código de tu administrador e ingrésalo aquí:</p>
+              <input
+                v-model="codigoLlaveInput"
+                type="text"
+                maxlength="6"
+                placeholder="000000"
+                class="w-full text-center text-2xl font-mono tracking-widest px-3 py-2.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-amber-400"
+              />
+              <button
+                type="button"
+                :disabled="!codigoLlaveInput.trim() || validandoLlave"
+                class="w-full py-2.5 px-4 rounded-lg text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
+                @click="usarLlaveIngreso"
+              >
+                {{ validandoLlave ? 'Validando…' : 'Validar y registrar' }}
+              </button>
+              <p v-if="errorLlave" class="text-sm text-red-600 dark:text-red-400 text-center">{{ errorLlave }}</p>
+            </template>
+            <template v-else-if="estadoLlave === 'aprobada'">
+              <p class="text-sm text-green-600 dark:text-green-400 text-center font-medium">Llave validada correctamente</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Procesando...</p>
+            </template>
+            <div class="flex justify-center pt-2">
+              <button type="button"
+                class="px-4 py-2 rounded-lg text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                @click="cancelarLlaveIngreso">
+                Cancelar
               </button>
             </div>
           </div>
@@ -309,6 +383,19 @@ const nuevoIngreso = ref({
   valor: '',
   descripcion: ''
  })
+
+// ===== Llaves para Ingresos =====
+const mostrarModalLlave = ref(false)
+const estadoLlave = ref('pendiente')
+const datosLlave = ref({ venta: 0, tope: 0 })
+const solicitandoLlave = ref(false)
+const solicitudExitosa = ref(false)
+const codigoLlaveInput = ref('')
+const validandoLlave = ref(false)
+const errorLlave = ref('')
+const solicitudLlaveId = ref(null)
+const datosIngresoParaLlave = ref(null)
+const edicionPendienteLlave = ref(null) // stores { resRuta, valorNum, ingresoEdit } for edit-after-key
 
 // Cargar ingresos al montar
 onMounted(async () => {
@@ -398,45 +485,103 @@ function cerrarModalExitoIngreso() {
   mostrarModalExitoIngreso.value = false
 }
 
-async function registrarIngreso() {
+// ===== Funciones de Llave =====
+function formatNumLlave(n, dec = 0) {
+  const num = Number(n)
+  if (!isFinite(num)) return '0'
+  return num.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec })
+}
+
+async function solicitarLlaveIngreso() {
+  if (solicitandoLlave.value) return
+  solicitandoLlave.value = true
+  errorLlave.value = ''
   try {
-    registrando.value = true
-
-    const vendedorId = localStorage.getItem('vendedorId')
-    if (!vendedorId) {
-      alert(t('common.couldNotIdentifyAdvisor'))
-      return
+    const token = localStorage.getItem('sessionToken')
+    const res = await fetch(`${API_BASE_URL}/api/vendedores/solicitar-llave`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        valor: datosLlave.value.venta,
+        tope: datosLlave.value.tope,
+        tipo: 'ingreso',
+        datos: datosIngresoParaLlave.value
+      })
+    })
+    if (res.ok) {
+      const data = await res.json()
+      solicitudLlaveId.value = data.solicitudId
+      solicitudExitosa.value = true
+      estadoLlave.value = 'esperando'
+    } else {
+      const err = await res.json().catch(() => ({}))
+      errorLlave.value = err.error || 'Error al solicitar llave'
     }
+  } catch (e) {
+    errorLlave.value = 'Error de conexión'
+  } finally {
+    solicitandoLlave.value = false
+  }
+}
 
-    let rutaId = rutaIdActual.value
-    if (!rutaId) {
-      const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
-      const ruta = await resRuta.json()
-      if (!ruta) {
-        alert('No hay una ruta activa. Debes abrir una ruta primero.')
-        return
+async function usarLlaveIngreso() {
+  if (validandoLlave.value) return
+  validandoLlave.value = true
+  errorLlave.value = ''
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const res = await fetch(`${API_BASE_URL}/api/vendedores/usar-llave`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ codigoLlave: codigoLlaveInput.value.trim() })
+    })
+    if (res.ok) {
+      estadoLlave.value = 'aprobada'
+      // Si es una edición pendiente, ejecutarla
+      if (edicionPendienteLlave.value) {
+        await ejecutarGuardarEdicion(edicionPendienteLlave.value)
+        edicionPendienteLlave.value = null
+      } else if (datosIngresoParaLlave.value) {
+        await ejecutarRegistroIngreso(datosIngresoParaLlave.value)
+        datosIngresoParaLlave.value = null
       }
-      rutaId = ruta._id
-      rutaIdActual.value = rutaId
+      mostrarModalLlave.value = false
+      estadoLlave.value = 'pendiente'
+      codigoLlaveInput.value = ''
+      solicitudExitosa.value = false
+    } else {
+      const err = await res.json()
+      errorLlave.value = err.error || 'Código inválido'
     }
+  } catch (e) {
+    errorLlave.value = 'Error de conexión'
+  } finally {
+    validandoLlave.value = false
+  }
+}
 
-    const ingresoData = {
-      vendedor: vendedorId,
-      ruta: rutaId,
-      tipo: nuevoIngreso.value.tipo,
-      valor: Number(nuevoIngreso.value.valor),
-      descripcion: nuevoIngreso.value.descripcion || undefined
-    }
+function cancelarLlaveIngreso() {
+  mostrarModalLlave.value = false
+  codigoLlaveInput.value = ''
+  errorLlave.value = ''
+  edicionPendienteLlave.value = null
+}
 
+function reabrirModalLlaveIngreso() {
+  mostrarModalLlave.value = true
+}
+
+async function ejecutarRegistroIngreso(ingresoData) {
+  registrando.value = true
+  try {
     const res = await fetch(`${API_BASE_URL}/api/ingresos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(ingresoData)
     })
-
     if (res.ok) {
+      window.dispatchEvent(new CustomEvent('ingreso-registrado'))
       nuevoIngreso.value = { tipo: 'Base', valor: '', descripcion: '' }
-      registrando.value = false
       tituloModalExitoIngreso.value = t('income.registeredSuccessTitle')
       mensajeExitoIngreso.value = t('income.registeredSuccessMessage')
       mostrarModalExitoIngreso.value = true
@@ -453,6 +598,65 @@ async function registrarIngreso() {
   }
 }
 
+async function registrarIngreso() {
+  const vendedorId = localStorage.getItem('vendedorId')
+  if (!vendedorId) {
+    alert(t('common.couldNotIdentifyAdvisor'))
+    return
+  }
+
+  let rutaId = rutaIdActual.value
+  if (!rutaId) {
+    const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
+    const ruta = await resRuta.json()
+    if (!ruta) {
+      alert('No hay una ruta activa. Debes abrir una ruta primero.')
+      return
+    }
+    rutaId = ruta._id
+    rutaIdActual.value = rutaId
+  }
+
+  const valorNum = Number(nuevoIngreso.value.valor)
+  if (!isFinite(valorNum) || valorNum <= 0) {
+    alert('El valor debe ser mayor a 0')
+    return
+  }
+
+  const ingresoData = {
+    vendedor: vendedorId,
+    ruta: rutaId,
+    tipo: nuevoIngreso.value.tipo,
+    valor: valorNum,
+    descripcion: nuevoIngreso.value.descripcion || undefined
+  }
+
+  // Validar tope de ingresos
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const resVal = await fetch(`${API_BASE_URL}/api/vendedores/validar-ingreso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ valor: valorNum })
+    })
+    if (resVal.ok) {
+      const data = await resVal.json()
+      if (data.necesitaLlave) {
+        datosLlave.value = { venta: valorNum, tope: data.tope }
+        datosIngresoParaLlave.value = ingresoData
+        estadoLlave.value = 'pendiente'
+        codigoLlaveInput.value = ''
+        errorLlave.value = ''
+        solicitudExitosa.value = false
+        mostrarModalLlave.value = true
+        return
+      }
+    }
+  } catch (_) {}
+  // Si no necesita llave o falla validación, proceder normal
+  await ejecutarRegistroIngreso(ingresoData)
+}
+
 function empezarEdicion(ingreso) {
   ingresoEnEdicionId.value = ingreso._id
   ingresoEdit.value = {
@@ -467,26 +671,14 @@ function cancelarEdicion() {
   ingresoEdit.value = { tipo: 'Base', valor: '', descripcion: '' }
 }
 
-async function guardarEdicionIngreso() {
+async function ejecutarGuardarEdicion(opts) {
+  const { resRuta, valorNum, ingresoEditData } = opts
+  guardandoEdicion.value = true
   try {
-    guardandoEdicion.value = true
-    const vendedorId = localStorage.getItem('vendedorId')
-    if (!vendedorId) return alert(t('common.couldNotIdentifyAdvisor'))
-    const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
-    const ruta = await resRuta.json()
-    if (!ruta) return alert('No hay ruta activa')
-
-    const valorNum = Number(ingresoEdit.value.valor)
-    if (!isFinite(valorNum) || valorNum < 0) return alert('Valor inválido')
-
-    const res = await fetch(`${API_BASE_URL}/api/ingresos/ruta/${ruta._id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/ingresos/ruta/${resRuta._id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tipo: ingresoEdit.value.tipo,
-        valor: valorNum,
-        descripcion: ingresoEdit.value.descripcion || undefined
-      })
+      body: JSON.stringify(ingresoEditData)
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
@@ -503,6 +695,47 @@ async function guardarEdicionIngreso() {
   } finally {
     guardandoEdicion.value = false
   }
+}
+
+async function guardarEdicionIngreso() {
+  const vendedorId = localStorage.getItem('vendedorId')
+  if (!vendedorId) return alert(t('common.couldNotIdentifyAdvisor'))
+  const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
+  const ruta = await resRuta.json()
+  if (!ruta) return alert('No hay ruta activa')
+
+  const valorNum = Number(ingresoEdit.value.valor)
+  if (!isFinite(valorNum) || valorNum < 0) return alert('Valor inválido')
+
+  const ingresoEditData = {
+    tipo: ingresoEdit.value.tipo,
+    valor: valorNum,
+    descripcion: ingresoEdit.value.descripcion || undefined
+  }
+
+  // Validar tope de ingresos
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const resVal = await fetch(`${API_BASE_URL}/api/vendedores/validar-ingreso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ valor: valorNum })
+    })
+    if (resVal.ok) {
+      const data = await resVal.json()
+      if (data.necesitaLlave) {
+        datosLlave.value = { venta: valorNum, tope: data.tope }
+        edicionPendienteLlave.value = { resRuta, valorNum, ingresoEditData }
+        estadoLlave.value = 'pendiente'
+        codigoLlaveInput.value = ''
+        errorLlave.value = ''
+        solicitudExitosa.value = false
+        mostrarModalLlave.value = true
+        return
+      }
+    }
+  } catch (_) {}
+  await ejecutarGuardarEdicion({ resRuta, valorNum, ingresoEditData })
 }
 
 function eliminarIngreso(ingreso) {

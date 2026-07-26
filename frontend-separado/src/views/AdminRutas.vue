@@ -52,8 +52,18 @@
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-200">
                     {{ $t('admin.routeStatusOpen') }}
                   </span>
-                  <span class="text-xs text-neutral-500 dark:text-slate-400">
+                  <span class="text-xs text-neutral-500 dark:text-slate-400 flex items-center gap-1">
                     {{ formatFecha(rutaAbiertaPorVendedor(v._id).fechaApertura) }}
+                    <button
+                      type="button"
+                      class="inline-flex items-center justify-center w-5 h-5 rounded hover:bg-neutral-200 dark:hover:bg-slate-600 text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      :title="$t('admin.editDates')"
+                      @click.stop="abrirModalFechas(rutaAbiertaPorVendedor(v._id))"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
                   </span>
                 </div>
                 <div class="mt-auto pt-2">
@@ -108,8 +118,18 @@
                   <div class="text-xs font-semibold text-neutral-600 dark:text-slate-300 uppercase tracking-wide mb-1">
                     {{ $t('admin.lastClosedRoute') }}
                   </div>
-                  <div class="text-sm text-neutral-800 dark:text-slate-200">
+                  <div class="text-sm text-neutral-800 dark:text-slate-200 flex items-center gap-1">
                     {{ $t('admin.closedAt') }}: {{ formatFecha(ultimaRutaCerradaPorVendedor(v._id).fechaCierre) }}
+                    <button
+                      type="button"
+                      class="inline-flex items-center justify-center w-5 h-5 rounded hover:bg-neutral-200 dark:hover:bg-slate-600 text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      :title="$t('admin.editDates')"
+                      @click.stop="abrirModalFechas(ultimaRutaCerradaPorVendedor(v._id))"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
                 <p v-else class="text-sm text-neutral-500 dark:text-slate-400 italic">
@@ -149,6 +169,52 @@
       @confirm="confirmarModalRuta"
       @cancel="cerrarModalRuta"
     />
+
+    <!-- Modal editar fechas -->
+    <div
+      v-if="modalFechas.show"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      @click.self="cerrarModalFechas"
+    >
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-6">
+        <h3 class="text-lg font-bold text-neutral-900 dark:text-slate-100">{{ $t('admin.editRouteDatesTitle') }}</h3>
+        <p class="text-sm text-neutral-500 dark:text-slate-400 mb-5">{{ modalFechas.vendedorNombre }}</p>
+
+        <label class="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mb-1">{{ $t('admin.openingDate') }}</label>
+        <input
+          type="datetime-local"
+          v-model="modalFechas.fechaApertura"
+          class="w-full px-3 py-2.5 border-2 border-neutral-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-neutral-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+
+        <label class="block text-sm font-semibold text-neutral-700 dark:text-slate-300 mt-4 mb-1">{{ $t('admin.closingDate') }}</label>
+        <input
+          type="datetime-local"
+          v-model="modalFechas.fechaCierre"
+          class="w-full px-3 py-2.5 border-2 border-neutral-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-neutral-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+
+        <p v-if="modalFechas.error" class="text-sm text-red-600 dark:text-red-400 mt-3">{{ modalFechas.error }}</p>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold border-2 border-neutral-400 dark:border-slate-500 bg-white dark:bg-slate-700 text-neutral-800 dark:text-slate-100 hover:bg-neutral-50 dark:hover:bg-slate-600 transition-colors"
+            @click="cerrarModalFechas"
+          >
+            {{ $t('common.cancel') }}
+          </button>
+          <button
+            type="button"
+            :disabled="guardandoFechas"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white shadow-sm transition-colors"
+            @click="guardarFechas"
+          >
+            {{ guardandoFechas ? '…' : $t('common.save') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -174,6 +240,75 @@ const modalRuta = reactive({
   action: '', // 'cerrar' | 'reabrir'
   vendedorId: ''
 })
+
+const modalFechas = reactive({
+  show: false,
+  rutaId: '',
+  vendedorNombre: '',
+  fechaApertura: '',
+  fechaCierre: '',
+  error: ''
+})
+const guardandoFechas = ref(false)
+
+function dateToInput(d) {
+  if (!d) return ''
+  const date = new Date(d)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function abrirModalFechas(ruta) {
+  if (!ruta) return
+  modalFechas.show = true
+  modalFechas.rutaId = String(ruta._id)
+  modalFechas.vendedorNombre = ruta.vendedor?.nombre || ''
+  modalFechas.fechaApertura = dateToInput(ruta.fechaApertura)
+  modalFechas.fechaCierre = dateToInput(ruta.fechaCierre)
+  modalFechas.error = ''
+}
+
+function cerrarModalFechas() {
+  modalFechas.show = false
+  modalFechas.rutaId = ''
+  modalFechas.vendedorNombre = ''
+  modalFechas.fechaApertura = ''
+  modalFechas.fechaCierre = ''
+  modalFechas.error = ''
+}
+
+async function guardarFechas() {
+  if (!modalFechas.rutaId || guardandoFechas.value) return
+  if (!modalFechas.fechaApertura && !modalFechas.fechaCierre) {
+    modalFechas.error = 'Debes ingresar al menos una fecha.'
+    return
+  }
+  guardandoFechas.value = true
+  modalFechas.error = ''
+  try {
+    const body = { codigoVinculacion: codigo() }
+    if (modalFechas.fechaApertura) body.fechaApertura = new Date(modalFechas.fechaApertura).toISOString()
+    if (modalFechas.fechaCierre) body.fechaCierre = new Date(modalFechas.fechaCierre).toISOString()
+    const res = await fetch(`${API_BASE_URL}/api/admin/rutas/${modalFechas.rutaId}/fechas`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      modalFechas.error = data.error || t('admin.dateSaveError')
+      return
+    }
+    cerrarModalFechas()
+    okMsg.value = t('admin.routeDatesSaved') + '.'
+    await cargar()
+  } catch (e) {
+    modalFechas.error = t('admin.dateSaveError')
+  } finally {
+    guardandoFechas.value = false
+  }
+}
 
 const modalRutaTitle = computed(() => {
   if (modalRuta.action === 'reabrir') return t('admin.reopenLastRoute')

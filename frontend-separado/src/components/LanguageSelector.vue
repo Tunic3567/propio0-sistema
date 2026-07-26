@@ -1,26 +1,23 @@
-<template>
-  <div class="relative" ref="containerRef">
+﻿<template>
+  <div ref="menuContainer" class="relative">
     <!-- Botón del selector -->
     <button
       type="button"
-      @click.stop="toggleDropdown"
-      class="flex items-center gap-1.5 sm:gap-2 h-9 min-h-9 sm:h-10 sm:min-h-10 px-2.5 sm:px-3 rounded-lg bg-neutral-100 dark:bg-slate-700 hover:bg-neutral-200 dark:hover:bg-slate-600 transition-theme border border-neutral-300 dark:border-slate-600 touch-manipulation"
+      @click="toggleDropdown"
+      class="flex items-center gap-1.5 sm:gap-2 h-9 min-h-9 sm:h-10 sm:min-h-10 px-2.5 sm:px-3 rounded-lg bg-neutral-100 dark:bg-slate-700 hover:bg-neutral-200 dark:hover:bg-slate-600 transition-theme border border-neutral-300 dark:border-slate-600"
       :class="{ 'bg-neutral-200 dark:bg-slate-600': isOpen }"
     >
-      <!-- Bandera/Icono del idioma actual -->
       <span class="text-base sm:text-lg" :title="currentLanguageName">
         {{ currentLanguageFlag }}
       </span>
-      <!-- Nombre del idioma (opcional, se puede ocultar en móviles) -->
       <span class="hidden sm:inline text-base font-semibold text-neutral-700 dark:text-slate-200">
         {{ currentLanguageCode.toUpperCase() }}
       </span>
-      <!-- Icono de flecha -->
-      <svg 
+      <svg
         class="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 dark:text-neutral-400 transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"
-        fill="none" 
-        stroke="currentColor" 
+        fill="none"
+        stroke="currentColor"
         viewBox="0 0 24 24"
       >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -39,8 +36,7 @@
       <div
         v-if="isOpen"
         role="menu"
-        class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-exec border border-slate-200 dark:border-slate-600 z-50 overflow-hidden touch-manipulation"
-        @click.stop
+        class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-exec border border-slate-200 dark:border-slate-600 z-50 overflow-hidden"
       >
         <div class="py-1">
           <button
@@ -48,7 +44,7 @@
             :key="lang.code"
             type="button"
             role="menuitem"
-            @click.stop="selectLanguage(lang.code)"
+            @click="selectLanguage(lang.code)"
             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-700 transition-theme"
             :class="{ 'bg-neutral-100 dark:bg-slate-700 text-neutral-900 dark:text-slate-100 font-medium': currentLanguageCode === lang.code }"
           >
@@ -70,15 +66,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { locale } = useI18n()
 
 const isOpen = ref(false)
-const containerRef = ref(null)
-/** En iOS Safari el mismo toque puede disparar `click` en document justo al abrir; ignoramos cierres externos unos ms. */
-const ignoreOutsideCloseUntil = ref(0)
+const menuContainer = ref(null)
 
 const languages = [
   { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -95,64 +89,29 @@ const currentLanguage = computed(() => {
 const currentLanguageFlag = computed(() => currentLanguage.value.flag)
 const currentLanguageName = computed(() => currentLanguage.value.name)
 
-function toggleDropdown(event) {
-  event?.stopPropagation()
-  if (!isOpen.value) {
-    ignoreOutsideCloseUntil.value = Date.now() + 500
-    isOpen.value = true
+watch(isOpen, (val) => {
+  if (val) {
+    nextTick(() => document.addEventListener('click', onClickFuera))
   } else {
-    ignoreOutsideCloseUntil.value = 0
+    document.removeEventListener('click', onClickFuera)
+  }
+})
+
+function onClickFuera(e) {
+  if (menuContainer.value && !menuContainer.value.contains(e.target)) {
     isOpen.value = false
   }
 }
 
-function closeDropdown() {
-  ignoreOutsideCloseUntil.value = 0
-  isOpen.value = false
+function toggleDropdown() {
+  isOpen.value = !isOpen.value
 }
 
 function selectLanguage(langCode) {
   locale.value = langCode
   localStorage.setItem('app-locale', langCode)
-  closeDropdown()
-  
-  // Disparar evento para que otros componentes se actualicen
+  isOpen.value = false
   window.dispatchEvent(new CustomEvent('language-changed', { detail: { locale: langCode } }))
 }
 
-// Cerrar al hacer clic fuera (iOS: ignorar el primer ciclo tras abrir)
-function handlePointerOutside(event) {
-  if (!isOpen.value) return
-  if (Date.now() < ignoreOutsideCloseUntil.value) return
-  const el = containerRef.value
-  if (!el) return
-  const t = event.target
-  if (t instanceof Node && !el.contains(t)) {
-    closeDropdown()
-  }
-}
-
-// Cerrar con ESC
-function handleEscape(e) {
-  if (e.key === 'Escape' && isOpen.value) {
-    closeDropdown()
-  }
-}
-
-onMounted(() => {
-  // pointerup en fase burbuja: en iOS el `click` en document a veces se dispara junto al toque que abre el menú y lo cierra al instante
-  setTimeout(() => {
-    document.addEventListener('pointerup', handlePointerOutside, false)
-  }, 0)
-  document.addEventListener('keydown', handleEscape)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('pointerup', handlePointerOutside, false)
-  document.removeEventListener('keydown', handleEscape)
-})
 </script>
-
-<style scoped>
-/* Estilos adicionales si son necesarios */
-</style>

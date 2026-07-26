@@ -2,93 +2,93 @@
     <div class="min-h-screen w-full max-w-full min-w-0 overflow-x-clip bg-neutral-100 dark:bg-slate-900 transition-theme">
       <NavbarAdmin @logout="logout" />
       <div class="p-4">
-        <div class="max-w-2xl mx-auto flex justify-between items-center mb-4">
-          <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Nuevo cliente (admin)</h1>
+        <div class="max-w-2xl mx-auto flex justify-between items-center mb-3">
+          <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Nuevo cliente (admin)</h1>
           <button
             type="button"
             @click="volver"
-            class="bg-gray-500 dark:bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition"
+            class="bg-gray-500 dark:bg-gray-600 text-white px-3 py-1.5 text-sm rounded hover:bg-gray-600 dark:hover:bg-gray-700 transition"
           >
             {{ $t('common.back') }}
           </button>
         </div>
-        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg border-2 border-neutral-300 dark:border-gray-600 shadow-md p-6">
+        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg border-2 border-neutral-300 dark:border-gray-600 shadow-md p-4">
           <form @submit.prevent="crearCliente">
-            <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 mb-2 font-semibold">{{ $t('admin.assignedAdvisor') }} <span class="text-red-500">*</span></label>
+            <div class="mb-3">
+              <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm font-semibold">{{ $t('admin.assignedAdvisor') }} <span class="text-red-500">*</span></label>
               <select
                 v-model="vendedorSeleccionado"
                 required
-                class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400"
+                class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400"
               >
                 <option value="">{{ $t('admin.selectAdvisorPlaceholder') }}</option>
                 <option v-for="v in vendedores" :key="v._id" :value="v._id">{{ v.nombre }} ({{ v.usuario }})</option>
               </select>
-              <p v-if="!cargandoVendedores && vendedores.length === 0" class="text-sm text-amber-600 dark:text-amber-400 mt-1">{{ $t('admin.noAdvisorsInGroup') }}</p>
+              <p v-if="!cargandoVendedores && vendedores.length === 0" class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ $t('admin.noAdvisorsInGroup') }}</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <!-- Nombre(s) -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.name') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.name') }}</label>
                 <input
                   v-model="cliente.nombres"
                   type="text"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 />
               </div>
   
               <!-- Apellido(s) -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.lastname') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.lastname') }}</label>
                 <input
                   v-model="cliente.apellidos"
                   type="text"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 />
               </div>
   
               <!-- Id -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.id') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.id') }}</label>
                 <input
                   v-model="cliente.cc"
                   type="text"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 />
               </div>
   
               <!-- Apodo -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.nickname') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.nickname') }}</label>
                 <input
                   v-model="cliente.apodo"
                   type="text"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                 />
               </div>
   
               <!-- Celular -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.phone') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.phone') }}</label>
                 <input
                   v-model="cliente.celular"
                   type="tel"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 />
               </div>
   
               <!-- Valor del préstamo -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.value') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.value') }}</label>
                 <input
                   v-model="cliente.valor"
                   type="number"
                   min="0"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500 appearance-none no-spinner"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500 appearance-none no-spinner"
                   required
                   @wheel="e => e.target.blur()"
                 />
@@ -96,83 +96,103 @@
   
               <!-- Número de Parcelas -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('payment.installmentCount') }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('payment.installmentCount') }}</label>
                 <select
                   v-model="cliente.parcelas"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 >
                   <option value="">{{ $t('common.select') || 'Seleccione' }}</option>
                   <option v-for="n in 99" :key="n" :value="n">{{ n }}</option>
                 </select>
               </div>
-
+  
               <!-- Frecuencia de Pago -->
               <div>
-                <label class="block text-gray-700 dark:text-gray-300 mb-2">{{ $t('client.paymentFrequency') || 'Frecuencia de Pago' }}</label>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.paymentFrequency') || 'Frecuencia de Pago' }}</label>
                 <select
                   v-model="cliente.frecuencia"
-                  class="w-full px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+                  class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
                   required
                 >
                   <option value="">{{ $t('client.selectFrequency') || 'Seleccione frecuencia' }}</option>
                   <option value="diaria">{{ $t('client.daily') || 'Diaria' }}</option>
                   <option value="semanal">{{ $t('client.weekly') || 'Semanal' }}</option>
+                  <option value="quincenal">{{ $t('client.biweekly') || 'Quincenal' }}</option>
                   <option value="mensual">{{ $t('client.monthly') || 'Mensual' }}</option>
-                </select>
-              </div>
+              </select>
             </div>
+
+            <!-- Día de pago (solo para Semanal/Quincenal/Mensual) -->
+            <div v-if="cliente.frecuencia && cliente.frecuencia !== 'diaria'">
+              <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.paymentDay') || 'Día de pago' }}</label>
+              <select
+                v-model="cliente.diaPago"
+                required
+                class="w-full px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500"
+              >
+                <option value="">{{ $t('client.selectPaymentDay') || 'Seleccione día' }}</option>
+                <option value="lunes">{{ $t('client.monday') || 'Lunes' }}</option>
+                <option value="martes">{{ $t('client.tuesday') || 'Martes' }}</option>
+                <option value="miércoles">{{ $t('client.wednesday') || 'Miércoles' }}</option>
+                <option value="jueves">{{ $t('client.thursday') || 'Jueves' }}</option>
+                <option value="viernes">{{ $t('client.friday') || 'Viernes' }}</option>
+                <option value="sábado">{{ $t('client.saturday') || 'Sábado' }}</option>
+                <option value="domingo">{{ $t('client.sunday') || 'Domingo' }}</option>
+              </select>
+            </div>
+          </div>
   
             <!-- Información de interés y total -->
-            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <label class="flex items-center gap-2 mb-2 cursor-pointer select-none">
+            <div class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+              <label class="flex items-center gap-2 mb-1 cursor-pointer select-none">
                 <input
                   v-model="interesPersonalizadoActivo"
                   type="checkbox"
                   class="rounded border-gray-400 dark:border-gray-500 text-blue-600 focus:ring-blue-500"
                 />
-                <span class="text-gray-800 dark:text-gray-200 font-medium">{{ $t('client.customInterest') }}</span>
+                <span class="text-gray-800 dark:text-gray-200 text-sm font-medium">{{ $t('client.customInterest') }}</span>
               </label>
-              <div v-if="interesPersonalizadoActivo" class="mb-3">
-                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm">{{ $t('client.customInterestPercent') }}</label>
+              <div v-if="interesPersonalizadoActivo" class="mb-2">
+                <label class="block text-gray-700 dark:text-gray-300 mb-1 text-xs">{{ $t('client.customInterestPercent') }}</label>
                 <input
                   v-model="porcentajeInteresPersonalizado"
                   type="number"
                   min="0"
                   max="100"
                   step="0.01"
-                  class="w-full md:max-w-xs px-3 py-2 border-2 border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500 appearance-none no-spinner"
+                  class="w-full md:max-w-xs px-2.5 py-1.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-blue-400 dark:focus:border-blue-500 appearance-none no-spinner"
                   @wheel="e => e.target.blur()"
                 />
               </div>
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-gray-700 dark:text-gray-300 font-semibold">{{ $t('client.appliedInterest') }}:</span>
-                <span class="text-lg font-bold text-black dark:text-white">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700 dark:text-gray-300 text-sm font-semibold">{{ $t('client.appliedInterest') }}:</span>
+                <span class="text-sm font-bold text-black dark:text-white">
                   <template v-if="interesAplicado !== null">{{ interesAplicado }}%</template>
                   <template v-else>—</template>
                 </span>
               </div>
             </div>
-
+  
             <!-- Total a pagar (como texto resaltado) -->
-            <div class="flex items-end mt-4" v-if="totalAPagar">
+            <div class="flex items-end mt-3">
               <span class="block text-gray-700 dark:text-gray-300 mb-1 font-semibold mr-2">Total a pagar:</span>
-              <span class="text-2xl font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-4 py-1 rounded shadow">
+              <span class="text-sm font-semibold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-3 py-1 rounded shadow">
                 ${{ totalAPagar }}
               </span>
             </div>
 
             <!-- Valor de la parcela -->
-            <div class="flex items-end mt-2" v-if="valorParcela">
+            <div class="flex items-end mt-1">
               <span class="block text-gray-700 dark:text-gray-300 mb-1 font-semibold mr-2">{{ $t('client.installmentValue') }}:</span>
-              <span class="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-4 py-1 rounded shadow">
+              <span class="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-3 py-1 rounded shadow">
                 ${{ valorParcela }}
               </span>
             </div>
   
             <!-- Dirección Comercial con autocompletado -->
-            <div class="mt-4">
-              <label class="block text-gray-700 dark:text-gray-300 mb-2 font-semibold">Dirección Comercial</label>
+            <div class="mt-3">
+              <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm font-semibold">Dirección Comercial</label>
               <div class="relative flex gap-2">
                 <div class="flex-1 relative">
                   <input
@@ -198,7 +218,7 @@
                 <button
                   type="button"
                   @click="miUbicacion('comercial')"
-                  class="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+                  class="px-3 py-1.5 text-sm bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 transition-colors flex items-center gap-1 whitespace-nowrap"
                 >
                   Mi ubicación
                 </button>
@@ -206,19 +226,19 @@
                   v-if="coordenadasComercial"
                   type="button"
                   @click="comprobarDireccion('comercial')"
-                  class="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+                  class="px-3 py-1.5 text-sm bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors flex items-center gap-1 whitespace-nowrap"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
-                  Comprobar dirección
+                  Comprobar
                 </button>
               </div>
             </div>
 
             <!-- Dirección Residencial con autocompletado -->
-            <div class="mt-6">
-              <label class="block text-gray-700 dark:text-gray-300 mb-2 font-semibold">{{ $t('client.residentialAddress') }}</label>
+            <div class="mt-3">
+              <label class="block text-gray-700 dark:text-gray-300 mb-1 text-sm font-semibold">{{ $t('client.residentialAddress') }}</label>
               <div class="relative flex gap-2">
                 <div class="flex-1 relative">
                   <input
@@ -244,7 +264,7 @@
                 <button
                   type="button"
                   @click="miUbicacion('residencial')"
-                  class="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+                  class="px-3 py-1.5 text-sm bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 transition-colors flex items-center gap-1 whitespace-nowrap"
                 >
                   Mi ubicación
                 </button>
@@ -252,29 +272,29 @@
                   v-if="coordenadasResidencial"
                   type="button"
                   @click="comprobarDireccion('residencial')"
-                  class="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap"
+                  class="px-3 py-1.5 text-sm bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors flex items-center gap-1 whitespace-nowrap"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
-                  Comprobar dirección
+                  Comprobar
                 </button>
               </div>
             </div>
-  
+
             <!-- Botones -->
-            <div class="mt-6 flex space-x-4">
+            <div class="mt-4 flex space-x-3">
               <button
                 type="submit"
                 :disabled="creacionEnCurso"
-                class="flex-1 bg-blue-500 dark:bg-blue-600 text-white py-3 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                class="flex-1 bg-blue-500 dark:bg-blue-600 text-white py-2.5 text-sm rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {{ creacionEnCurso ? $t('payment.saving') : $t('client.create') }}
               </button>
               <button
                 type="button"
                 @click="volver"
-                class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded hover:bg-gray-400 dark:hover:bg-gray-700 transition"
+                class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2.5 text-sm rounded hover:bg-gray-400 dark:hover:bg-gray-700 transition"
               >
                 Cancelar
               </button>
@@ -286,7 +306,7 @@
       <!-- Modal de alerta para Id reportado -->
       <Teleport to="body">
         <div v-if="mostrarModalCedulaReportada" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="mostrarModalCedulaReportada = false"></div>
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalCedulaReportada = false"></div>
           <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-yellow-300/50 dark:border-yellow-700/50 transition-all duration-300">
             <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-yellow-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
               <div class="flex items-center gap-3 mb-2">
@@ -333,7 +353,7 @@
       <!-- Modal de éxito (cliente creado) -->
       <Teleport to="body">
         <div v-if="mostrarModalExitoCliente" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalExitoCliente"></div>
+          <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cerrarModalExitoCliente"></div>
           <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-green-200/50 dark:border-green-700/50 transition-all duration-300">
             <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
               <div class="flex items-center gap-3 mb-2">
@@ -384,7 +404,8 @@ import API_BASE_URL from '../config/api.js'
     direccion_residencial: '',
     valor: '',
     parcelas: '',
-    frecuencia: ''
+    frecuencia: '',
+    diaPago: ''
   })
 
   // Coordenadas de las direcciones (se envían al backend, pero no se muestran)
@@ -428,7 +449,7 @@ import API_BASE_URL from '../config/api.js'
     const valor = parseFloat(cliente.value.valor) || 0
     const parcelas = parseInt(cliente.value.parcelas) || 0
     const i = interesAplicado.value
-    if (valor <= 0 || parcelas <= 0 || i === null) return ''
+    if (valor <= 0 || parcelas <= 0 || i === null) return '0.00'
     const interes = i / 100
     return (valor + valor * interes).toFixed(2)
   })
@@ -436,7 +457,7 @@ import API_BASE_URL from '../config/api.js'
   const valorParcela = computed(() => {
     const total = parseFloat(totalAPagar.value) || 0
     const parcelas = parseInt(cliente.value.parcelas) || 0
-    return total > 0 && parcelas > 0 ? (total / parcelas).toFixed(2) : ''
+    return total > 0 && parcelas > 0 ? (total / parcelas).toFixed(2) : '0.00'
   })
   
   function volver() {
@@ -531,35 +552,35 @@ import API_BASE_URL from '../config/api.js'
   }
 
   // Obtener ubicación actual + reverse geocoding
-  async function miUbicacion(tipo) {
-    if (!navigator.geolocation) {
+  function miUbicacion(tipo) {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       alert('Geolocalización no soportada en este dispositivo')
       return
     }
-    try {
-      const posicion = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000
-        })
-      })
-      const lat = posicion.coords.latitude
-      const lng = posicion.coords.longitude
-      // reverse geocoding
-      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-      const data = await resp.json()
-      const direccion = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-      if (tipo === 'comercial') {
-        cliente.value.direccion = direccion
-        coordenadasComercial.value = { lat, lng }
-      } else {
-        cliente.value.direccion_residencial = direccion
-        coordenadasResidencial.value = { lat, lng }
-      }
-    } catch (e) {
-      alert('No fue posible obtener la ubicación actual')
-    }
+    navigator.geolocation.getCurrentPosition(
+      async (posicion) => {
+        const lat = posicion.coords.latitude
+        const lng = posicion.coords.longitude
+        try {
+          const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+          const data = await resp.json()
+          const direccion = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+          if (tipo === 'comercial') {
+            cliente.value.direccion = direccion
+            coordenadasComercial.value = { lat, lng }
+          } else {
+            cliente.value.direccion_residencial = direccion
+            coordenadasResidencial.value = { lat, lng }
+          }
+        } catch (_) {
+          alert('No fue posible obtener la dirección desde la ubicación')
+        }
+      },
+      () => {
+        alert('No fue posible obtener la ubicación. Asegúrate de tener la ubicación activada en Ajustes del iPhone.')
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+    )
   }
   
   async function crearCliente() {

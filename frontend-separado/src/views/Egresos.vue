@@ -191,7 +191,7 @@
     <!-- Modal de éxito (egreso registrado/actualizado/eliminado) -->
     <Teleport to="body">
       <div v-if="mostrarModalExitoEgreso" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cerrarModalExitoEgreso"></div>
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cerrarModalExitoEgreso"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-green-200/50 dark:border-green-700/50 transition-all duration-300">
           <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-green-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
             <div class="flex items-center gap-3 mb-2">
@@ -206,6 +206,80 @@
             <div class="flex justify-center">
               <button @click="cerrarModalExitoEgreso" class="px-6 py-2.5 text-white bg-green-700 hover:bg-green-800 border-2 border-green-800/60 rounded-lg font-semibold transition-all duration-200 shadow-md">
                 {{ t('common.accept') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Banner reingreso solicitud llave -->
+    <Teleport to="body">
+      <div v-if="solicitudExitosa && !mostrarModalLlave" class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-md px-4">
+        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-lg px-4 py-3 shadow-lg cursor-pointer" @click="reabrirModalLlaveEgreso">
+          <p class="text-sm font-medium text-amber-800 dark:text-amber-200 text-center">Solicitud de llave enviada — Haz clic para ver el estado</p>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal de Llave necesaria (egreso) -->
+    <Teleport to="body">
+      <div v-if="mostrarModalLlave" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="mostrarModalLlave = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-amber-300/50 dark:border-amber-700/50 transition-all duration-300">
+          <div class="p-6 border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 bg-gradient-to-r from-amber-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-2">
+              <svg class="w-10 h-10 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Llave requerida</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-4">
+            <template v-if="estadoLlave === 'pendiente'">
+              <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                Este egreso de <strong>${{ formatNumLlave(datosLlave.venta, 0) }}</strong> excede el tope de <strong>${{ formatNumLlave(datosLlave.tope, 0) }}</strong> configurado por tu administrador.
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Solicita una llave para continuar con el registro del egreso.</p>
+              <button
+                type="button"
+                :disabled="solicitandoLlave"
+                class="w-full py-2.5 px-4 rounded-lg text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
+                @click="solicitarLlaveEgreso"
+              >
+                {{ solicitandoLlave ? 'Solicitando…' : 'Solicitar llave al administrador' }}
+              </button>
+              <p v-if="solicitudExitosa" class="text-sm text-green-600 dark:text-green-400 text-center">Solicitud enviada. Espera el código de tu administrador.</p>
+            </template>
+            <template v-else-if="estadoLlave === 'esperando'">
+              <p class="text-sm text-green-600 dark:text-green-400 text-center font-medium">Solicitud enviada correctamente</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Espera el código de tu administrador e ingrésalo aquí:</p>
+              <input
+                v-model="codigoLlaveInput"
+                type="text"
+                maxlength="6"
+                placeholder="000000"
+                class="w-full text-center text-2xl font-mono tracking-widest px-3 py-2.5 border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:border-amber-400"
+              />
+              <button
+                type="button"
+                :disabled="!codigoLlaveInput.trim() || validandoLlave"
+                class="w-full py-2.5 px-4 rounded-lg text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
+                @click="usarLlaveEgreso"
+              >
+                {{ validandoLlave ? 'Validando…' : 'Validar y registrar' }}
+              </button>
+              <p v-if="errorLlave" class="text-sm text-red-600 dark:text-red-400 text-center">{{ errorLlave }}</p>
+            </template>
+            <template v-else-if="estadoLlave === 'aprobada'">
+              <p class="text-sm text-green-600 dark:text-green-400 text-center font-medium">Llave validada correctamente</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 text-center">Procesando...</p>
+            </template>
+            <div class="flex justify-center pt-2">
+              <button type="button"
+                class="px-4 py-2 rounded-lg text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                @click="cancelarLlaveEgreso">
+                Cancelar
               </button>
             </div>
           </div>
@@ -252,6 +326,133 @@ const cargandoRuta = ref(true);
 const modal = ref({ visible: false, egreso: null, valor: 0, descripcion: '' })
 const puedeCrear = ref(true)
 let pollingInterval = null
+
+// ===== Llaves para Egresos =====
+const mostrarModalLlave = ref(false)
+const estadoLlave = ref('pendiente')
+const datosLlave = ref({ venta: 0, tope: 0 })
+const solicitandoLlave = ref(false)
+const solicitudExitosa = ref(false)
+const codigoLlaveInput = ref('')
+const validandoLlave = ref(false)
+const errorLlave = ref('')
+const solicitudLlaveId = ref(null)
+const datosEgresoParaLlave = ref(null)
+const edicionPendienteLlave = ref(null)
+
+function formatNumLlave(n, dec = 0) {
+  const num = Number(n)
+  if (!isFinite(num)) return '0'
+  return num.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec })
+}
+
+async function solicitarLlaveEgreso() {
+  if (solicitandoLlave.value) return
+  solicitandoLlave.value = true
+  errorLlave.value = ''
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const res = await fetch(`${API_BASE_URL}/api/vendedores/solicitar-llave`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        valor: datosLlave.value.venta,
+        tope: datosLlave.value.tope,
+        tipo: 'egreso',
+        datos: datosEgresoParaLlave.value
+      })
+    })
+    if (res.ok) {
+      const data = await res.json()
+      solicitudLlaveId.value = data.solicitudId
+      solicitudExitosa.value = true
+      estadoLlave.value = 'esperando'
+    } else {
+      const err = await res.json().catch(() => ({}))
+      errorLlave.value = err.error || 'Error al solicitar llave'
+    }
+  } catch (e) {
+    errorLlave.value = 'Error de conexión'
+  } finally {
+    solicitandoLlave.value = false
+  }
+}
+
+async function usarLlaveEgreso() {
+  if (validandoLlave.value) return
+  validandoLlave.value = true
+  errorLlave.value = ''
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const res = await fetch(`${API_BASE_URL}/api/vendedores/usar-llave`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ codigoLlave: codigoLlaveInput.value.trim() })
+    })
+    if (res.ok) {
+      estadoLlave.value = 'aprobada'
+      if (edicionPendienteLlave.value) {
+        const e = edicionPendienteLlave.value
+        const fetchRes = await fetch(`${API_BASE_URL}/api/egresos/${e._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ valor: Number(e.nuevoValor), descripcion: e.nuevaDescripcion })
+        })
+        if (fetchRes.ok) {
+          modal.value.visible = false
+          tituloModalExitoEgreso.value = t('expense.updatedSuccessTitle')
+          mensajeExitoEgreso.value = t('expense.updatedSuccessMessage')
+          mostrarModalExitoEgreso.value = true
+          fetchEgresos()
+        } else {
+          alert('Error al actualizar egreso')
+        }
+        edicionPendienteLlave.value = null
+      } else if (datosEgresoParaLlave.value) {
+        const fetchRes = await fetch(`${API_BASE_URL}/api/egresos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datosEgresoParaLlave.value)
+        })
+        if (fetchRes.ok) {
+          window.dispatchEvent(new CustomEvent('egreso-registrado'))
+          valor.value = 0
+          descripcion.value = ''
+          tipo.value = 'Retiro de caja'
+          tituloModalExitoEgreso.value = t('expense.registeredSuccessTitle')
+          mensajeExitoEgreso.value = t('expense.registeredSuccessMessage')
+          mostrarModalExitoEgreso.value = true
+          fetchEgresos()
+        } else {
+          alert('Error al registrar egreso')
+        }
+        datosEgresoParaLlave.value = null
+      }
+      mostrarModalLlave.value = false
+      estadoLlave.value = 'pendiente'
+      codigoLlaveInput.value = ''
+      solicitudExitosa.value = false
+    } else {
+      const err = await res.json()
+      errorLlave.value = err.error || 'Código inválido'
+    }
+  } catch (e) {
+    errorLlave.value = 'Error de conexión'
+  } finally {
+    validandoLlave.value = false
+  }
+}
+
+function cancelarLlaveEgreso() {
+  mostrarModalLlave.value = false
+  codigoLlaveInput.value = ''
+  errorLlave.value = ''
+  edicionPendienteLlave.value = null
+}
+
+function reabrirModalLlaveEgreso() {
+  mostrarModalLlave.value = true
+}
 
 function cerrarModalExitoEgreso() {
   mostrarModalExitoEgreso.value = false;
@@ -390,7 +591,7 @@ async function fetchEgresos() {
   });
   egresos.value = await res.json();
   const TIPOS_EGRESO = ['Retiro de caja', 'Comisiones', 'Gasolina', 'Repuestos', 'Salario', 'Gastos varios'];
-  puedeCrear.value = egresos.value.length < TIPOS_EGRESO.length;
+  puedeCrear.value = TIPOS_EGRESO.some(t => !yaExiste(t));
   loading.value = false;
 }
 
@@ -419,7 +620,7 @@ async function registrarEgreso() {
     alert('Debes ingresar una descripción para gastos varios');
     return;
   }
-  registrando.value = true;
+
   const egreso = {
     vendedor: vendedorId,
     ruta: rutaId,
@@ -427,6 +628,31 @@ async function registrarEgreso() {
     valor: valor.value,
     descripcion: tipo.value === 'Gastos varios' ? descripcion.value : ''
   };
+
+  // Validar tope de egresos
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const resVal = await fetch(`${API_BASE_URL}/api/vendedores/validar-egreso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ valor: valor.value })
+    })
+    if (resVal.ok) {
+      const data = await resVal.json()
+      if (data.necesitaLlave) {
+        datosLlave.value = { venta: valor.value, tope: data.tope }
+        datosEgresoParaLlave.value = egreso
+        estadoLlave.value = 'pendiente'
+        codigoLlaveInput.value = ''
+        errorLlave.value = ''
+        solicitudExitosa.value = false
+        mostrarModalLlave.value = true
+        return
+      }
+    }
+  } catch (_) {}
+
+  registrando.value = true;
   try {
     const res = await fetch(`${API_BASE_URL}/api/egresos`, {
       method: 'POST',
@@ -434,6 +660,7 @@ async function registrarEgreso() {
       body: JSON.stringify(egreso)
     });
     if (res.ok) {
+      window.dispatchEvent(new CustomEvent('egreso-registrado'))
       valor.value = 0;
       descripcion.value = '';
       tipo.value = 'Retiro de caja';
@@ -445,6 +672,7 @@ async function registrarEgreso() {
       const data = await res.json();
       alert(data.error || 'Ya existe un egreso de este tipo en esta ruta');
     } else {
+      const data = await res.json().catch(() => ({}));
       alert(data.detalles ? `${data.error || 'Error al registrar egreso'}: ${data.detalles}` : (data.error || 'Error al registrar egreso'));
     }
   } finally {
@@ -453,6 +681,7 @@ async function registrarEgreso() {
 }
 
 function yaExiste(nombreTipo) {
+  if (nombreTipo === 'Gastos varios') return false;
   return egresos.value.some(e => e.tipo === nombreTipo);
 }
 
@@ -463,10 +692,36 @@ function editarEgreso(e) {
 async function guardarEdicion() {
   const e = modal.value.egreso;
   if (!e) return;
+  const nuevoValor = Number(modal.value.valor)
+
+  // Validar tope de egresos
+  try {
+    const token = localStorage.getItem('sessionToken')
+    const resVal = await fetch(`${API_BASE_URL}/api/vendedores/validar-egreso`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ valor: nuevoValor })
+    })
+    if (resVal.ok) {
+      const data = await resVal.json()
+      if (data.necesitaLlave) {
+        modal.value.visible = false
+        datosLlave.value = { venta: nuevoValor, tope: data.tope }
+        edicionPendienteLlave.value = { _id: e._id, nuevoValor, nuevaDescripcion: modal.value.descripcion }
+        estadoLlave.value = 'pendiente'
+        codigoLlaveInput.value = ''
+        errorLlave.value = ''
+        solicitudExitosa.value = false
+        mostrarModalLlave.value = true
+        return
+      }
+    }
+  } catch (_) {}
+
   const res = await fetch(`${API_BASE_URL}/api/egresos/${e._id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ valor: Number(modal.value.valor), descripcion: modal.value.descripcion })
+    body: JSON.stringify({ valor: nuevoValor, descripcion: modal.value.descripcion })
   });
   if (res.ok) {
     modal.value.visible = false;

@@ -34,7 +34,8 @@
     "retryLoad": "Retry",
     "couldNotIdentifyAdvisor": "Could not identify the advisor",
     "status": "Status",
-    "actions": "Actions"
+    "actions": "Actions",
+    "shareText": "Share text"
   },
   "vendorHome": {
     "welcomeHint": "Manage your route, payments and clients.",
@@ -57,6 +58,7 @@
     "clientHistory": "Client History",
     "summary": "Summary",
     "access": "Access",
+    "notes": "Daily Notes",
     "logout": "Logout",
     "adminPanel": "Admin Panel"
   },
@@ -101,6 +103,9 @@
     "renew": "Renew Client",
     "pendingInstallments": "Pending installments",
     "overdueInstallments": "Overdue installments",
+    "installmentsPaid": "Installments paid",
+    "clientInfo": "Client Information",
+    "frequency": "Frequency",
     "visits": "Visits",
     "loansWithUs": "Renovations",
     "clientsWithoutPayments": "Clients without payments",
@@ -126,7 +131,18 @@
     "appliedInterest": "Applied interest",
     "customInterest": "Custom interest rate",
     "customInterestPercent": "Interest rate (%)",
-    "customInterestInvalid": "Enter a valid interest rate between 0 and 100."
+    "customInterestInvalid": "Enter a valid interest rate between 0 and 100.",
+    "biweekly": "Biweekly",
+    "paymentDay": "Payment day",
+    "selectPaymentDay": "Select day",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "sortClients": "Sort Clients"
   },
   "payment": {
     "title": "Payments",
@@ -143,6 +159,7 @@
     "newBalance": "New balance",
     "alreadyRegistered": "Payment already registered",
     "existingPayment": "Existing payment",
+    "existingPaymentNotice": "This client already has a payment in the current route. You will be asked to overwrite it when saving.",
     "renewClient": "Do you want to renew this client?",
     "clientFinished": "The client has finished payment.",
     "finalize": "No, finalize",
@@ -187,7 +204,10 @@
     "current": "Current route",
     "openingDate": "Collection opening date",
     "closingDate": "Closing date",
-    "notClosed": "Not closed"
+    "notClosed": "Not closed",
+    "closeSummary": "Closed Route Summary",
+    "downloadPng": "Download PNG",
+    "shareImage": "Share"
   },
   "summary": {
     "title": "Summary",
@@ -309,6 +329,12 @@
     "commercial": "Commercial Address",
     "residential": "Residential Address"
   },
+  "errors": {
+    "required": "This field is required",
+    "invalidId": "ID is already registered",
+    "invalidDate": "Invalid date",
+    "userAlreadyInUse": "That username is already in use"
+  },
   "createClient": {
     "title": "Create Client",
     "form": {
@@ -323,11 +349,6 @@
       "days": "Days",
       "date": "Date",
       "save": "Save Client"
-    },
-    "errors": {
-      "required": "This field is required",
-      "invalidId": "ID is already registered",
-      "invalidDate": "Invalid date"
     }
   },
   "records": {
@@ -368,6 +389,8 @@
     "close": "Close",
     "syncingPayments": "Syncing payments with the server…",
     "cycleVisits": "Visits in this cycle",
+    "closedSummaries": "Closed route summaries",
+    "selectClosedRoute": "Select a closed route",
     "button": "History"
   },
   "accessHub": {
@@ -375,6 +398,7 @@
     "subtitle": "Your admin session and your advisors' credentials — one clear, secure place.",
     "tabSelf": "My account",
     "tabSelfHint": "Web panel",
+    "tabLlaves": "Keys",
     "tabVendors": "Advisors",
     "tabVendorsHint": "Field app",
     "selfBadge": "You",
@@ -433,7 +457,8 @@
     "currentPasswordRequired": "Current password is required.",
     "finishUserEditFirst": "Confirm or cancel the username change before saving.",
     "finishEmailEditFirst": "Confirm or cancel the email change before saving.",
-    "userEmptyName": "Username cannot be empty."
+    "userEmptyName": "Username cannot be empty.",
+    "pendingUserChangeHint": "Enter the current password and click «Save Changes» to apply."
   },
   "admin": {
     "title": "Admin Panel",
@@ -474,6 +499,12 @@
     "reopenLastRouteConfirm": "Reopen this advisor's last closed route? You can edit payments, income and expenses for that route. Cash and portfolio will be recalculated.",
     "noClosedRouteToReopen": "No closed routes to reopen",
     "routeSummaryHint": "Cash and portfolio sync when you close a route or change movements.",
+    "editDates": "Edit dates",
+    "editRouteDatesTitle": "Edit route dates",
+    "openingDate": "Opening date",
+    "closingDate": "Closing date",
+    "routeDatesSaved": "Dates updated successfully",
+    "dateSaveError": "Error saving dates",
     "viewMovements": "Movements",
     "cashShort": "Cash",
     "walletShort": "Portfolio",
@@ -503,6 +534,8 @@
     "movementTypeIncome": "Income",
     "movementTypeExpense": "Expense",
     "collectionOpeningShort": "Collection opening",
+    "showVendors": "Show advisors",
+    "hideVendors": "Hide advisors",
     "notifications": {
       "title": "Activity",
       "tooltip": "Recent activity from your advisors",
@@ -514,7 +547,8 @@
         "sale": "Sale",
         "client": "Client",
         "clientNew": "New client",
-        "clientRenewed": "Renewal"
+        "clientRenewed": "Renewal",
+        "clientEdit": "Edition"
       },
       "detailSale": "Sale · ${valor}{desc}",
       "detailClient": "New client · {name}{nick} · ${valor}",
@@ -527,7 +561,23 @@
       "confirmDeleteAll": "Hide all notifications from this list? Sales and clients are not deleted; they only stop showing here.",
       "confirmDeleteSelected": "Hide the {n} selected notifications?",
       "deleteError": "Could not update notifications."
-    }
+    },
+    "printRouteSheet": "Print Route Sheet",
+    "routeSheetTitle": "Route Sheet",
+    "printVendor": "Advisor",
+    "printName": "Name",
+    "printId": "ID",
+    "printPhone": "Phone",
+    "printSale": "Sale",
+    "printInstallment": "Installment",
+    "printDays": "Days",
+    "printFrequency": "Frequency",
+    "printAddress": "Address",
+    "printDate": "Print date",
+    "printFilter": "Filter",
+    "printAll": "All",
+    "printNoClients": "No clients to print with current filters.",
+    "printGroup": "Group"
   },
   "income": {
     "register": "Register Income",
@@ -572,5 +622,15 @@
       "salary": "Salary",
       "various": "Various expenses"
     }
+  },
+  "chatbot": {
+    "title": "Help Assistant",
+    "subtitle": "Ask questions about the system",
+    "placeholder": "Type your question here...",
+    "send": "Send",
+    "clearChat": "Clear chat",
+    "clearConfirm": "Delete all messages?",
+    "errorMessage": "Sorry, I couldn't process your question. Please try again.",
+    "welcomeMessage": "Hi! I'm the help assistant. Ask me how to use any feature of the system."
   }
 }

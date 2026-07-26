@@ -1,8 +1,8 @@
 <template>
   <Teleport to="body">
-    <div v-if="show" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div v-if="show" class="fixed inset-0 z-[99999] flex items-center justify-center p-4">
       <!-- Overlay con backdrop blur -->
-      <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click="cancel"></div>
+      <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="cancel"></div>
       
       <!-- Modal con diseño mejorado -->
       <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border-2 border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 transform">
