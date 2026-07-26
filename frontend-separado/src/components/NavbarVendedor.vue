@@ -63,7 +63,7 @@
             <LanguageSelector />
             <button
               @click="toggleChat"
-              class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-theme"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-neutral-200 dark:hover:bg-slate-600 transition-theme"
               :title="$t('chatbot.title')"
             >
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
