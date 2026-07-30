@@ -3,7 +3,7 @@
     <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="$emit('close')"></div>
     <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90dvh] flex flex-col overflow-hidden">
       <div class="shrink-0 flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
-        <h2 class="text-lg font-bold text-neutral-900 dark:text-slate-100">Resumen de Ruta Cerrada</h2>
+        <h2 class="text-lg font-bold text-neutral-900 dark:text-slate-100">{{ t('route.closeSummary') }}</h2>
         <button @click="$emit('close')" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-slate-300 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -13,16 +13,16 @@
         <div class="p-6">
           <div class="text-center mb-5">
             <h1 class="text-xl font-bold text-neutral-900">{{ vendedorNombre }}</h1>
-            <p class="text-xs text-neutral-500 mt-0.5">Resumen de Ruta Cerrada</p>
+            <p class="text-xs text-neutral-500 mt-0.5">{{ t('route.closeSummary') }}</p>
           </div>
 
           <div class="text-sm space-y-1 mb-4 text-neutral-700">
             <div class="flex justify-between">
-              <span>Apertura:</span>
+              <span>{{ t('route.openingDate') }}:</span>
               <span class="font-semibold">{{ formatFecha(ruta.fechaApertura) }}</span>
             </div>
             <div class="flex justify-between">
-              <span>Cierre:</span>
+              <span>{{ t('route.closingDate') }}:</span>
               <span class="font-semibold">{{ formatFecha(ruta.fechaCierre) }}</span>
             </div>
           </div>
@@ -31,37 +31,37 @@
 
           <div class="text-sm space-y-2.5">
             <div class="flex justify-between">
-              <span class="text-neutral-600">Caja Inicial</span>
+              <span class="text-neutral-600">{{ t('summary.initialCash') }}</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.cajaInicial, 2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-neutral-600">Recaudo Estimado</span>
+              <span class="text-neutral-600">{{ t('summary.expectedCollected') }}</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.recaudadoPretendido, 2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-neutral-600">Recaudo Actual</span>
+              <span class="text-neutral-600">{{ t('summary.currentCollected') }}</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.recaudado, 2) }}</span>
             </div>
             <div class="flex justify-between border-b border-dashed border-neutral-200 pb-2.5 mb-1.5">
-              <span class="text-neutral-700 font-medium">% de Recaudo</span>
+              <span class="text-neutral-700 font-medium">% {{ t('summary.collected') }}</span>
               <span class="font-bold tabular-nums"
                 :class="porcentajeRecaudo >= 100 ? 'text-green-600' : porcentajeRecaudo >= 70 ? 'text-amber-600' : 'text-red-600'"
               >{{ formatNum(porcentajeRecaudo, 1) }}%</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-neutral-600">Ingresos</span>
+              <span class="text-neutral-600">{{ t('summary.income') }} ({{ t('income.types.base') }})</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.ingresos, 2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-neutral-600">Ventas</span>
+              <span class="text-neutral-600">{{ t('summary.sales') }}</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.ventas, 2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-neutral-600">Egresos</span>
+              <span class="text-neutral-600">{{ t('summary.expenses') }} (Gastos)</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.egresos, 2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-neutral-600">Retiros</span>
+              <span class="text-neutral-600">{{ t('summary.withdrawals') }}</span>
               <span class="font-bold tabular-nums">${{ formatNum(ruta.retiros, 2) }}</span>
             </div>
           </div>
@@ -70,7 +70,7 @@
 
           <div class="text-sm space-y-2.5">
             <div class="flex justify-between font-bold text-neutral-900">
-              <span>Caja Final</span>
+              <span>{{ t('summary.finalCash') }}</span>
               <span class="tabular-nums">${{ formatNum(ruta.cajaFinal, 2) }}</span>
             </div>
           </div>
@@ -79,11 +79,11 @@
 
           <div class="text-xs text-neutral-600 space-y-1">
             <div class="flex justify-between">
-              <span>Total Clientes</span>
+              <span>{{ t('summary.totalClients') }}</span>
               <span class="font-semibold">{{ formatNum(resumen?.total ?? 0) }}</span>
             </div>
             <div class="flex justify-between">
-              <span>Nuevos / Renovados / Cancelados</span>
+              <span>{{ t('summary.newClients') }} / {{ t('summary.renewedClients') }} / {{ t('summary.cancelledClients') }}</span>
               <span class="font-semibold">{{ formatNum(resumen?.nuevos ?? 0) }} / {{ formatNum(resumen?.renovados ?? 0) }} / {{ formatNum(resumen?.cancelados ?? 0) }}</span>
             </div>
           </div>
@@ -95,7 +95,7 @@
           @click="$emit('close')"
           class="px-4 py-2 text-sm font-semibold text-neutral-700 dark:text-slate-300 bg-white dark:bg-gray-800 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-100 dark:hover:bg-gray-700 transition-colors"
         >
-          Cerrar
+          {{ t('common.close') }}
         </button>
         <button
           v-if="soportaCompartir"
@@ -103,14 +103,14 @@
           class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1.5"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-          Compartir
+          {{ t('route.shareImage') }}
         </button>
         <button
           @click="descargarPNG"
           class="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center gap-1.5"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Descargar PNG
+          {{ t('route.downloadPng') }}
         </button>
       </div>
     </div>
@@ -130,7 +130,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const summaryCardRef = ref(null)
 
 const soportaCompartir = computed(() => {

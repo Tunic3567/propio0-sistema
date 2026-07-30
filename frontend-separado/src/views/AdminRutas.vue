@@ -458,7 +458,7 @@ async function ejecutarCerrarRuta(vendedorId) {
     const res = await fetch(`${API_BASE_URL}/api/admin/rutas/cerrar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigoVinculacion: codigo(), vendedorId })
+      body: JSON.stringify({ codigoVinculacion: codigo(), vendedorId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '' })
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {

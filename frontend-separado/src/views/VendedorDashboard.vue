@@ -1671,10 +1671,11 @@ async function confirmarCierreRuta() {
     mostrarModalPendientes.value = true
     return
   }
+  const tz = getUserTimezone()
   const res = await fetch(`${API_BASE_URL}/api/rutas/cerrar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ vendedorId })
+    body: JSON.stringify({ vendedorId, timezone: tz })
   });
   if (res.ok) {
     mostrarModalCierre.value = false

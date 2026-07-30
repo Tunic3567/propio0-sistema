@@ -47,8 +47,8 @@
       </form>
       <div v-if="rutaAbierta || cargandoRuta" class="bg-white dark:bg-gray-800 rounded-lg border-2 border-neutral-300 dark:border-gray-600 shadow-md p-6 transition-colors duration-300">
         <h2 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">{{ $t('expense.registered') }}</h2>
-        <div v-if="!loading && egresos.length === 0" class="text-center text-gray-500 dark:text-gray-400">{{ $t('expense.noMovements') || 'No hay movimientos registrados en esta ruta.' }}</div>
-        <div v-else-if="egresos.length > 0" class="space-y-3">
+        <div v-if="!loading && (!Array.isArray(egresos) || egresos.length === 0)" class="text-center text-gray-500 dark:text-gray-400">{{ $t('expense.noMovements') || 'No hay movimientos registrados en esta ruta.' }}</div>
+        <div v-else-if="Array.isArray(egresos) && egresos.length > 0" class="space-y-3">
           <!-- Resumen de movimientos -->
           <div class="bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-600 rounded-lg p-3 mb-4 transition-colors duration-300">
             <div class="grid grid-cols-2 gap-4 text-sm">
@@ -556,14 +556,16 @@ function formatFecha(fecha) {
 }
 
 function calcularTotalRetiros() {
-  return egresos.value
+  const arr = Array.isArray(egresos.value) ? egresos.value : []
+  return arr
     .filter(e => e.tipo === 'Retiro de caja')
     .reduce((sum, e) => sum + (e.valor || 0), 0)
     .toFixed(2);
 }
 
 function calcularTotalEgresos() {
-  return egresos.value
+  const arr = Array.isArray(egresos.value) ? egresos.value : []
+  return arr
     .filter(e => e.tipo !== 'Retiro de caja')
     .reduce((sum, e) => sum + (e.valor || 0), 0)
     .toFixed(2);
@@ -571,33 +573,36 @@ function calcularTotalEgresos() {
 
 async function fetchEgresos() {
   loading.value = true;
-  const vendedorId = localStorage.getItem('vendedorId');
-  // Obtener la ruta activa
-  const estadoRuta = await consultarEstadoRuta();
-  rutaAbierta.value = estadoRuta.abierta;
-  cargandoRuta.value = estadoRuta.cargando;
-  const ruta = estadoRuta.ruta;
-  if (!ruta || !ruta._id) {
+  try {
+    const vendedorId = localStorage.getItem('vendedorId');
+    const estadoRuta = await consultarEstadoRuta();
+    rutaAbierta.value = estadoRuta.abierta;
+    cargandoRuta.value = estadoRuta.cargando;
+    const ruta = estadoRuta.ruta;
+    if (!ruta || !ruta._id) {
+      egresos.value = [];
+      rutaIdActual.value = null;
+      return;
+    }
+    rutaIdActual.value = ruta._id;
+    const timestamp = new Date().getTime()
+    const res = await fetch(`${API_BASE_URL}/api/egresos?vendedor=${vendedorId}&ruta=${ruta._id}&_t=${timestamp}`, {
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      egresos.value = await res.json();
+    } else {
+      egresos.value = [];
+    }
+    const TIPOS_EGRESO = ['Retiro de caja', 'Comisiones', 'Gasolina', 'Repuestos', 'Salario', 'Gastos varios'];
+    puedeCrear.value = TIPOS_EGRESO.some(t => !yaExiste(t));
+  } catch (error) {
+    console.error('Error al cargar egresos:', error);
     egresos.value = [];
-    rutaIdActual.value = null;
+  } finally {
     loading.value = false;
-    return;
   }
-  rutaIdActual.value = ruta._id;
-  // Forzar recarga desde la base de datos, evitando caché con timestamp
-  const timestamp = new Date().getTime()
-  const res = await fetch(`${API_BASE_URL}/api/egresos?vendedor=${vendedorId}&ruta=${ruta._id}&_t=${timestamp}`, {
-    cache: 'no-store'
-  });
-  egresos.value = await res.json();
-  const TIPOS_EGRESO = ['Retiro de caja', 'Comisiones', 'Gasolina', 'Repuestos', 'Salario', 'Gastos varios'];
-  puedeCrear.value = TIPOS_EGRESO.some(t => !yaExiste(t));
-  loading.value = false;
 }
-
-onMounted(async () => {
-  await fetchEgresos();
-});
 
 async function registrarEgreso() {
   const vendedorId = localStorage.getItem('vendedorId');
@@ -682,6 +687,7 @@ async function registrarEgreso() {
 
 function yaExiste(nombreTipo) {
   if (nombreTipo === 'Gastos varios') return false;
+  if (!Array.isArray(egresos.value)) return false;
   return egresos.value.some(e => e.tipo === nombreTipo);
 }
 

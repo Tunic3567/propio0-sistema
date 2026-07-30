@@ -524,6 +524,10 @@
     "selectAdvisorForClient": "Selecciona el asesor al que pertenecerá el cliente.",
     "couldNotDetermineAdvisor": "No se pudo determinar el asesor de la ruta.",
     "incomeExpenseAnyAdvisor": "Crea ingresos o egresos para cualquier ruta de tus asesores. Al guardar, editar o eliminar se actualizan caja y cartera en el resumen.",
+    "incomeExpenseMoveIncomeToTop": "Mover ingreso al inicio",
+    "incomeExpenseMoveIncomeToTopTooltip": "Mueve este ingreso al inicio de la lista",
+    "incomeExpenseMoveIncomeToTopSuccess": "Ingreso movido al inicio",
+    "incomeExpenseConfirmDeleteGeneric": "¿Seguro que deseas eliminar este movimiento?",
     "vendorFallbackName": "Asesor",
     "filterByRoute": "Filtrar por ruta",
     "routePayments": "Pagos de la ruta",
@@ -589,6 +593,7 @@
     "printGroup": "Grupo"
   },
   "income": {
+    "incomeSection": "Ingresos",
     "register": "Registrar Ingreso",
     "registered": "Ingresos Registrados",
     "registeredSuccessTitle": "Ingreso registrado",

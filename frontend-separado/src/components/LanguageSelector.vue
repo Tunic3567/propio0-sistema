@@ -110,6 +110,7 @@ function toggleDropdown() {
 function selectLanguage(langCode) {
   locale.value = langCode
   localStorage.setItem('app-locale', langCode)
+  document.documentElement.lang = langCode
   isOpen.value = false
   window.dispatchEvent(new CustomEvent('language-changed', { detail: { locale: langCode } }))
 }

@@ -53,7 +53,7 @@
             </div>
           </div>
         </div>
-        <h2 class="text-xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">{{ t('payment.register') }}<span v-if="clienteNombre"> · {{ clienteNombre }}</span></h2>
+        <h2 class="text-xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100"><span v-if="clienteNombre">{{ clienteNombre }}</span></h2>
 
         <!-- Info card -->
         <div class="mb-4 p-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-sm">

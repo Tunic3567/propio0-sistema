@@ -1,8 +1,13 @@
 <!doctype html>
 <html lang="en" class="notranslate">
   <head>
+    <script>
+      (function(){var l=localStorage.getItem('app-locale')||navigator.language||'es';if(l.startsWith('pt'))l='pt';else if(l.startsWith('en'))l='en';else l='es';document.documentElement.lang=l})()
+    </script>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <!-- Evita zoom por pellizco / doble toque en iOS y mantiene escala fija (PWA / web móvil) -->
     <meta
       name="viewport"
@@ -14,6 +19,22 @@
     <meta name="google" content="notranslate" />
     <meta name="application-name" content="FinzBPP" />
     <meta name="apple-mobile-web-app-title" content="FinzBPP" />
+    <meta name="description" content="FinzBPP — Sistema de gestión de cobranza y administración de rutas para asesores. Controlá pagos, ingresos, egresos y cartera en tiempo real." />
+    <meta name="theme-color" content="#1e293b" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="FinzBPP" />
+    <meta property="og:description" content="FinzBPP — Sistema de gestión de cobranza y administración de rutas para asesores. Controlá pagos, ingresos, egresos y cartera en tiempo real." />
+    <meta property="og:image" content="/logo.png" />
+    <meta property="og:image:width" content="2306" />
+    <meta property="og:image:height" content="2522" />
+    <meta property="og:url" content="https://finzbpp.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FinzBPP" />
+    <meta name="twitter:description" content="FinzBPP — Sistema de gestión de cobranza y administración de rutas para asesores." />
+    <meta name="twitter:image" content="/logo.png" />
     <title>FinzBPP</title>
     <!-- Leaflet CSS: empaquetado desde npm en main.js (evita unpkg + Tracking Prevention en Edge) -->
   </head>

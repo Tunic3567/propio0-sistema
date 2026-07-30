@@ -1,4 +1,5 @@
 <template>
+  <OfflineStatusBar @sync="forzarSync" />
   <div class="relative w-full max-w-full min-w-0">
     <!-- Navbar principal: fixed + espaciador reserva alto (menú lateral z-[101] queda por encima) -->
     <nav
@@ -312,6 +313,8 @@ import { toggleChat } from '../chatState.js';
 import API_BASE_URL from '../config/api.js';
 import { clearOfflinePagosPending, emitOfflinePagosChanged, getOfflinePendingCount } from '../utils/offlinePagoQueue.js';
 import { syncAllPendingPagos } from '../utils/syncOfflinePagos.js';
+import OfflineStatusBar from './OfflineStatusBar.vue';
+import { forceSync } from '../utils/syncEngine.js';
 
 const props = defineProps({
   rutaAbierta: Boolean,
@@ -461,6 +464,10 @@ function navigateTo(path) {
 function cerrarRuta() {
   emit('cerrar-ruta');
   closeSidebar();
+}
+
+function forzarSync() {
+  forceSync()
 }
 
 function logout() {

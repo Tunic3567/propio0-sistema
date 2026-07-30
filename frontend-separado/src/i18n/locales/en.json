@@ -515,6 +515,10 @@
     "selectAdvisorForClient": "Select the advisor the client will belong to.",
     "couldNotDetermineAdvisor": "Could not determine the advisor for this route.",
     "incomeExpenseAnyAdvisor": "Create income or expenses for any of your advisors' routes. Saving, editing or deleting updates cash and portfolio in the summary.",
+    "incomeExpenseMoveIncomeToTop": "Move income to top",
+    "incomeExpenseMoveIncomeToTopTooltip": "Moves this income to the top of the list",
+    "incomeExpenseMoveIncomeToTopSuccess": "Income moved to top",
+    "incomeExpenseConfirmDeleteGeneric": "Are you sure you want to delete this movement?",
     "vendorFallbackName": "Advisor",
     "filterByRoute": "Filter by route",
     "routePayments": "Route payments",
@@ -580,6 +584,7 @@
     "printGroup": "Group"
   },
   "income": {
+    "incomeSection": "Income",
     "register": "Register Income",
     "registered": "Registered Income",
     "registeredSuccessTitle": "Income registered",

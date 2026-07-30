@@ -114,11 +114,13 @@
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { chatVisible, closeChat } from '../chatState.js'
 import API_BASE_URL from '../config/api.js'
 
 const { t } = useI18n()
+const route = useRoute()
 
 const mensajes = ref(cargarHistorial())
 const mensajeActual = ref('')
@@ -170,7 +172,10 @@ async function enviar() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ mensaje: texto })
+      body: JSON.stringify({
+        mensaje: texto,
+        rutaActual: route.path
+      })
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))

@@ -19,6 +19,8 @@ const RepairResumenAdmin = () => import('../views/RepairResumenAdmin.vue')
 const GestionUsuarios = () => import('../views/GestionUsuarios.vue')
 const SuperResumenGlobal = () => import('../views/SuperResumenGlobal.vue')
 const SuperDashboard = () => import('../views/SuperDashboard.vue')
+const LimpiarVendedor = () => import('../views/LimpiarVendedor.vue')
+const LimpiarCliente = () => import('../views/LimpiarCliente.vue')
 import AdminRutas from '../views/AdminRutas.vue'
 import AdminVentas from '../views/AdminVentas.vue'
 const NotasDia = () => import('../views/NotasDia.vue')
@@ -76,6 +78,18 @@ const routes = [
     path: '/admin/super/dashboard',
     name: 'SuperDashboard',
     component: SuperDashboard,
+    meta: { requiresAuth: true, role: 'superusuario' }
+  },
+  {
+    path: '/admin/super/limpiar-vendedor',
+    name: 'LimpiarVendedor',
+    component: LimpiarVendedor,
+    meta: { requiresAuth: true, role: 'superusuario' }
+  },
+  {
+    path: '/admin/super/limpiar-cliente',
+    name: 'LimpiarCliente',
+    component: LimpiarCliente,
     meta: { requiresAuth: true, role: 'superusuario' }
   },
   {

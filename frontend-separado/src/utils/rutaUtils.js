@@ -106,7 +106,7 @@ export async function cerrarRuta() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ vendedorId })
+      body: JSON.stringify({ vendedorId, timezone: getUserTimezone() })
     })
 
     if (res.ok) {
