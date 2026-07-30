@@ -17,11 +17,7 @@
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               Corregir fechas
             </button>
-            <button type="button" @click="router.push('/admin/super/limpiar-cliente')"
-              class="px-3 py-1.5 rounded-lg border-2 border-red-400/60 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-xs font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1.5 shrink-0">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              Eliminar cliente
-            </button>
+
           </div>
         </div>
 
@@ -76,7 +72,7 @@
             <div v-if="seccionesAbiertas.sinRuta">
               <DashboardClientesDosColumnas :list="filtrar(clientesSinRuta)" :item-key="(c, i) => c._id || i">
                 <template #default="{ item: c, index: i }">
-                  <ClienteCard :cliente="c" :index="i" :pagos-index="pagosIndex" :rutas-por-vendedor="rutasPorVendedor" @pagar="irAPagos" @historial="irHistorialCliente" @llamar="llamarCliente" @editar-cliente="abrirModalEditarCliente" />
+                  <ClienteCard :cliente="c" :index="i" :pagos-index="pagosIndex" :rutas-por-vendedor="rutasPorVendedor" @pagar="irAPagos" @historial="irHistorialCliente" @llamar="llamarCliente" @editar-cliente="abrirModalEditarCliente" @eliminar-cliente="confirmarEliminarCliente" />
                 </template>
               </DashboardClientesDosColumnas>
             </div>
@@ -93,7 +89,7 @@
             <div v-if="seccionesAbiertas.sinPago">
               <DashboardClientesDosColumnas :list="filtrar(clientesSinPago)" :item-key="(c, i) => c._id || i">
                 <template #default="{ item: c, index: i }">
-                  <ClienteCard :cliente="c" :index="i" :pagos-index="pagosIndex" :rutas-por-vendedor="rutasPorVendedor" @pagar="irAPagos" @historial="irHistorialCliente" @llamar="llamarCliente" @editar-cliente="abrirModalEditarCliente" />
+                  <ClienteCard :cliente="c" :index="i" :pagos-index="pagosIndex" :rutas-por-vendedor="rutasPorVendedor" @pagar="irAPagos" @historial="irHistorialCliente" @llamar="llamarCliente" @editar-cliente="abrirModalEditarCliente" @eliminar-cliente="confirmarEliminarCliente" />
                 </template>
               </DashboardClientesDosColumnas>
             </div>
@@ -112,7 +108,7 @@
             <div v-if="seccionesAbiertas.conPago">
               <DashboardClientesDosColumnas :list="filtrar(clientesConPago)" :item-key="(c, i) => c._id || i" wide-gap>
                 <template #default="{ item: c, index: i }">
-                  <ClienteCard :cliente="c" :index="i" :pagos-index="pagosIndex" :rutas-por-vendedor="rutasPorVendedor" :pago-en-ruta="pagoPorClienteMap.get(String(c._id)) || null" @pagar="irAPagos" @historial="irHistorialCliente" @llamar="llamarCliente" @eliminar-pago="abrirModalEliminar" @editar-cliente="abrirModalEditarCliente" />
+                  <ClienteCard :cliente="c" :index="i" :pagos-index="pagosIndex" :rutas-por-vendedor="rutasPorVendedor" :pago-en-ruta="pagoPorClienteMap.get(String(c._id)) || null" @pagar="irAPagos" @historial="irHistorialCliente" @llamar="llamarCliente" @eliminar-pago="abrirModalEliminar" @editar-cliente="abrirModalEditarCliente" @eliminar-cliente="confirmarEliminarCliente" />
                 </template>
               </DashboardClientesDosColumnas>
             </div>
@@ -163,6 +159,38 @@
             <button type="button" @click="confirmarEliminar" :disabled="eliminando" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors flex items-center gap-2">
               <svg v-if="eliminando" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
               {{ eliminando ? 'Eliminando...' : 'Confirmar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-if="modalEliminarCliente" class="fixed inset-0 z-[9999] flex items-center justify-center p-4" @click.self="modalEliminarCliente = null">
+        <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="modalEliminarCliente = null" />
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-5 md:p-6 mx-auto border border-neutral-300 dark:border-slate-600">
+          <h3 class="text-lg font-bold text-red-700 dark:text-red-300 mb-4">Eliminar cliente permanentemente</h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="text-neutral-600 dark:text-slate-400">Cliente</span>
+              <span class="font-semibold text-neutral-900 dark:text-slate-100 text-right">{{ modalEliminarCliente?.nombres }} {{ modalEliminarCliente?.apellidos }}</span>
+            </div>
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/40 rounded-lg p-3 text-xs text-red-800 dark:text-red-200 mt-2 space-y-1">
+              <p>Se eliminar&aacute;n <strong>todos</strong> los datos relacionados:</p>
+              <ul class="list-disc list-inside">
+                <li>Pagos registrados</li>
+                <li>Historial del cliente</li>
+                <li>Notas del d&iacute;a asociadas</li>
+                <li>C&eacute;dulas reportadas</li>
+                <li>El registro del cliente</li>
+              </ul>
+              <p class="font-bold mt-1">Esta acci&oacute;n no se puede deshacer.</p>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 mt-5">
+            <button type="button" @click="modalEliminarCliente = null" class="px-4 py-2 rounded-lg border border-neutral-400 dark:border-slate-500 bg-white dark:bg-slate-700 text-neutral-800 dark:text-slate-100 text-sm font-semibold hover:bg-neutral-100 dark:hover:bg-slate-600 transition-colors">
+              Cancelar
+            </button>
+            <button type="button" @click="ejecutarEliminarCliente" :disabled="eliminandoCliente" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors flex items-center gap-2">
+              <svg v-if="eliminandoCliente" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+              {{ eliminandoCliente ? 'Eliminando...' : 'Eliminar permanentemente' }}
             </button>
           </div>
         </div>
@@ -466,6 +494,8 @@ const filtroBusqueda = ref('')
 const modalHistorialVentas = ref(null)
 const modalEliminar = ref(null)
 const eliminando = ref(false)
+const modalEliminarCliente = ref(null)
+const eliminandoCliente = ref(false)
 const guardandoCorrecciones = ref(false)
 const mensajeCorregir = ref(null)
 const seccionesAbiertas = ref({ sinRuta: true, sinPago: true, conPago: true })
@@ -757,6 +787,33 @@ async function confirmarEliminar() {
     alert('Error de red al eliminar el pago')
   } finally {
     eliminando.value = false
+  }
+}
+
+function confirmarEliminarCliente(cliente) {
+  modalEliminarCliente.value = cliente
+}
+
+async function ejecutarEliminarCliente() {
+  if (!modalEliminarCliente.value) return
+  eliminandoCliente.value = true
+  const clienteId = modalEliminarCliente.value._id
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/super/clientes/${encodeURIComponent(String(clienteId))}/limpiar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('sessionToken')}`
+      }
+    })
+    const data = await res.json().catch(() => null)
+    if (!res.ok) { alert(data?.error || 'Error al eliminar el cliente'); return }
+    modalEliminarCliente.value = null
+    await cargarDatos()
+  } catch (e) {
+    alert('Error de red al eliminar el cliente')
+  } finally {
+    eliminandoCliente.value = false
   }
 }
 
