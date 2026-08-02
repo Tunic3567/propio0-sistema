@@ -47,7 +47,7 @@
                 {{ (t.bloques || []).length }} bloque(s)
               </p>
             </div>
-            <div class="flex items-center gap-1 shrink-0" @click.stop>
+            <div v-if="t._id !== 'nuevo'" class="flex items-center gap-1 shrink-0" @click.stop>
               <button type="button" title="Subir" :disabled="idx === 0" @click="moverTarjeta(t._id, -1)"
                 class="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-slate-600 text-neutral-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
@@ -219,9 +219,11 @@ function toggle(id) {
 }
 
 function nuevaTarjeta() {
+  if (editandoId.value === 'nuevo') return
   borrador.value = { pregunta: '', bloques: [] }
   editandoId.value = 'nuevo'
   abiertasIds.value = new Set([...abiertasIds.value, 'nuevo'])
+  tutoriales.value = [{ _id: 'nuevo', pregunta: 'Nueva tarjeta', bloques: [] }, ...tutoriales.value]
 }
 
 function editarTarjeta(t) {
@@ -239,6 +241,7 @@ function cancelarEdicion() {
   const set = new Set(abiertasIds.value)
   set.delete('nuevo')
   abiertasIds.value = set
+  tutoriales.value = tutoriales.value.filter(t => t._id !== 'nuevo')
 }
 
 async function guardarTarjeta(t) {
