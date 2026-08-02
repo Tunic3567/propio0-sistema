@@ -17,6 +17,12 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             Recargar
           </button>
+          <button type="button" @click="cargarEjemplos" :disabled="sembrando"
+            class="px-4 py-2 rounded-lg border border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-sm font-semibold hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg v-if="sembrando" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            {{ sembrando ? 'Cargando...' : 'Cargar tarjetas de ejemplo' }}
+          </button>
         </div>
         <button type="button" @click="nuevaTarjeta"
           class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors flex items-center gap-2">
@@ -184,6 +190,7 @@ const error = ref('')
 const abiertasIds = ref(new Set())
 const editandoId = ref(null)
 const guardando = ref(false)
+const sembrando = ref(false)
 const borrador = ref({ pregunta: '', bloques: [] })
 
 onMounted(cargar)
@@ -209,6 +216,27 @@ async function cargar() {
 
 function abierta(id) {
   return abiertasIds.value.has(id)
+}
+
+async function cargarEjemplos() {
+  if (!confirm('¿Cargar las tarjetas de ejemplo para vendedores? Se agregarán las que falten y se actualizarán las que ya existan.')) return
+  sembrando.value = true
+  error.value = ''
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/tutoriales/seed`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({})
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error || 'Error al cargar las tarjetas')
+    alert(`Listo: ${data.nuevas || 0} nueva(s), ${data.actualizadas || 0} actualizada(s).`)
+    await cargar()
+  } catch (e) {
+    alert(e.message)
+  } finally {
+    sembrando.value = false
+  }
 }
 
 function toggle(id) {
