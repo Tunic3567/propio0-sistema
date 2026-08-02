@@ -1679,9 +1679,12 @@ async function confirmarCierreRuta() {
   });
   if (res.ok) {
     mostrarModalCierre.value = false
+    const rutaCerrada = await res.json().catch(() => null)
+    const rutaIdCerrada = rutaCerrada?._id
     try {
       const vid = localStorage.getItem('vendedorId')
-      const panelRes = await fetch(`${API_BASE_URL}/api/vendedores/${vid}/panel?_ts=${Date.now()}`, { cache: 'no-store' })
+      const qs = rutaIdCerrada ? `?rutaId=${rutaIdCerrada}&` : '?'
+      const panelRes = await fetch(`${API_BASE_URL}/api/vendedores/${vid}/panel${qs}_ts=${Date.now()}`, { cache: 'no-store' })
       if (panelRes.ok) {
         const panel = await panelRes.json()
         datosResumenCierre.value = {
