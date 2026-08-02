@@ -258,6 +258,20 @@
           </svg>
           <span class="text-left leading-snug">Tutorial</span>
         </button>
+
+        <button
+          v-if="esSuperUsuario"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left border border-red-400/60 dark:border-red-600/50"
+          :class="[
+            isActive('/admin/super/eliminar-admin') ? 'bg-red-100 dark:bg-red-950/50 text-red-950 dark:text-red-100 border-l-2 border-red-600' : 'text-red-900 dark:text-red-200 hover:bg-red-50 dark:hover:bg-red-950/30'
+          ]"
+          @click="navigateTo('/admin/super/eliminar-admin')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <span class="text-left leading-snug">Eliminar admin <span class="block text-xs opacity-80">(solo test)</span></span>
+        </button>
       </div>
 
       <!-- Acciones críticas -->
@@ -376,6 +390,7 @@ const tituloHeader = computed(() => {
   if (route.path.startsWith('/admin/repair-resumen')) return 'Reparar resumen (emergencia)';
   if (route.path.startsWith('/admin/super/limpiar-vendedor')) return 'Limpiar vendedor (test)';
   if (route.path.startsWith('/admin/super/tutoriales')) return 'Tutorial';
+  if (route.path.startsWith('/admin/super/eliminar-admin')) return 'Eliminar admin (test)';
   if (route.path.startsWith('/admin/ventas')) return t('nav.sales');
   if (route.path.startsWith('/admin/resumen')) return t('nav.summary') || 'Resumen';
   if (route.path.startsWith('/admin/rutas')) return 'Rutas';

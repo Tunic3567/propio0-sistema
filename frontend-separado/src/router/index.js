@@ -21,6 +21,7 @@ const SuperResumenGlobal = () => import('../views/SuperResumenGlobal.vue')
 const SuperDashboard = () => import('../views/SuperDashboard.vue')
 const LimpiarVendedor = () => import('../views/LimpiarVendedor.vue')
 const Tutoriales = () => import('../views/Tutoriales.vue')
+const EliminarAdmin = () => import('../views/EliminarAdmin.vue')
 import AdminRutas from '../views/AdminRutas.vue'
 import AdminVentas from '../views/AdminVentas.vue'
 const NotasDia = () => import('../views/NotasDia.vue')
@@ -90,6 +91,12 @@ const routes = [
     path: '/admin/super/tutoriales',
     name: 'Tutoriales',
     component: Tutoriales,
+    meta: { requiresAuth: true, role: 'superusuario' }
+  },
+  {
+    path: '/admin/super/eliminar-admin',
+    name: 'EliminarAdmin',
+    component: EliminarAdmin,
     meta: { requiresAuth: true, role: 'superusuario' }
   },
   {
