@@ -36,9 +36,19 @@
               </svg>
               <span class="text-sm font-medium text-neutral-700 dark:text-slate-200 hidden sm:inline">{{ $t('chatbot.title') }}</span>
             </button>
+            <div class="hidden md:flex items-center gap-2 sm:gap-2.5">
+              <LanguageSelector />
+            </div>
             <AdminNotificationsBell />
             <ThemeToggle />
-            <LanguageSelector />
+            <HeaderMoreMenu>
+              <div class="flex items-center justify-between px-2 py-2 border-b border-neutral-200 dark:border-slate-600">
+                <span class="text-sm font-semibold text-neutral-700 dark:text-slate-200 px-2">Más opciones</span>
+              </div>
+              <div class="flex items-center justify-center gap-2 py-3">
+                <LanguageSelector />
+              </div>
+            </HeaderMoreMenu>
           </div>
         </div>
       </div>
@@ -300,6 +310,7 @@ import { useI18n } from 'vue-i18n';
 import LanguageSelector from './LanguageSelector.vue';
 import ThemeToggle from './ThemeToggle.vue';
 import AdminNotificationsBell from './AdminNotificationsBell.vue';
+import HeaderMoreMenu from './HeaderMoreMenu.vue';
 import { toggleChat } from '../chatState.js';
 import API_BASE_URL from '../config/api.js';
 import OfflineStatusBar from './OfflineStatusBar.vue';

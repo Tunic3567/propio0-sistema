@@ -672,10 +672,10 @@ function cancelarEdicion() {
 }
 
 async function ejecutarGuardarEdicion(opts) {
-  const { resRuta, valorNum, ingresoEditData } = opts
+  const { ruta, valorNum, ingresoEditData } = opts
   guardandoEdicion.value = true
   try {
-    const res = await fetch(`${API_BASE_URL}/api/ingresos/ruta/${resRuta._id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/ingresos/ruta/${ruta._id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(ingresoEditData)
@@ -725,7 +725,7 @@ async function guardarEdicionIngreso() {
       const data = await resVal.json()
       if (data.necesitaLlave) {
         datosLlave.value = { venta: valorNum, tope: data.tope }
-        edicionPendienteLlave.value = { resRuta, valorNum, ingresoEditData }
+        edicionPendienteLlave.value = { ruta, valorNum, ingresoEditData }
         estadoLlave.value = 'pendiente'
         codigoLlaveInput.value = ''
         errorLlave.value = ''
@@ -735,7 +735,7 @@ async function guardarEdicionIngreso() {
       }
     }
   } catch (_) {}
-  await ejecutarGuardarEdicion({ resRuta, valorNum, ingresoEditData })
+  await ejecutarGuardarEdicion({ ruta, valorNum, ingresoEditData })
 }
 
 function eliminarIngreso(ingreso) {

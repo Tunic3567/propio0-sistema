@@ -1,7 +1,7 @@
 import { openDB } from 'idb'
 
 const DB_NAME = 'propio-offline-v2'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise = null
 
@@ -16,7 +16,16 @@ function getDb() {
           const store = db.createObjectStore('entities', { keyPath: 'id' })
           store.createIndex('entityType', 'entityType', { unique: false })
         }
+        if (db.objectStoreNames.contains('entities')) {
+          const store = db.transaction('entities').store
+          if (!store.indexNames.contains('entityType')) {
+            store.createIndex('entityType', 'entityType', { unique: false })
+          }
+        }
       }
+    }).catch((e) => {
+      dbPromise = null
+      throw e
     })
   }
   return dbPromise
