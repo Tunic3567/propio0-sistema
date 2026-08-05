@@ -1,7 +1,7 @@
 import { openDB } from 'idb'
 
 const DB_NAME = 'propio-offline-v2'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 let dbPromise = null
 
