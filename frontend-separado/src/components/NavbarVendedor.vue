@@ -446,7 +446,7 @@ function toggleSidebar() {
       if (!vendedorId) {
         rutaAbiertaLocal.value = false;
       } else {
-        fetch(`${API_BASE_URL}/api/rutas/actual/${encodeURIComponent(vendedorId)}`, { cache: 'no-store' })
+        fetch(`${API_BASE_URL}/api/rutas/actual/${encodeURIComponent(vendedorId)}?_t=${Date.now()}`, { cache: 'no-store' })
           .then((r) => (r.ok ? r.json() : null))
           .then((data) => {
             // API devuelve null si no hay ruta abierta, o el documento de la ruta abierta

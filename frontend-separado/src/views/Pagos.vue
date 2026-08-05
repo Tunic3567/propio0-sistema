@@ -774,7 +774,7 @@ import { consultarEstadoRuta } from '../utils/rutaUtils.js'
         let estadoRuta
         if (esAdmin) {
           if (vendorId) {
-            const res = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendorId}`)
+const res = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendorId}?_t=${Date.now()}`)
             if (res.ok) {
               const ruta = await res.json()
               estadoRuta = { abierta: Boolean(ruta?.abierta), ruta }

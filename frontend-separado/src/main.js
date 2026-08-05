@@ -62,6 +62,15 @@ function isRutaActualRequest(url) {
   return url.startsWith(API_BASE_URL) && /\/api\/rutas\/actual\//.test(url)
 }
 
+/** Estado de ruta siempre debe ser en vivo: no se cachea ni se sirve de caché (evita falso "cerrada"). */
+function isRouteStatusRequest(url) {
+  return (
+    isRutaActualRequest(url) ||
+    /\/api\/rutas\/anterior\//.test(url) ||
+    /\/api\/vendedores\/[^/]+\/panel/.test(url)
+  )
+}
+
 function vendedorIdFromRutaActualUrl(url) {
   const match = String(url || '').match(/\/api\/rutas\/actual\/([^/?#]+)/)
   return match ? decodeURIComponent(match[1]) : localStorage.getItem('vendedorId')
@@ -178,7 +187,7 @@ window.fetch = async function patchedFetch(input, init) {
     }
 
     if (method === 'GET') {
-      const cached = await getCachedQueryResult(url)
+      const cached = isRouteStatusRequest(url) ? null : await getCachedQueryResult(url)
       if (cached !== null) {
         if (shouldTrustLocalSessionTemporarily()) {
           window.dispatchEvent(new CustomEvent('offline-session-trusted'))
@@ -199,7 +208,10 @@ window.fetch = async function patchedFetch(input, init) {
     if (!isOffline && shouldUseRutaTemporal(url)) {
       const res = await origFetch(input, nextInit)
       if (res.ok) {
-        try { const data = await res.clone().json(); await cacheQueryResult(url, data) } catch {}
+        try {
+          const data = await res.clone().json()
+          if (!isRouteStatusRequest(url)) await cacheQueryResult(url, data)
+        } catch {}
       }
       return res
     }
@@ -211,7 +223,7 @@ window.fetch = async function patchedFetch(input, init) {
       if (method === 'GET') {
         try {
           const data = await res.clone().json()
-          await cacheQueryResult(url, data)
+          if (!isRouteStatusRequest(url)) await cacheQueryResult(url, data)
           if (Array.isArray(data)) {
             const entity = extractEntityType(url)
             for (const item of data) {
@@ -224,6 +236,10 @@ window.fetch = async function patchedFetch(input, init) {
       }
       if (isMutationMethod(method)) {
         await invalidateQueryCache(url)
+        if (/\/api\/rutas\/(?:abrir|cerrar|reabrir)/.test(url)) {
+          await invalidateQueryCache('/api/rutas/actual')
+          await invalidateQueryCache('/api/rutas/anterior')
+        }
       }
     }
 
@@ -245,7 +261,7 @@ window.fetch = async function patchedFetch(input, init) {
     return res
   } catch (error) {
     if (isOurBackend && !isLogin && method === 'GET') {
-      const cached = await getCachedQueryResult(url)
+      const cached = isRouteStatusRequest(url) ? null : await getCachedQueryResult(url)
       if (cached !== null) {
         if (shouldTrustLocalSessionTemporarily()) {
           window.dispatchEvent(new CustomEvent('offline-session-trusted'))

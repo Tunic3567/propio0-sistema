@@ -110,6 +110,7 @@ export async function cerrarRuta() {
     })
 
     if (res.ok) {
+      try { localStorage.removeItem(getRutaSnapshotKey(vendedorId)) } catch (_) {}
       return true
     } else {
       console.error('Error cerrando ruta:', res.statusText)

@@ -607,7 +607,7 @@ async function registrarIngreso() {
 
   let rutaId = rutaIdActual.value
   if (!rutaId) {
-    const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
+    const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}?_t=${Date.now()}`)
     const ruta = await resRuta.json()
     if (!ruta) {
       alert('No hay una ruta activa. Debes abrir una ruta primero.')
@@ -700,7 +700,7 @@ async function ejecutarGuardarEdicion(opts) {
 async function guardarEdicionIngreso() {
   const vendedorId = localStorage.getItem('vendedorId')
   if (!vendedorId) return alert(t('common.couldNotIdentifyAdvisor'))
-  const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
+  const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}?_t=${Date.now()}`)
   const ruta = await resRuta.json()
   if (!ruta) return alert('No hay ruta activa')
 
@@ -746,7 +746,7 @@ function eliminarIngreso(ingreso) {
 async function confirmarEliminarIngreso() {
   try {
     const vendedorId = localStorage.getItem('vendedorId')
-    const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`)
+    const resRuta = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}?_t=${Date.now()}`)
     const ruta = await resRuta.json()
     if (!ruta) return alert('No hay ruta activa')
     const r = await fetch(`${API_BASE_URL}/api/ingresos/ruta/${ruta._id}`, { method: 'DELETE' })

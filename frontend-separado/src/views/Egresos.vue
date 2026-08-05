@@ -608,7 +608,7 @@ async function registrarEgreso() {
   const vendedorId = localStorage.getItem('vendedorId');
   let rutaId = rutaIdActual.value;
   if (!rutaId) {
-    const rutaRes = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}`);
+    const rutaRes = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendedorId}?_t=${Date.now()}`);
     const ruta = await rutaRes.json();
     if (!ruta || !ruta._id) {
       alert('No hay ruta activa. Debes abrir una ruta para registrar egresos.');
