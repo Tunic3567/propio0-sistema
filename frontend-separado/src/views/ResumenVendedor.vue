@@ -439,8 +439,21 @@ onMounted(async () => {
   const vendedorId = localStorage.getItem('vendedorId')
   if (!vendedorId) { router.push('/'); return }
   
-  // Cargar datos iniciales
-  await cargarPanel(vendedorId)
+  // Stale-while-revalidate: mostrar cache inmediatamente, refrescar en background
+  const cacheKey = `panelCache_${vendedorId}`
+  try {
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      panel.value = parsed
+      rutaAbierta.value = parsed?.ruta?.abierta === true
+      rutaAbiertaCargada.value = true
+      loading.value = false
+    }
+  } catch {}
+
+  // Cargar datos frescos del servidor (siempre)
+  await cargarPanel(vendedorId, cacheKey)
 
   // Escuchar eventos para actualizar cuando sea necesario
   window.addEventListener('cliente-creado', actualizarResumen)
@@ -461,7 +474,10 @@ onMounted(async () => {
   // Iniciar auto-actualización cada 30 segundos
   pollingInterval = window.setInterval(() => {
     const vid = localStorage.getItem('vendedorId')
-    if (vid) cargarPanel(vid)
+    if (vid) {
+      const ck = `panelCache_${vid}`
+      cargarPanel(vid, ck)
+    }
   }, 30000)
 })
 
@@ -469,23 +485,31 @@ function onResumenVisibility() {
   if (document.visibilityState === 'visible') actualizarResumen()
 }
 
-async function cargarPanel(vendedorId) {
+async function cargarPanel(vendedorId, cacheKey) {
   cargandoRuta.value = true
   try {
     const url = new URL(`${API_BASE_URL}/api/vendedores/${vendedorId}/panel`)
     url.searchParams.set('_ts', String(Date.now()))
     const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
     if (res.ok) {
-      panel.value = await res.json()
-      rutaAbierta.value = panel.value?.ruta?.abierta === true
+      const data = await res.json()
+      panel.value = data
+      rutaAbierta.value = data?.ruta?.abierta === true
       rutaAbiertaCargada.value = true
+      if (cacheKey) {
+        try { localStorage.setItem(cacheKey, JSON.stringify(data)) } catch {}
+      }
       } else {
       console.error('Error en la respuesta:', res.statusText)
-      panel.value = null
+      if (!cacheKey || !localStorage.getItem(`panelCache_${vendedorId}`)) {
+        panel.value = null
+      }
     }
   } catch (error) {
     console.error('Error al cargar panel:', error)
-    panel.value = null
+    if (!cacheKey || !localStorage.getItem(`panelCache_${vendedorId}`)) {
+      panel.value = null
+    }
   } finally {
     cargandoRuta.value = false
   }
@@ -495,7 +519,8 @@ async function cargarPanel(vendedorId) {
 function actualizarResumen() {
   const vendedorId = localStorage.getItem('vendedorId')
   if (vendedorId) {
-    cargarPanel(vendedorId)
+    const ck = `panelCache_${vendedorId}`
+    cargarPanel(vendedorId, ck)
   }
 }
 
