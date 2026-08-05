@@ -726,6 +726,7 @@ async function fetchPagos() {
       pagos.value = [];
       return;
     }
+    const cacheKey = `registrosCache_${vendedorId}`;
     const timestamp = Date.now();
     const [estadoRuta, resReg] = await Promise.all([
       consultarEstadoRuta(),
@@ -739,8 +740,21 @@ async function fetchPagos() {
     const data =
       (!ruta || !ruta._id) ? [] : resReg.ok ? await resReg.json() : [];
     pagos.value = data;
+    if ((!ruta || !ruta._id)) {
+      try { localStorage.removeItem(cacheKey) } catch {}
+    } else {
+      try { localStorage.setItem(cacheKey, JSON.stringify(data)) } catch {}
+    }
   } catch (e) {
-    pagos.value = [];
+    // Si falla la red, servir la última data cacheada en vez de vaciar
+    const cached = localStorage.getItem(`registrosCache_${vendedorId}`);
+    if (cached) {
+      try {
+        pagos.value = JSON.parse(cached);
+      } catch {}
+    } else {
+      pagos.value = [];
+    }
     console.error('Error al obtener registros:', e);
   } finally {
     loading.value = false;
@@ -799,6 +813,21 @@ async function guardarEdicion() {
 }
 
 onMounted(async () => {
+  // Stale-while-revalidate: mostrar cache inmediatamente, refrescar en background
+  try {
+    const vendedorId = localStorage.getItem('vendedorId');
+    if (vendedorId) {
+      const cached = localStorage.getItem(`registrosCache_${vendedorId}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          pagos.value = parsed;
+          loading.value = false;
+        }
+      }
+    }
+  } catch (_) {}
+
   // fetchPagos() ya consulta el estado de ruta en paralelo con /registros; clientes va en paralelo.
   await Promise.all([cargarClientes(), fetchPagos()])
 

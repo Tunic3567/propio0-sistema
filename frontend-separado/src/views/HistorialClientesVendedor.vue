@@ -471,10 +471,22 @@ async function cargarHistorial(options = {}) {
     }
     const list = await fetchHistorialListRaw()
     historiales.value = list
+    try { localStorage.setItem(`historialCache_${vendedorId}`, JSON.stringify(list)) } catch {}
     syncModalHistorialSiAbierto(list)
   } catch (error) {
     console.error('Error cargando historial de clientes:', error)
-    if (!silent) alert('Error al cargar el historial de clientes')
+    // Fallback a cache en caso de error de red
+    const vendedorId = localStorage.getItem('vendedorId')
+    const cached = vendedorId ? localStorage.getItem(`historialCache_${vendedorId}`) : null
+    if (cached) {
+      try {
+        const list = JSON.parse(cached)
+        historiales.value = list
+        syncModalHistorialSiAbierto(list)
+      } catch {}
+    } else if (!silent) {
+      alert('Error al cargar el historial de clientes')
+    }
   } finally {
     if (!silent) cargando.value = false
   }
@@ -585,6 +597,21 @@ function logout() {
 
 onMounted(async () => {
   
+  // Stale-while-revalidate: mostrar cache inmediatamente, refrescar en background
+  try {
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId) {
+      const cached = localStorage.getItem(`historialCache_${vendedorId}`)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          historiales.value = parsed
+          cargando.value = false
+        }
+      }
+    }
+  } catch (_) {}
+
   // Consultar estado de la ruta
   const estadoRuta = await consultarEstadoRuta()
   rutaAbierta.value = estadoRuta.abierta

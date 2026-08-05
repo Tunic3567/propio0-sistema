@@ -399,6 +399,21 @@ const edicionPendienteLlave = ref(null) // stores { resRuta, valorNum, ingresoEd
 
 // Cargar ingresos al montar
 onMounted(async () => {
+  // Stale-while-revalidate: mostrar cache inmediatamente, refrescar en background
+  try {
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId) {
+      const cached = localStorage.getItem(`ingresosCache_${vendedorId}`)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          ingresos.value = parsed
+          cargandoRuta.value = false
+        }
+      }
+    }
+  } catch (_) {}
+
   await cargarIngresos()
   
   // Escuchar eventos para actualizar cuando sea necesario
@@ -434,6 +449,7 @@ async function cargarIngresos() {
       return
     }
 
+    const cacheKey = `ingresosCache_${vendedorId}`
     const estado = await consultarEstadoRuta()
     const ruta = estado?.ruta || null
     rutaAbierta.value = !!estado?.abierta
@@ -441,6 +457,7 @@ async function cargarIngresos() {
     if (!ruta || !ruta._id || !rutaAbierta.value) {
       ingresos.value = []
       rutaIdActual.value = null
+      try { localStorage.removeItem(cacheKey) } catch {}
       return
     }
 
@@ -452,13 +469,22 @@ async function cargarIngresos() {
       cache: 'no-store'
     })
     if (res.ok) {
-      ingresos.value = await res.json()
+      const data = await res.json()
+      ingresos.value = data
+      try { localStorage.setItem(cacheKey, JSON.stringify(data)) } catch {}
       }
   } catch (error) {
     console.error('Error al cargar ingresos:', error)
-    ingresos.value = []
-    rutaAbierta.value = false
-    rutaIdActual.value = null
+    // Fallback a cache en caso de error de red
+    const vendedorId = localStorage.getItem('vendedorId')
+    const cached = vendedorId ? localStorage.getItem(`ingresosCache_${vendedorId}`) : null
+    if (cached) {
+      try { ingresos.value = JSON.parse(cached) } catch {}
+    } else {
+      ingresos.value = []
+      rutaAbierta.value = false
+      rutaIdActual.value = null
+    }
   } finally {
     cargandoRuta.value = false
   }
