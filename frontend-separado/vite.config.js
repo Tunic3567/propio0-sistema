@@ -49,6 +49,11 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,json,png,svg,ico}'],
         runtimeCaching: [
           {
+            // Estado de ruta y panel NUNCA deben cachearse — siempre en vivo
+            urlPattern: /^https:\/\/sistema-cobranza-backend\.onrender\.com\/api\/(rutas|vendedores)\/.*/i,
+            handler: 'NetworkOnly'
+          },
+          {
             urlPattern: /^https:\/\/sistema-cobranza-backend\.onrender\.com\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {

@@ -4,7 +4,7 @@ import { generateId } from './idGenerator.js'
 const DB_NAME = 'propio-offline-v2'
 const STORE_NAME = 'mutationQueue'
 
-let DB_VERSION = 1
+let DB_VERSION = 2
 let dbPromise = null
 
 function getDb() {
