@@ -24,7 +24,7 @@
 
       <div v-else>
         <!-- El asesor solo ve la ruta actual; el historial de días/rutas es solo para admin -->
-        <div v-if="loading && !panel" class="text-gray-400 dark:text-gray-500">{{ $t('history.noData') }}</div>
+        <div v-if="!loading && !panel" class="text-gray-400 dark:text-gray-500">{{ $t('history.noData') }}</div>
         <div v-else-if="panel" class="resumen-content space-y-2 pt-2">
         <div class="border-b-2 border-[#1E293B]/15 dark:border-[#1E293B]/50 pb-2 mb-2">
           <div v-if="rutasCerradas.length > 0" role="button" tabindex="0" @click="mostrarHistorialResumenes = true" @keydown.enter="mostrarHistorialResumenes = true" class="flex items-center gap-2 rounded-lg -mx-1 px-1 py-1 hover:bg-neutral-200/50 dark:hover:bg-slate-800/80 active:bg-neutral-300/40 dark:active:bg-slate-700/60 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
@@ -271,127 +271,6 @@ defineOptions({ name: 'ResumenVendedor' })
 
 const { t, locale } = useI18n()
 
-// WebSocket refs
-const ws = ref(null)
-const reconnecting = ref(false)
-const lastUpdate = ref(Date.now())
-
-// Initialize WebSocket connection
-function connectWebSocket(vendedorId) {
-  // Close existing connection
-  if (ws.value) {
-    ws.value.close()
-    ws.value = null
-  }
-
-  // WebSocket URL - ajuste según tu configuración backend
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  const wsUrl = `${protocol}//${window.location.hostname}:8080/ws/vendedor/${vendedorId}`
-  
-  ws.value = new WebSocket(wsUrl)
-
-  ws.value.onopen = () => {
-    console.log('WebSocket conectado para vendedor', vendedorId)
-    reconnecting.value = false
-  }
-
-  ws.value.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data)
-      lastUpdate.value = Date.now()
-      
-      // Procesar actualizaciones en tiempo real
-      handleRealTimeUpdate(data)
-    } catch (error) {
-      console.error('Error al parsear mensaje WebSocket:', error)
-    }
-  }
-
-  ws.value.onerror = (error) => {
-    console.error('Error en WebSocket:', error)
-  }
-
-  ws.value.onclose = () => {
-    console.log('WebSocket cerrado, intentando reconectar...')
-    ws.value = null
-    
-    // Intentar reconectar después de un tiempo
-    if (!reconnecting.value) {
-      reconnecting.value = true
-      setTimeout(() => {
-        const vendedorId = localStorage.getItem('vendedorId')
-        if (vendedorId) {
-          connectWebSocket(vendedorId)
-        }
-      }, 3000) // Esperar 3 segundos antes de reconectar
-    }
-  }
-}
-
-// Función para procesar actualizaciones en tiempo real
-function handleRealTimeUpdate(data) {
-  switch (data.type) {
-    case 'panel-updated':
-      if (data.vendedorId === localStorage.getItem('vendedorId')) {
-        // Actualizar el panel con los nuevos datos
-        panel.value = data.panel
-        
-        // Si la ruta cambia de estado, actualizar rutaAbierta
-        if (data.panel?.ruta?.abierta !== undefined) {
-          const nuevaEstado = data.panel.ruta.abierta === true
-          if (rutaAbierta.value !== nuevaEstado) {
-            rutaAbierta.value = nuevaEstado
-            rutaAbiertaCargada.value = true
-          }
-        }
-        
-        // Marcar que se recibió una actualización
-        lastUpdate.value = Date.now()
-      }
-      break
-      
-    case 'ruta-opened':
-      if (data.vendedorId === localStorage.getItem('vendedorId')) {
-        rutaAbierta.value = true
-        rutaAbiertaCargada.value = true
-        // Actualizar panel para reflejar cambios en los datos
-        if (panel.value?.ruta) {
-          panel.value.ruta.abierta = true
-        }
-      }
-      break
-      
-    case 'ruta-closed':
-      if (data.vendedorId === localStorage.getItem('vendedorId')) {
-        rutaAbierta.value = false
-        rutaAbiertaCargada.value = true
-        // Actualizar panel para reflejar cambios
-        if (panel.value?.ruta) {
-          panel.value.ruta.abierta = false
-        }
-      }
-      break
-      
-    case 'client-added':
-    case 'client-updated':
-    case 'client-deleted':
-    case 'payment-added':
-    case 'payment-updated':
-    case 'payment-deleted':
-    case 'income-added':
-    case 'income-updated':
-    case 'income-deleted':
-    case 'expense-added':
-    case 'expense-updated':
-    case 'expense-deleted':
-      // Para actualizaciones de datos específicos, recargar el panel
-      if (data.vendedorId === localStorage.getItem('vendedorId')) {
-        cargarPanel(localStorage.getItem('vendedorId'))
-      }
-      break
-  }
-}
-
 function formatNum(value, decimals = 0) {
   const n = Number(value)
   const loc = (locale && locale.value) || 'es'
@@ -420,6 +299,7 @@ import {
 const router = useRouter()
 const appScrollRoot = useAppScrollRoot()
 const resumenVendedorScrollEl = ref(null)
+const loading = ref(true)
 const cargandoRuta = ref(false)
 const panel = ref(null)
 const rutaAbierta = ref(false)
