@@ -22,6 +22,9 @@ function getDb() {
             store.createIndex('entityType', 'entityType', { unique: false })
           }
         }
+        if (!db.objectStoreNames.contains('mutationQueue')) {
+          db.createObjectStore('mutationQueue', { keyPath: 'id' })
+        }
       }
     }).catch((e) => {
       dbPromise = null

@@ -10,9 +10,22 @@ let dbPromise = null
 function getDb() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion, newVersion, transaction) {
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains('queryCache')) {
+          db.createObjectStore('queryCache', { keyPath: 'url' })
+        }
+        if (!db.objectStoreNames.contains('entities')) {
+          const store = db.createObjectStore('entities', { keyPath: 'id' })
+          store.createIndex('entityType', 'entityType', { unique: false })
+        }
+        if (db.objectStoreNames.contains('entities') && transaction) {
+          const store = transaction.objectStore('entities')
+          if (!store.indexNames.contains('entityType')) {
+            store.createIndex('entityType', 'entityType', { unique: false })
+          }
         }
       }
     })
