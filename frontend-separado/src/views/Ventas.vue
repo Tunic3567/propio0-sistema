@@ -147,15 +147,9 @@
                     <span class="text-sm font-bold text-blue-600 dark:text-blue-400">${{ valorParcela }}</span>
                   </div>
                 </div>
-                <p class="text-xs text-neutral-500 dark:text-slate-400">
-                  {{ $t('sales.onlyQuotasHelp') || 'Solo actualizar cuotas/días: no se modifican saldo ni pagos; se recalculan parcelas y estado.' }}
-                </p>
                 <div class="flex justify-end gap-2 pt-2 flex-wrap">
                   <button type="button" @click="cerrarModal" class="px-4 py-2 rounded-lg bg-neutral-200 dark:bg-slate-600 text-neutral-800 dark:text-slate-200 hover:bg-neutral-300 dark:hover:bg-slate-500">
                     {{ $t('common.cancel') }}
-                  </button>
-                  <button type="button" @click="actualizarSoloCuotas" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium">
-                    {{ $t('sales.onlyQuotas') || 'Solo cuotas/días' }}
                   </button>
                   <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium">
                     {{ $t('common.save') }}
@@ -424,36 +418,6 @@ async function guardarEdicion() {
   } else {
     const data = await res.json().catch(() => ({}))
     alert(data.error || 'Error al actualizar cliente')
-  }
-}
-
-async function actualizarSoloCuotas() {
-  const id = modal.value._id
-  if (!id) return
-  const parcelas = parseInt(modal.value.parcelas) || 0
-  if (!parcelas) {
-    alert('Indica el número de parcelas/cuotas')
-    return
-  }
-  const total = parseFloat(totalAPagar.value) || 0
-  const valorParcelaCalculado = parcelas > 0 ? total / parcelas : 0
-  const frecuenciaLower = (modal.value.frecuencia || 'diaria').toLowerCase()
-  let dias = parcelas
-  if (frecuenciaLower === 'semanal') dias = parcelas * 7
-  else if (frecuenciaLower === 'mensual') dias = parcelas * 30
-  else if (frecuenciaLower === 'quincenal') dias = parcelas * 15
-  const res = await fetch(`${API_BASE_URL}/api/clientes/${id}/cuotas`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dias, parcela: Number(valorParcelaCalculado.toFixed(2)) })
-  })
-  if (res.ok) {
-    cerrarModal()
-    await fetchClientes()
-    window.dispatchEvent(new CustomEvent('actualizar-dashboard'))
-  } else {
-    const data = await res.json().catch(() => ({}))
-    alert(data.error || 'Error al actualizar cuotas')
   }
 }
 
