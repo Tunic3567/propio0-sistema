@@ -277,6 +277,10 @@ window.fetch = async function patchedFetch(input, init) {
       window.dispatchEvent(new CustomEvent('offline-ruta-temporal-trusted'))
       return rutaActivaTemporalResponse(url)
     }
+    // Si falló la consulta de estado de ruta pero hay sesión activa, no bloquear
+    if (isRouteStatusRequest(url) && localStorage.getItem('sessionToken')) {
+      return rutaActivaTemporalResponse(url)
+    }
     if (isOurBackend && !isLogin && shouldTrustLocalSessionTemporarily()) {
       window.dispatchEvent(new CustomEvent('offline-session-trusted'))
     }

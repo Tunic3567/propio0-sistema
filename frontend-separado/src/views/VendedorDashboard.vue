@@ -1648,7 +1648,14 @@ async function abrirRuta() {
     window.dispatchEvent(new CustomEvent('ruta-abierta'))
   } else {
     const data = await res.json().catch(() => ({}))
-    alert(data.msg || data.error || 'No se pudo abrir la ruta')
+    if (data?.error === 'RUTA_YA_ABIERTA') {
+      // La ruta ya estaba abierta → actualizar UI en vez de mostrar alerta
+      mostrarModalApertura.value = false
+      await actualizarDashboard()
+      window.dispatchEvent(new CustomEvent('ruta-abierta'))
+    } else {
+      alert(data.msg || data.error || 'No se pudo abrir la ruta')
+    }
   }
 }
 

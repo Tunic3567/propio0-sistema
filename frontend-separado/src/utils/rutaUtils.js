@@ -83,12 +83,26 @@ export async function consultarEstadoRuta() {
       }
     }
 
+    // Si el backend responde con RUTA_YA_ABIERTA, la ruta está abierta
+    try {
+      const body = await res.clone().json()
+      if (body?.error === 'RUTA_YA_ABIERTA') {
+        return { abierta: true, cargando: false, ruta: body.ruta || null }
+      }
+    } catch (_) {}
+
     return { abierta: false, cargando: false }
   } catch (error) {
     if (isNetworkOrOfflineError(error) && debeConfiarRutaTemporalmente()) {
       console.warn('⚠️ consultarEstadoRuta - sin conexión; se confía temporalmente en la ruta local')
       const vendedorId = localStorage.getItem('vendedorId')
       return estadoRutaConfiableOffline(vendedorId)
+    }
+
+    // Si hay sesión activa, asumir ruta abierta optimistamente ante errores
+    if (localStorage.getItem('sessionToken')) {
+      console.warn('⚠️ consultarEstadoRuta - error de red con sesión activa; se asume ruta abierta')
+      return { abierta: true, cargando: false, ruta: null, offline: true, confianzaTemporal: true }
     }
 
     console.error('❌ consultarEstadoRuta - Error:', error)
