@@ -348,7 +348,7 @@
 <script setup>
 import API_BASE_URL from '../config/api.js'
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js'
-import { addPendingLocal, getPendingLocal, clearPendingLocal } from '../utils/pendingLocalData.js'
+import { addPendingLocal, getPendingLocal, clearPendingLocal, addPendingEdit, applyPendingEdits, clearPendingEdits } from '../utils/pendingLocalData.js'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -440,13 +440,17 @@ onUnmounted(() => {
 })
 
 function mergePendingIngresos(list, vendedorId) {
+  let result = [...list]
+  // Merge edits first (modify existing items)
+  result = applyPendingEdits(result, vendedorId, 'ingresos')
+  // Add new pending items
   const pending = getPendingLocal(vendedorId, 'ingresos')
-  if (!pending.length) return list
-  const existing = new Set(list.map(i => String(i._id || i.id || '')))
-  const result = [...list]
-  for (const p of pending) {
-    if (!existing.has(String(p._id || p.id || ''))) {
-      result.unshift(p)
+  if (pending.length) {
+    const existing = new Set(result.map(i => String(i._id || i.id || '')))
+    for (const p of pending) {
+      if (!existing.has(String(p._id || p.id || ''))) {
+        result.unshift(p)
+      }
     }
   }
   return result
@@ -491,6 +495,7 @@ async function cargarIngresos() {
       // Si estamos online y el fetch fue exitoso, limpiar pending local
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         clearPendingLocal(vendedorId, 'ingresos')
+        clearPendingEdits(vendedorId, 'ingresos')
       }
       }
   } catch (error) {
@@ -752,6 +757,11 @@ async function ejecutarGuardarEdicion(opts) {
     tituloModalExitoIngreso.value = t('income.updatedSuccessTitle')
     mensajeExitoIngreso.value = t('income.updatedSuccessMessage')
     mostrarModalExitoIngreso.value = true
+    // Guardar edit en pending local data para reflejo offline inmediato
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId && ingresoEnEdicionId.value) {
+      addPendingEdit(vendedorId, 'ingresos', { _id: ingresoEnEdicionId.value, ...ingresoEditData })
+    }
     cargarIngresos()
   } catch (e) {
     console.error('guardarEdicionIngreso error:', e)

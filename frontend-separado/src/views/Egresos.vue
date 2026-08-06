@@ -298,7 +298,7 @@ import { useI18n } from 'vue-i18n';
 import NavbarVendedor from '../components/NavbarVendedor.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js';
-import { addPendingLocal, getPendingLocal, clearPendingLocal } from '../utils/pendingLocalData.js';
+import { addPendingLocal, getPendingLocal, clearPendingLocal, addPendingEdit, applyPendingEdits, clearPendingEdits } from '../utils/pendingLocalData.js';
 
 const { t } = useI18n();
 
@@ -404,6 +404,11 @@ async function usarLlaveEgreso() {
           tituloModalExitoEgreso.value = t('expense.updatedSuccessTitle')
           mensajeExitoEgreso.value = t('expense.updatedSuccessMessage')
           mostrarModalExitoEgreso.value = true
+          // Guardar edit en pending local data
+          const vendedorId = localStorage.getItem('vendedorId')
+          if (vendedorId && e._id) {
+            addPendingEdit(vendedorId, 'egresos', { _id: e._id, valor: Number(e.nuevoValor), descripcion: e.nuevaDescripcion })
+          }
           fetchEgresos()
         } else {
           alert('Error al actualizar egreso')
@@ -589,13 +594,15 @@ function calcularTotalEgresos() {
 }
 
 function mergePendingEgresos(list, vendedorId) {
+  let result = [...list]
+  result = applyPendingEdits(result, vendedorId, 'egresos')
   const pending = getPendingLocal(vendedorId, 'egresos')
-  if (!pending.length) return list
-  const existing = new Set(list.map(e => String(e._id || e.id || '')))
-  const result = [...list]
-  for (const p of pending) {
-    if (!existing.has(String(p._id || p.id || ''))) {
-      result.unshift(p)
+  if (pending.length) {
+    const existing = new Set(result.map(e => String(e._id || e.id || '')))
+    for (const p of pending) {
+      if (!existing.has(String(p._id || p.id || ''))) {
+        result.unshift(p)
+      }
     }
   }
   return result
@@ -627,6 +634,7 @@ async function fetchEgresos() {
       egresos.value = mergePendingEgresos(egresos.value, vendedorId)
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         clearPendingLocal(vendedorId, 'egresos')
+        clearPendingEdits(vendedorId, 'egresos')
       }
     } else {
       egresos.value = [];
@@ -790,6 +798,11 @@ async function guardarEdicion() {
     tituloModalExitoEgreso.value = t('expense.updatedSuccessTitle');
     mensajeExitoEgreso.value = t('expense.updatedSuccessMessage');
     mostrarModalExitoEgreso.value = true;
+    // Guardar edit en pending local data para reflejo offline inmediato
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId) {
+      addPendingEdit(vendedorId, 'egresos', { _id: e._id, valor: nuevoValor, descripcion: modal.value.descripcion })
+    }
     fetchEgresos();
   } else {
     alert('Error al actualizar egreso');
