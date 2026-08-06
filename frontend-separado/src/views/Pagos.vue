@@ -838,10 +838,12 @@ const res = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendorId}?_t=${Date.
 
     const sinRed =
       typeof navigator !== 'undefined' && navigator.onLine === false
-    if (sinRed) {
+if (sinRed) {
       guardando.value = true
       try {
         await encolarPagoOffline(pago, nuevoSaldoCalc)
+        window.dispatchEvent(new CustomEvent('actualizar-dashboard'));
+        window.dispatchEvent(new CustomEvent('pago-registrado'));
       } catch (err) {
         console.error(err)
         alert(t('payment.offlineEnqueueFailed'))
@@ -852,9 +854,6 @@ const res = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendorId}?_t=${Date.
     }
 
     // Optimistic: mostrar feedback inmediatamente, POST en background
-    window.dispatchEvent(new CustomEvent('actualizar-dashboard'));
-    window.dispatchEvent(new CustomEvent('pago-registrado'));
-
     if (nuevoSaldoCalc === 0) {
       clienteRenovarSnapshot.value = cliente.value ? { ...cliente.value } : null
       mostrarModalRenovar.value = true;
@@ -919,6 +918,8 @@ const res = await fetch(`${API_BASE_URL}/api/rutas/actual/${vendorId}?_t=${Date.
       } else {
         aplicarSaldoLocalOptimista(nuevoSaldoCalc)
         tituloModalExito.value = ''
+        window.dispatchEvent(new CustomEvent('actualizar-dashboard'));
+        window.dispatchEvent(new CustomEvent('pago-registrado'));
       }
     } catch (e) {
       mostrarModalExito.value = false;
