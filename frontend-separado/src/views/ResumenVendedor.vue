@@ -546,6 +546,12 @@ async function cargarPanel(vendedorId, cacheKey) {
       console.error('Error en la respuesta:', res.statusText)
       if (!cacheKey || !localStorage.getItem(`panelCache_${vendedorId}`)) {
         panel.value = null
+      } else if (panel.value) {
+        // Offline: recalcular panel con pending local data
+        panel.value = recalcularPanelLocal(panel.value, vendedorId)
+        if (cacheKey) {
+          try { localStorage.setItem(cacheKey, JSON.stringify(panel.value)) } catch {}
+        }
       }
     }
   } catch (error) {

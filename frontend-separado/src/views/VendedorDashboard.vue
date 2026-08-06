@@ -1599,6 +1599,29 @@ async function actualizarDashboard() {
         }
       } catch (_) {}
 
+      // Aplicar pagos pendientes offline a los saldos de clientes
+      try {
+        const pendingPagos = getPendingLocal(vid, 'pagos')
+        if (pendingPagos.length > 0 && clientes.value.length > 0) {
+          clientes.value = clientes.value.map(c => {
+            const pp = pendingPagos.find(p => {
+              const cid = typeof p.cliente === 'object' ? p.cliente?._id : p.cliente
+              const rid = typeof p.ruta === 'object' ? p.ruta?._id : p.ruta
+              const tipo = String(p.tipo || '').toLowerCase()
+              return String(cid) === String(c._id) && String(rid) === String(rutaActualId.value) &&
+                (tipo === 'parcela' || tipo === 'abono')
+            })
+            if (!pp) return c
+            const valor = Number(pp.valor) || 0
+            const nuevoTotal = Math.max(0, (Number(c.total) || 0) - valor)
+            if (nuevoTotal <= 0) {
+              return { ...c, total: nuevoTotal, finalizadoPendiente: true }
+            }
+            return { ...c, total: nuevoTotal }
+          })
+        }
+      } catch (_) {}
+
       exito = pagosOk && clientesOk
       if (!exito) {
         dashboardLoadError.value = true
