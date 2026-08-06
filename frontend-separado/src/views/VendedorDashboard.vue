@@ -1067,6 +1067,7 @@
 import API_BASE_URL from '../config/api.js'
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js'
 import { fetchPagosAndClientesForVendor } from '../utils/vendedorParallelFetch.js'
+import { getPendingLocal, clearPendingLocal } from '../utils/pendingLocalData.js'
 import { ref, onMounted, onActivated, onDeactivated, onUnmounted, watch, computed, nextTick, defineOptions } from 'vue'
 import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -1573,6 +1574,17 @@ async function actualizarDashboard() {
       const { pagosList, todos, pagosOk, clientesOk } = await dataPromise
 
       pagos.value = pagosList
+      // Merge pending local payments (offline) into the pagos list
+      const pendingPagos = getPendingLocal(vid, 'pagos')
+      if (pendingPagos.length > 0) {
+        for (const pp of pendingPagos) {
+          pagos.value.push(pp)
+        }
+      }
+      // Si la data vino del servidor, los pagos ya estan persistidos — limpiar pending local
+      if (pagosOk && typeof navigator !== 'undefined' && navigator.onLine) {
+        clearPendingLocal(vid, 'pagos')
+      }
       clientes.value = aplicarFiltroClientesVendedor(todos)
 
       exito = pagosOk && clientesOk

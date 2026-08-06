@@ -298,6 +298,7 @@ import { useI18n } from 'vue-i18n';
 import NavbarVendedor from '../components/NavbarVendedor.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js';
+import { addPendingLocal, getPendingLocal, clearPendingLocal } from '../utils/pendingLocalData.js';
 
 const { t } = useI18n();
 
@@ -415,6 +416,22 @@ async function usarLlaveEgreso() {
           body: JSON.stringify(datosEgresoParaLlave.value)
         })
         if (fetchRes.ok) {
+          // Guardar en pending local data
+          const vid = localStorage.getItem('vendedorId')
+          if (vid && datosEgresoParaLlave.value) {
+            const pendingId = 'offline_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
+            addPendingLocal(vid, 'egresos', {
+              _id: pendingId,
+              id: pendingId,
+              vendedor: datosEgresoParaLlave.value.vendedor,
+              ruta: datosEgresoParaLlave.value.ruta,
+              tipo: datosEgresoParaLlave.value.tipo,
+              valor: datosEgresoParaLlave.value.valor,
+              descripcion: datosEgresoParaLlave.value.descripcion,
+              fecha: new Date().toISOString(),
+              offline: true
+            })
+          }
           window.dispatchEvent(new CustomEvent('egreso-registrado'))
           valor.value = 0
           descripcion.value = ''
@@ -571,6 +588,19 @@ function calcularTotalEgresos() {
     .toFixed(2);
 }
 
+function mergePendingEgresos(list, vendedorId) {
+  const pending = getPendingLocal(vendedorId, 'egresos')
+  if (!pending.length) return list
+  const existing = new Set(list.map(e => String(e._id || e.id || '')))
+  const result = [...list]
+  for (const p of pending) {
+    if (!existing.has(String(p._id || p.id || ''))) {
+      result.unshift(p)
+    }
+  }
+  return result
+}
+
 async function fetchEgresos() {
   loading.value = true;
   try {
@@ -581,6 +611,8 @@ async function fetchEgresos() {
     const ruta = estadoRuta.ruta;
     if (!ruta || !ruta._id) {
       egresos.value = [];
+      // Merge pending incluso sin ruta
+      if (vendedorId) egresos.value = mergePendingEgresos(egresos.value, vendedorId)
       rutaIdActual.value = null;
       return;
     }
@@ -591,14 +623,22 @@ async function fetchEgresos() {
     });
     if (res.ok) {
       egresos.value = await res.json();
+      // Merge pending local egresos y limpiar si estamos online
+      egresos.value = mergePendingEgresos(egresos.value, vendedorId)
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        clearPendingLocal(vendedorId, 'egresos')
+      }
     } else {
       egresos.value = [];
+      if (vendedorId) egresos.value = mergePendingEgresos(egresos.value, vendedorId)
     }
     const TIPOS_EGRESO = ['Retiro de caja', 'Comisiones', 'Gasolina', 'Repuestos', 'Salario', 'Gastos varios'];
     puedeCrear.value = TIPOS_EGRESO.some(t => !yaExiste(t));
   } catch (error) {
     console.error('Error al cargar egresos:', error);
     egresos.value = [];
+    const vendedorId = localStorage.getItem('vendedorId');
+    if (vendedorId) egresos.value = mergePendingEgresos(egresos.value, vendedorId)
   } finally {
     loading.value = false;
   }
@@ -665,6 +705,22 @@ async function registrarEgreso() {
       body: JSON.stringify(egreso)
     });
     if (res.ok) {
+      // Guardar en pending local data para visualización offline inmediata
+      const vendedorId = localStorage.getItem('vendedorId')
+      if (vendedorId) {
+        const pendingId = 'offline_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
+        addPendingLocal(vendedorId, 'egresos', {
+          _id: pendingId,
+          id: pendingId,
+          vendedor: egreso.vendedor,
+          ruta: egreso.ruta,
+          tipo: egreso.tipo,
+          valor: egreso.valor,
+          descripcion: egreso.descripcion,
+          fecha: new Date().toISOString(),
+          offline: true
+        })
+      }
       window.dispatchEvent(new CustomEvent('egreso-registrado'))
       valor.value = 0;
       descripcion.value = '';

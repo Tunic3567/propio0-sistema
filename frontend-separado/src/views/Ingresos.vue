@@ -348,6 +348,7 @@
 <script setup>
 import API_BASE_URL from '../config/api.js'
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js'
+import { addPendingLocal, getPendingLocal, clearPendingLocal } from '../utils/pendingLocalData.js'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -438,6 +439,19 @@ onUnmounted(() => {
   window.removeEventListener('ruta-abierta', actualizarIngresos)
 })
 
+function mergePendingIngresos(list, vendedorId) {
+  const pending = getPendingLocal(vendedorId, 'ingresos')
+  if (!pending.length) return list
+  const existing = new Set(list.map(i => String(i._id || i.id || '')))
+  const result = [...list]
+  for (const p of pending) {
+    if (!existing.has(String(p._id || p.id || ''))) {
+      result.unshift(p)
+    }
+  }
+  return result
+}
+
 async function cargarIngresos() {
   cargandoRuta.value = true
   try {
@@ -472,6 +486,12 @@ async function cargarIngresos() {
       const data = await res.json()
       ingresos.value = data
       try { localStorage.setItem(cacheKey, JSON.stringify(data)) } catch {}
+      // Merge pending local ingresos
+      ingresos.value = mergePendingIngresos(ingresos.value, vendedorId)
+      // Si estamos online y el fetch fue exitoso, limpiar pending local
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        clearPendingLocal(vendedorId, 'ingresos')
+      }
       }
   } catch (error) {
     console.error('Error al cargar ingresos:', error)
@@ -485,6 +505,8 @@ async function cargarIngresos() {
       rutaAbierta.value = false
       rutaIdActual.value = null
     }
+    // Merge pending local incluso en fallback
+    if (vendedorId) ingresos.value = mergePendingIngresos(ingresos.value, vendedorId)
   } finally {
     cargandoRuta.value = false
   }
@@ -606,6 +628,22 @@ async function ejecutarRegistroIngreso(ingresoData) {
       body: JSON.stringify(ingresoData)
     })
     if (res.ok) {
+      // Guardar en pending local data para visualización offline inmediata
+      const vendedorId = localStorage.getItem('vendedorId')
+      if (vendedorId) {
+        const pendingId = 'offline_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
+        addPendingLocal(vendedorId, 'ingresos', {
+          _id: pendingId,
+          id: pendingId,
+          vendedor: ingresoData.vendedor,
+          ruta: ingresoData.ruta,
+          tipo: ingresoData.tipo,
+          valor: ingresoData.valor,
+          descripcion: ingresoData.descripcion,
+          fecha: new Date().toISOString(),
+          offline: true
+        })
+      }
       window.dispatchEvent(new CustomEvent('ingreso-registrado'))
       nuevoIngreso.value = { tipo: 'Base', valor: '', descripcion: '' }
       tituloModalExitoIngreso.value = t('income.registeredSuccessTitle')

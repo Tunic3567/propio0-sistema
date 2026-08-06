@@ -358,6 +358,7 @@
 import API_BASE_URL from '../config/api.js'
 import { enqueueOfflinePago, emitOfflinePagosChanged, getOfflinePendingCount } from '../utils/offlinePagoQueue.js'
 import { consultarEstadoRuta } from '../utils/rutaUtils.js'
+import { addPendingLocal } from '../utils/pendingLocalData.js'
 
   import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
@@ -744,11 +745,27 @@ import { consultarEstadoRuta } from '../utils/rutaUtils.js'
     } catch (_) {}
   }
 
-  async function encolarPagoOffline(pago, nuevoSaldoCalc) {
+async function encolarPagoOffline(pago, nuevoSaldoCalc) {
     await enqueueOfflinePago(pago)
     aplicarSaldoLocalOptimista(nuevoSaldoCalc)
     const n = await getOfflinePendingCount()
     emitOfflinePagosChanged(n)
+    // Guardar en pendingLocalData para que el Dashboard lo vea inmediatamente
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId) {
+      const pendingId = 'offline_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
+      addPendingLocal(vendedorId, 'pagos', {
+        _id: pendingId,
+        id: pendingId,
+        cliente: pago.cliente,
+        tipo: pago.tipo,
+        valor: pago.valor,
+        numParcelas: pago.numParcelas,
+        ruta: pago.ruta,
+        fecha: new Date().toISOString(),
+        offline: true
+      })
+    }
     window.dispatchEvent(new CustomEvent('actualizar-dashboard'))
     if (nuevoSaldoCalc === 0) {
       clienteRenovarSnapshot.value = cliente.value ? { ...cliente.value, total: 0 } : null
