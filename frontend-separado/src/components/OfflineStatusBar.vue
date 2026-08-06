@@ -1,10 +1,9 @@
 <template>
-  <Teleport to="body">
-    <div
-      v-if="visible"
-      class="fixed top-0 left-0 right-0 z-[9999] transition-all duration-300"
-      :class="barClass"
-    >
+  <div
+    v-if="visible"
+    class="w-full transition-all duration-300"
+    :class="barClass"
+  >
       <div class="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between text-sm font-medium">
         <div class="flex items-center gap-2">
           <svg v-if="isOffline" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,7 +37,6 @@
         </div>
       </div>
     </div>
-  </Teleport>
 </template>
 
 <script setup>

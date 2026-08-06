@@ -1068,6 +1068,7 @@ import API_BASE_URL from '../config/api.js'
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js'
 import { fetchPagosAndClientesForVendor } from '../utils/vendedorParallelFetch.js'
 import { getPendingLocal, clearPendingLocal } from '../utils/pendingLocalData.js'
+import { getAllCachedEntities } from '../utils/offlineCache.js'
 import { ref, onMounted, onActivated, onDeactivated, onUnmounted, watch, computed, nextTick, defineOptions } from 'vue'
 import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -1586,6 +1587,17 @@ async function actualizarDashboard() {
         clearPendingLocal(vid, 'pagos')
       }
       clientes.value = aplicarFiltroClientesVendedor(todos)
+      // Merge clientes creados offline desde cached entities
+      try {
+        const cachedClients = await getAllCachedEntities('clientes')
+        if (cachedClients && cachedClients.length) {
+          const existingIds = new Set(clientes.value.map(c => String(c._id)))
+          const offlineClients = cachedClients.filter(c => c.offline && !existingIds.has(String(c._id)))
+          if (offlineClients.length) {
+            clientes.value = [...clientes.value, ...offlineClients]
+          }
+        }
+      } catch (_) {}
 
       exito = pagosOk && clientesOk
       if (!exito) {

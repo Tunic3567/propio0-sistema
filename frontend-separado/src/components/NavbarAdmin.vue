@@ -1,10 +1,10 @@
 <template>
-  <OfflineStatusBar @sync="forzarSync" />
   <div class="relative w-full max-w-full min-w-0">
     <!-- Navbar principal: fixed + espaciador (drawer lateral z-[101]) -->
     <nav
       class="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)] bg-white dark:bg-slate-800 shadow-md border-b border-neutral-200 dark:border-slate-600 transition-theme overflow-x-clip"
     >
+      <OfflineStatusBar @sync="forzarSync" />
       <div class="px-3 py-2 sm:px-4">
         <div class="flex items-center justify-between gap-2 min-w-0">
           <!-- Logo/Título -->

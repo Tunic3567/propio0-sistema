@@ -265,6 +265,7 @@ import ResumenCierreModal from '../components/ResumenCierreModal.vue'
 import HistorialResumenesModal from '../components/HistorialResumenesModal.vue'
 import API_BASE_URL from '../config/api.js'
 import { getUserTimezone } from '../utils/rutaUtils.js'
+import { getPendingLocal } from '../utils/pendingLocalData.js'
 import { useAppScrollRoot } from '../composables/useAppScrollRoot.js'
 
 defineOptions({ name: 'ResumenVendedor' })
@@ -464,6 +465,7 @@ onMounted(async () => {
   window.addEventListener('egreso-registrado', actualizarResumen)
   window.addEventListener('ruta-cerrada', actualizarResumen)
   window.addEventListener('ruta-abierta', actualizarResumen)
+  window.addEventListener('pending-local-changed', actualizarResumen)
   document.addEventListener('visibilitychange', onResumenVisibility)
 
   await nextTick()
@@ -485,6 +487,47 @@ function onResumenVisibility() {
   if (document.visibilityState === 'visible') actualizarResumen()
 }
 
+function recalcularPanelLocal(p, vendedorId) {
+  if (!p || !vendedorId) return p
+  const panel = JSON.parse(JSON.stringify(p))
+  const pagosPendientes = getPendingLocal(vendedorId, 'pagos')
+  const ingresosPendientes = getPendingLocal(vendedorId, 'ingresos')
+  const egresosPendientes = getPendingLocal(vendedorId, 'egresos')
+  if (!pagosPendientes.length && !ingresosPendientes.length && !egresosPendientes.length) return panel
+
+  const ruta = panel.ruta = panel.ruta || {}
+  let recaudadoDelta = 0
+  const clientesConPago = new Set()
+  for (const pp of pagosPendientes) {
+    const tipo = String(pp.tipo || '').toLowerCase()
+    if (tipo === 'parcela' || tipo === 'abono') {
+      recaudadoDelta += Number(pp.valor) || 0
+      clientesConPago.add(String(pp.cliente || ''))
+    }
+  }
+  let ingresosDelta = 0
+  for (const ip of ingresosPendientes) {
+    ingresosDelta += Number(ip.valor) || 0
+  }
+  let egresosDelta = 0
+  let retirosDelta = 0
+  for (const ep of egresosPendientes) {
+    if (String(ep.tipo || '') === 'Retiro de caja') {
+      retirosDelta += Number(ep.valor) || 0
+    } else {
+      egresosDelta += Number(ep.valor) || 0
+    }
+  }
+  ruta.recaudado = (Number(ruta.recaudado) || 0) + recaudadoDelta
+  ruta.ingresos = (Number(ruta.ingresos) || 0) + ingresosDelta
+  ruta.egresos = (Number(ruta.egresos) || 0) + egresosDelta
+  ruta.retiros = (Number(ruta.retiros) || 0) + retirosDelta
+  ruta.cajaFinal = (Number(ruta.cajaInicial) || 0) + ruta.ingresos + ruta.recaudado - (Number(ruta.ventas) || 0) - ruta.egresos - ruta.retiros
+  const resumen = panel.resumen = panel.resumen || {}
+  resumen.clientesConPagosRegistrados = (resumen.clientesConPagosRegistrados || 0) + clientesConPago.size
+  return panel
+}
+
 async function cargarPanel(vendedorId, cacheKey) {
   cargandoRuta.value = true
   try {
@@ -493,11 +536,11 @@ async function cargarPanel(vendedorId, cacheKey) {
     const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
     if (res.ok) {
       const data = await res.json()
-      panel.value = data
+      panel.value = recalcularPanelLocal(data, vendedorId)
       rutaAbierta.value = data?.ruta?.abierta === true
       rutaAbiertaCargada.value = true
       if (cacheKey) {
-        try { localStorage.setItem(cacheKey, JSON.stringify(data)) } catch {}
+        try { localStorage.setItem(cacheKey, JSON.stringify(panel.value)) } catch {}
       }
       } else {
       console.error('Error en la respuesta:', res.statusText)
@@ -507,8 +550,12 @@ async function cargarPanel(vendedorId, cacheKey) {
     }
   } catch (error) {
     console.error('Error al cargar panel:', error)
-    if (!cacheKey || !localStorage.getItem(`panelCache_${vendedorId}`)) {
+    const cachedKey = `panelCache_${vendedorId}`
+    if (!cacheKey || !localStorage.getItem(cachedKey)) {
       panel.value = null
+    } else if (panel.value) {
+      // Offline: recalcular panel con pending local data
+      panel.value = recalcularPanelLocal(panel.value, vendedorId)
     }
   } finally {
     cargandoRuta.value = false
@@ -537,6 +584,7 @@ onUnmounted(() => {
   window.removeEventListener('egreso-registrado', actualizarResumen)
   window.removeEventListener('ruta-cerrada', actualizarResumen)
   window.removeEventListener('ruta-abierta', actualizarResumen)
+  window.removeEventListener('pending-local-changed', actualizarResumen)
   document.removeEventListener('visibilitychange', onResumenVisibility)
   if (pollingInterval) {
     window.clearInterval(pollingInterval)
