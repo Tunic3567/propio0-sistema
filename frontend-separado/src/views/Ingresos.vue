@@ -753,15 +753,16 @@ async function ejecutarGuardarEdicion(opts) {
       const err = await res.json().catch(() => ({}))
       return alert(err?.error || 'Error al actualizar ingreso')
     }
+    // Guardar edit en pending local data ANTES de cancelarEdicion (que limpia el _id)
+    const vendedorId = localStorage.getItem('vendedorId')
+    const editId = ingresoEnEdicionId.value
     cancelarEdicion()
+    if (vendedorId && editId) {
+      addPendingEdit(vendedorId, 'ingresos', { _id: editId, ...ingresoEditData })
+    }
     tituloModalExitoIngreso.value = t('income.updatedSuccessTitle')
     mensajeExitoIngreso.value = t('income.updatedSuccessMessage')
     mostrarModalExitoIngreso.value = true
-    // Guardar edit en pending local data para reflejo offline inmediato
-    const vendedorId = localStorage.getItem('vendedorId')
-    if (vendedorId && ingresoEnEdicionId.value) {
-      addPendingEdit(vendedorId, 'ingresos', { _id: ingresoEnEdicionId.value, ...ingresoEditData })
-    }
     cargarIngresos()
   } catch (e) {
     console.error('guardarEdicionIngreso error:', e)
