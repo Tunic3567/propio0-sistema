@@ -497,7 +497,16 @@ async function cargarIngresos() {
         clearPendingLocal(vendedorId, 'ingresos')
         clearPendingEdits(vendedorId, 'ingresos')
       }
-      }
+      } else if (cacheKey) {
+      // Offline o error: cargar del localStorage cache y aplicar edits
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          ingresos.value = JSON.parse(cached)
+          ingresos.value = mergePendingIngresos(ingresos.value, vendedorId)
+        }
+      } catch {}
+    }
   } catch (error) {
     console.error('Error al cargar ingresos:', error)
     // Fallback a cache en caso de error de red

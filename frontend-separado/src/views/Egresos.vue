@@ -629,7 +629,9 @@ async function fetchEgresos() {
       cache: 'no-store'
     });
     if (res.ok) {
-      egresos.value = await res.json();
+      const data = await res.json();
+      egresos.value = data;
+      try { localStorage.setItem(`egresosCache_${vendedorId}`, JSON.stringify(data)) } catch {}
       // Merge pending local egresos y limpiar si estamos online
       egresos.value = mergePendingEgresos(egresos.value, vendedorId)
       if (typeof navigator !== 'undefined' && navigator.onLine) {
@@ -637,16 +639,27 @@ async function fetchEgresos() {
         clearPendingEdits(vendedorId, 'egresos')
       }
     } else {
-      egresos.value = [];
+      // Offline: cargar cache local si existe y mergear edits
+      const cached = localStorage.getItem(`egresosCache_${vendedorId}`)
+      if (cached) {
+        try { egresos.value = JSON.parse(cached) } catch {}
+      }
       if (vendedorId) egresos.value = mergePendingEgresos(egresos.value, vendedorId)
     }
     const TIPOS_EGRESO = ['Retiro de caja', 'Comisiones', 'Gasolina', 'Repuestos', 'Salario', 'Gastos varios'];
     puedeCrear.value = TIPOS_EGRESO.some(t => !yaExiste(t));
   } catch (error) {
     console.error('Error al cargar egresos:', error);
-    egresos.value = [];
     const vendedorId = localStorage.getItem('vendedorId');
-    if (vendedorId) egresos.value = mergePendingEgresos(egresos.value, vendedorId)
+    if (vendedorId) {
+      const cached = localStorage.getItem(`egresosCache_${vendedorId}`)
+      if (cached) {
+        try { egresos.value = JSON.parse(cached) } catch {}
+      }
+      egresos.value = mergePendingEgresos(egresos.value, vendedorId)
+    } else {
+      egresos.value = [];
+    }
   } finally {
     loading.value = false;
   }
@@ -836,6 +849,21 @@ function cancelarEliminarEgreso() {
 }
 
 onMounted(async () => {
+  // Stale-while-revalidate: mostrar cache inmediatamente antes del fetch
+  try {
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId) {
+      const cached = localStorage.getItem(`egresosCache_${vendedorId}`)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          egresos.value = parsed
+          loading.value = false
+        }
+      }
+    }
+  } catch (_) {}
+
   // Consultar estado de la ruta
   const estadoRuta = await consultarEstadoRuta()
   rutaAbierta.value = estadoRuta.abierta
