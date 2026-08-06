@@ -91,33 +91,6 @@
           </div>
 
     </div>
-        <!-- Pagos guardados sin conexión (cola local) -->
-        <div
-          v-if="offlinePagoCount > 0"
-          class="mx-3 mb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-amber-300/90 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/50 px-3 py-2"
-        >
-          <p class="text-xs sm:text-sm text-amber-950 dark:text-amber-100 font-medium min-w-0 leading-snug">
-            {{ t('payment.offlineBanner', { count: offlinePagoCount }) }}
-          </p>
-          <div class="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              :disabled="syncingOffline || !navigatorOnline"
-              class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-amber-700 text-white hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              @click="sincronizarPagosOffline"
-            >
-              {{ syncingOffline ? t('payment.syncing') : t('payment.syncNow') }}
-            </button>
-            <button
-              type="button"
-              :disabled="syncingOffline"
-              class="px-3 py-1.5 rounded-lg text-sm font-semibold border border-amber-500/80 text-amber-950 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900/70 disabled:opacity-50 disabled:cursor-not-allowed"
-              @click="descartarPagosOffline"
-            >
-              {{ t('payment.discardOfflineQueue') }}
-            </button>
-          </div>
-        </div>
       </div>
     </nav>
 
@@ -323,8 +296,6 @@ import VendedorNotificationsBell from './VendedorNotificationsBell.vue';
 import HeaderMoreMenu from './HeaderMoreMenu.vue';
 import { toggleChat } from '../chatState.js';
 import API_BASE_URL from '../config/api.js';
-import { clearOfflinePagosPending, emitOfflinePagosChanged, getOfflinePendingCount } from '../utils/offlinePagoQueue.js';
-import { syncAllPendingPagos } from '../utils/syncOfflinePagos.js';
 import OfflineStatusBar from './OfflineStatusBar.vue';
 import { forceSync } from '../utils/syncEngine.js';
 
@@ -343,63 +314,6 @@ const { t } = useI18n();
 const sidebarOpen = ref(false); // Cerrado por defecto
 /** Sincronizado con la prop; evita menú habilitado cuando la ruta ya está cerrada */
 const rutaAbiertaLocal = ref(!!props.rutaAbierta);
-
-const offlinePagoCount = ref(0);
-const syncingOffline = ref(false);
-const navigatorOnline = ref(typeof navigator !== 'undefined' ? navigator.onLine : true);
-
-async function refreshOfflinePagoCount() {
-  try {
-    offlinePagoCount.value = await getOfflinePendingCount();
-  } catch {
-    offlinePagoCount.value = 0;
-  }
-}
-
-function onOfflinePagosChanged(ev) {
-  const c = ev?.detail?.count;
-  if (typeof c === 'number') offlinePagoCount.value = c;
-  else void refreshOfflinePagoCount();
-}
-
-function onNetOnlineStatus() {
-  navigatorOnline.value = typeof navigator !== 'undefined' ? navigator.onLine : true;
-  if (navigatorOnline.value) void refreshOfflinePagoCount();
-}
-
-async function sincronizarPagosOffline() {
-  if (syncingOffline.value || !navigatorOnline.value) return;
-  syncingOffline.value = true;
-  try {
-    const r = await syncAllPendingPagos();
-    await refreshOfflinePagoCount();
-    if (r.synced > 0 || r.skippedDuplicate > 0 || r.discardedInvalid > 0) {
-      let msg = r.skippedDuplicate > 0
-        ? t('payment.syncDoneDup', { synced: r.synced, dup: r.skippedDuplicate })
-        : t('payment.syncDone', { synced: r.synced });
-      if (r.discardedInvalid > 0) {
-        msg = `${msg} ${t('payment.syncDiscardedInvalid', { count: r.discardedInvalid })}`;
-      }
-      alert(msg);
-    }
-  } finally {
-    syncingOffline.value = false;
-  }
-}
-
-async function descartarPagosOffline() {
-  if (syncingOffline.value) return;
-  const ok = window.confirm(t('payment.discardOfflineQueueConfirm', { count: offlinePagoCount.value }));
-  if (!ok) return;
-  syncingOffline.value = true;
-  try {
-    await clearOfflinePagosPending();
-    offlinePagoCount.value = 0;
-    emitOfflinePagosChanged(0);
-  } finally {
-    syncingOffline.value = false;
-  }
-}
 
 watch(
   () => props.rutaAbierta,
@@ -493,16 +407,9 @@ watch(sidebarOpen, (open) => {
 });
 
 onMounted(() => {
-  void refreshOfflinePagoCount();
-  window.addEventListener('offline-pagos-changed', onOfflinePagosChanged);
-  window.addEventListener('online', onNetOnlineStatus);
-  window.addEventListener('offline', onNetOnlineStatus);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('offline-pagos-changed', onOfflinePagosChanged);
-  window.removeEventListener('online', onNetOnlineStatus);
-  window.removeEventListener('offline', onNetOnlineStatus);
   unlockBodyScroll();
 });
 </script> 
