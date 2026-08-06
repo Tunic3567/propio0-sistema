@@ -348,7 +348,7 @@
 <script setup>
 import API_BASE_URL from '../config/api.js'
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js'
-import { addPendingLocal, getPendingLocal, clearPendingLocal, addPendingEdit, applyPendingEdits, clearPendingEdits } from '../utils/pendingLocalData.js'
+import { addPendingLocal, getPendingLocal, clearPendingLocal, addPendingEdit, applyPendingEdits, clearPendingEdits, addPendingDelete, applyPendingDeletes, clearPendingDeletes } from '../utils/pendingLocalData.js'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -441,9 +441,7 @@ onUnmounted(() => {
 
 function mergePendingIngresos(list, vendedorId) {
   let result = [...list]
-  // Merge edits first (modify existing items)
-  result = applyPendingEdits(result, vendedorId, 'ingresos')
-  // Add new pending items
+  // 1. Agregar nuevos ingresos pendientes
   const pending = getPendingLocal(vendedorId, 'ingresos')
   if (pending.length) {
     const existing = new Set(result.map(i => String(i._id || i.id || '')))
@@ -453,6 +451,10 @@ function mergePendingIngresos(list, vendedorId) {
       }
     }
   }
+  // 2. Aplicar ediciones pendientes sobre toda la lista (cache + nuevos)
+  result = applyPendingEdits(result, vendedorId, 'ingresos')
+  // 3. Filtrar eliminaciones pendientes
+  result = applyPendingDeletes(result, vendedorId, 'ingresos')
   return result
 }
 
@@ -496,15 +498,16 @@ async function cargarIngresos() {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         clearPendingLocal(vendedorId, 'ingresos')
         clearPendingEdits(vendedorId, 'ingresos')
+        clearPendingDeletes(vendedorId, 'ingresos')
       }
       } else if (cacheKey) {
-      // Offline o error: cargar del localStorage cache y aplicar edits
+      // Offline o error: cargar del localStorage cache si existe, y siempre mergear
       try {
         const cached = localStorage.getItem(cacheKey)
         if (cached) {
           ingresos.value = JSON.parse(cached)
-          ingresos.value = mergePendingIngresos(ingresos.value, vendedorId)
         }
+        ingresos.value = mergePendingIngresos(ingresos.value, vendedorId)
       } catch {}
     }
   } catch (error) {
@@ -839,7 +842,13 @@ async function confirmarEliminarIngreso() {
       return alert(err?.error || 'Error al eliminar ingreso')
     }
     mostrarModalEliminar.value = false
+    // Guardar delete en pending local para reflejo offline
+    const delId = ingresoAEliminar.value?._id
     ingresoAEliminar.value = null
+    if (delId) {
+      const vendedorId = localStorage.getItem('vendedorId')
+      if (vendedorId) addPendingDelete(vendedorId, 'ingresos', delId)
+    }
     tituloModalExitoIngreso.value = t('income.deletedSuccessTitle')
     mensajeExitoIngreso.value = t('income.deletedSuccessMessage')
     mostrarModalExitoIngreso.value = true

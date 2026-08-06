@@ -298,7 +298,7 @@ import { useI18n } from 'vue-i18n';
 import NavbarVendedor from '../components/NavbarVendedor.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import { consultarEstadoRuta, getUserTimezone } from '../utils/rutaUtils.js';
-import { addPendingLocal, getPendingLocal, clearPendingLocal, addPendingEdit, applyPendingEdits, clearPendingEdits } from '../utils/pendingLocalData.js';
+import { addPendingLocal, getPendingLocal, clearPendingLocal, addPendingEdit, applyPendingEdits, clearPendingEdits, addPendingDelete, applyPendingDeletes, clearPendingDeletes } from '../utils/pendingLocalData.js';
 
 const { t } = useI18n();
 
@@ -595,7 +595,6 @@ function calcularTotalEgresos() {
 
 function mergePendingEgresos(list, vendedorId) {
   let result = [...list]
-  result = applyPendingEdits(result, vendedorId, 'egresos')
   const pending = getPendingLocal(vendedorId, 'egresos')
   if (pending.length) {
     const existing = new Set(result.map(e => String(e._id || e.id || '')))
@@ -605,6 +604,8 @@ function mergePendingEgresos(list, vendedorId) {
       }
     }
   }
+  result = applyPendingEdits(result, vendedorId, 'egresos')
+  result = applyPendingDeletes(result, vendedorId, 'egresos')
   return result
 }
 
@@ -637,9 +638,10 @@ async function fetchEgresos() {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         clearPendingLocal(vendedorId, 'egresos')
         clearPendingEdits(vendedorId, 'egresos')
+        clearPendingDeletes(vendedorId, 'egresos')
       }
     } else {
-      // Offline: cargar cache local si existe y mergear edits
+      // Offline: cargar cache local si existe y siempre mergear
       const cached = localStorage.getItem(`egresosCache_${vendedorId}`)
       if (cached) {
         try { egresos.value = JSON.parse(cached) } catch {}
@@ -834,6 +836,9 @@ async function confirmarEliminarEgreso() {
   if (!e?._id) return;
   const res = await fetch(`${API_BASE_URL}/api/egresos/${e._id}`, { method: 'DELETE' });
   if (res.ok) {
+    // Guardar delete en pending local para reflejo offline
+    const vendedorId = localStorage.getItem('vendedorId')
+    if (vendedorId && e._id) addPendingDelete(vendedorId, 'egresos', e._id)
     tituloModalExitoEgreso.value = t('expense.deletedSuccessTitle');
     mensajeExitoEgreso.value = t('expense.deletedSuccessMessage');
     mostrarModalExitoEgreso.value = true;

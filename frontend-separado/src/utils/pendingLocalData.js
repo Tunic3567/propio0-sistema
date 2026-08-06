@@ -78,7 +78,48 @@ export function applyPendingEdits(list, vendedorId, type) {
 export function clearPendingEdits(vendedorId, type) {
   if (!vendedorId) return
   try {
-    localStorage.removeItem(`pendingEdits_${type}_${vendedorId}`)
+    localStorage.removeItem(editsKey(vendedorId, type))
+    window.dispatchEvent(new CustomEvent('pending-local-changed', { detail: { type, vendedorId } }))
+  } catch {}
+}
+
+function deletesKey(vendedorId, type) {
+  return `pendingDeletes_${type}_${vendedorId}`
+}
+
+export function addPendingDelete(vendedorId, type, itemId) {
+  if (!vendedorId || !itemId) return
+  try {
+    const k = deletesKey(vendedorId, type)
+    const raw = localStorage.getItem(k)
+    const list = raw ? JSON.parse(raw) : []
+    if (!list.includes(itemId)) {
+      list.push(itemId)
+      localStorage.setItem(k, JSON.stringify(list))
+      window.dispatchEvent(new CustomEvent('pending-local-changed', { detail: { type, vendedorId } }))
+    }
+  } catch {}
+}
+
+export function applyPendingDeletes(list, vendedorId, type) {
+  if (!vendedorId || !list || !list.length) return list
+  try {
+    const k = deletesKey(vendedorId, type)
+    const raw = localStorage.getItem(k)
+    if (!raw) return list
+    const deletes = JSON.parse(raw)
+    if (!deletes.length) return list
+    const deleteSet = new Set(deletes.map(String))
+    return list.filter(item => !deleteSet.has(String(item._id)))
+  } catch {
+    return list
+  }
+}
+
+export function clearPendingDeletes(vendedorId, type) {
+  if (!vendedorId) return
+  try {
+    localStorage.removeItem(deletesKey(vendedorId, type))
     window.dispatchEvent(new CustomEvent('pending-local-changed', { detail: { type, vendedorId } }))
   } catch {}
 }
